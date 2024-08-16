@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="60px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Add-icon</title>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Enter-Food-water" transform="translate(-206.000000, -833.000000)">
+            <g id="Data" transform="translate(40.000000, 260.000000)">
+                <g id="Group-5-Copy" transform="translate(5.000000, 573.000000)">
+                    <g id="Add-icon" transform="translate(161.000000, 0.000000)">
+                        <circle id="Oval" fill-opacity="0.2" fill="#0078D3" cx="30" cy="30" r="30"></circle>
+                        <g id="Add" transform="translate(18.000000, 18.375000)" stroke="#0078D3" stroke-linecap="round" stroke-width="3">
+                            <line x1="12" y1="23.25" x2="12" y2="0" id="Path"></line>
+                            <line x1="12" y1="23.625" x2="12" y2="-0.375" id="Path" transform="translate(12.000000, 11.625000) rotate(90.000000) translate(-12.000000, -11.625000) "></line>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

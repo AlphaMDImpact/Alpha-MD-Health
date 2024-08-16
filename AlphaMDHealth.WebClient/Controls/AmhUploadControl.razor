@@ -1,0 +1,118 @@
+﻿@namespace AlphaMDHealth.WebClient
+@using Microsoft.Fast.Components.FluentUI
+@using Radzen.Blazor
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                Class=""
+                For=@(string.Concat(ResourceKey, FieldType, " input-file"))
+                IsValid=@IsValid>
+    <ChildControl>
+        @if (GetActiveFilesCount() < _resource.MaxLength)
+        {
+            @if (AppState.IsPatient)
+            {
+                if (GetActiveFilesCount() == 0)
+                {
+                    <RadzenCard Style="background-color:#DCE1E8; display:flex; flex-direction:column;" class="mx-1 my-2 p-3 justify-content-center align-items-center">
+                        <AmhImageControl Icon=@ImageConstants.PATIENT_FILES_SVG
+                                         ImageHeight=@AppImageSize.ImageSizeS
+                                         ImageWidth=@AppImageSize.ImageSizeS
+                                         FieldType=@FieldTypes.ImageControl />
+                        <div style="width:70%;text-align:center">
+                            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHVCenterLabelControl
+                                             Value=@LibResources.GetResourceByKey(PageResources,ResourceConstants.R_DOCUMENT_FILE_EMPTY_VIEW_KEY).PlaceHolderValue />
+                        </div>
+                    </RadzenCard>
+                }
+            }
+            else
+            {
+                <div class=@(AppState.ClassName($"input-primary input-primary-mobile upload-control {Class} {(IsControlEnabled ? "" : "disabled-file-input")}"))
+                     onclick=@GetOnUploadJavaScript()>
+
+                    <AmhImageControl Icon=@ImageConstants.I_DEFAULT_UPLOAD_ICON
+                                     ImageHeight=@AppImageSize.ImageSizeM
+                                     ImageWidth=@AppImageSize.ImageSizeM
+                                     FieldType=@FieldTypes.ImageControl />
+
+                    <AmhLabelControl FieldType=@FieldTypes.TertiarySmallHStartVCenterLabelControl
+                                     Value=@_resource.PlaceHolderValue />
+                </div>
+            }
+            <FluentInputFile Id=@string.Concat(ResourceKey, FieldType, "input-file",UniqueID)
+                             Style="display:none;"
+                             Mode=@InputFileMode.Stream
+                             OnFileUploaded=@OnFileUploadedAsync />
+        }
+        @if (IsPatientMobileView)
+        {
+            @if (GetActiveFilesCount() < _resource.MaxLength)
+            {
+                @if (AppState.IsPatient)
+                {
+                    <button onclick=@GetOnUploadJavaScript()
+                            style=@Style
+                            class=@AppState.ClassName($"btn-base primary-btn1 px-1")>
+                        @LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_UPLOAD_DOCUMENT_TEXT_KEY)
+                    </button>
+                }
+
+            }
+        }
+        @if (GenericMethods.IsListNotEmpty(_files))
+        {
+            <AmhTableControl DataSource=@_files.Where(x=>x.IsActive == true).ToList()
+                             DataSourceType=@AttachmentModel
+                             ShowSearch=@false
+                             ShowPagination=@true
+                             ShowHeader=@false
+                             Class="px-2"
+                             CssClass="col-12 ps pl-0 pb-3"
+                             IsPatientMobileView=@IsPatientMobileView
+                             SourceFieldStructure=@getViewCellModel()
+                             TableStructure=@GenerateTableStructure()
+                             OnValueChanged=@((e)=>OnFileClicked((AttachmentModel)e))
+                             ShouldShowNoRecordFound=@false
+                             OnActionClicked=@OnDeleteActionClicked />
+
+            @if (_showPreview)
+            {
+                <AmhAttachmentPreviewControl ShowPopup=@_showPreview
+                                             DataSource=@_currentFile
+                                             ResourceKey=@DescriptionResourceKey
+                                             OnActionClick=@OnPreviewActionClicked />
+            }
+
+            if (!_hideDeletedConfirmationPopup)
+            {
+                <AmhMessageControl Actions=@_popupActions
+                                   ShowHidePopup=@_hideDeletedConfirmationPopup
+                                   ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   OnValueChanged=@OnDeleteConfirmationActionClicked />
+            }
+        }
+        @if (!IsPatientMobileView)
+        {
+            @if (GetActiveFilesCount() < _resource.MaxLength)
+            {
+                @if (AppState.IsPatient)
+                {
+                    <button onclick=@GetOnUploadJavaScript()
+                            style=@Style
+                            class=@AppState.ClassName($"btn-base primary-btn1 px-1")>
+                        @LibResources.GetResourceValueByKey(PageResources,ResourceConstants.R_UPLOAD_DOCUMENT_TEXT_KEY)
+                    </button>
+                }
+
+            }
+        }
+    </ChildControl>
+</AmhBaseControl>

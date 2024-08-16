@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.NewChatView.ToString())
+              ShowPageTitle=@(_chatData.ErrCode != ErrorCode.OK)
+              ApplyFixedFooter=true
+              IsAccordion=true
+              PageResources=@_chatData.Resources>
+        <ChildContent>  
+            @if (_chatData.ErrCode == ErrorCode.OK)
+            {
+                <AmhTableControl DataSource=@_chatData.Chats
+                                 DataSourceType=@ChatModel
+                                 ShowAddButton=false
+                                 TableStructure=@GenerateTableStructure()
+                                 ShowSearch=@(_chatData?.UserChatCards?.Count > 0)
+                                 OnValueChanged=@((e) => OnCardClickAsync((ChatModel)e))
+                                 TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.NewChatView.ToString()) />
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_chatData.ErrCode.ToString() />
+            }
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}
+
+
+

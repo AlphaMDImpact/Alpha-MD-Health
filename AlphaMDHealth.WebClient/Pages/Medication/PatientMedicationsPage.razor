@@ -1,0 +1,52 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientMedicationsView"
+@page "/PatientMedicationsView/{patientmedicationid:guid}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(Parameters?.Count < 1)
+              PageResources=@_medicationData.Resources
+              PageTitle=@GetPageTitle()
+              ApplyCard=@(IsPatientMobileView ? false : (_medicationData.RecordCount <1))
+              ApplyParentStructure=@(!ShowDetailPage)
+              ApplyFixedFooter=@(IsPatientMobileView ? !(_medicationData.RecordCount > 0) : false)
+              ShowPageTitle=@(_medicationData.ErrCode != ErrorCode.OK)>
+
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PatientMedicationPage PatientMedicationID=@_patientMedicationID
+                                       ApplyFixedFooter=true
+                                       ShowDetailPage=true
+                                       OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_medicationData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@GetPageTitle()
+                                     DataSource=@_medicationData.Medications
+                                     DataSourceType=@PatientMedicationModel
+                                     TableStructure=@GenerateTableStructure()
+                                     SourceFieldStructure=@getViewCellModel()
+                                     ShowSearch=@(_medicationData.RecordCount < 1)
+                                     ShowViewAll=@(_medicationData.RecordCount > 0)
+                                     IsPatientMobileView=@IsPatientMobileView
+                                     ShowPagination=@(_medicationData.RecordCount < 1)
+                                     ShowAddButton=@(_medicationData.RecordCount < 1 && LibPermissions.HasPermission(_medicationData.FeaturePermissions, AppPermissions.PatientMedicationAddEdit.ToString()))
+                                     OnValueChanged=@(e => OnAddEditClick((PatientMedicationModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_medicationData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

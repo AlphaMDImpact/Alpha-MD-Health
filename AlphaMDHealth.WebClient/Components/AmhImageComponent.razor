@@ -1,0 +1,10 @@
+﻿@code {
+    [Parameter] public string IconValue { get; set; }
+}
+
+<div class="d-flex justify-content-center mb-3">
+    <AmhImageControl FieldType=@FieldTypes.CircleImageControl
+                     Icon=@IconValue
+                     ImageHeight=AppImageSize.ImageSizeXXL
+                     ImageWidth=AppImageSize.ImageSizeXXL />
+</div>

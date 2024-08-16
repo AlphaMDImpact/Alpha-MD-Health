@@ -1,0 +1,81 @@
+﻿@inherits BasePage
+@namespace AlphaMDHealth.WebClient
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error @bind-Success=@Success @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.CreditAddEdit.ToString())
+              OnClose=@OnClose
+              PageResources=@_healthScanData?.Resources
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=true
+              PageOperation=@GetPageOperationType(_isEditable, TransactionID == 0)>
+        <ChildContent>
+            @if (_healthScanData.ErrCode == ErrorCode.OK)
+            {
+                @if (_isFormValid)
+                {
+                    <RazorpayPaymentGateway Value=@_charges OnPaymentComplete=@OnPaymentResponseReceivedAsync />
+                }
+                <div>
+                    <div class="col-sm">
+                        <AmhNumericEntryControl @bind-Value=@_healthScanData.ExternalServiceTransaction.MinimumQuantityToBuy
+                                                ResourceKey=@ResourceConstants.R_MINIMUM_TO_BUY_KEY
+                                                IsControlEnabled=@false />
+                    </div>
+                    <div class="col-sm">
+                        <AmhNumericEntryControl @bind-Value=@_healthScanData.ExternalServiceTransaction.UnitPrice
+                                                ResourceKey=@ResourceConstants.R_UNIT_PRICE_KEY
+                                                IsControlEnabled=@false />
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-sm">
+                        <AmhNumericEntryControl @bind-Value=@_healthScanData.ExternalServiceTransaction.Quantity
+                                                ResourceKey=@ResourceConstants.R_QUANTITY_TO_BUY_KEY
+                                                OnValueChanged=@CalculateDiscountAndTotalAmount
+                                                IsControlEnabled=@_isEditable />
+                    </div>
+                </div>
+                <div class="row mb-2">
+
+                    <div class="col-sm">
+                        <AmhNumericEntryControl @bind-Value=@_totalAmount
+                                                ResourceKey=@ResourceConstants.R_TOTAL_AMOUNT_BEFORE_DISCOUNT_KEY
+                                                IsControlEnabled=@false />
+                    </div>
+                    <div class="col-sm">
+                        <AmhNumericEntryControl @bind-Value=@_healthScanData.ExternalServiceTransaction.DiscountPercentage
+                                                ResourceKey=@ResourceConstants.R_DISCOUNT_PERCENTAGE_KEY
+                                                IsControlEnabled=@false />
+                    </div>
+                </div>
+                <div class="row mb-2">
+
+                    <div class="col-sm">
+                        <AmhNumericEntryControl @bind-Value=@_healthScanData.ExternalServiceTransaction.DiscountPrice
+                                                ResourceKey=@ResourceConstants.R_TOTAL_DISCOUNT_KEY
+                                                IsControlEnabled=@false />
+                    </div>
+                    <div class="col-sm">
+                        <AmhNumericEntryControl @bind-Value=@_healthScanData.ExternalServiceTransaction.TotalPrice
+                                                ResourceKey=@ResourceConstants.R_AMOUNT_TO_PAY_KEY
+                                                IsControlEnabled=@false />
+                    </div>
+                </div>               
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_healthScanData.ErrCode.ToString() />
+            }
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClickedAsync />
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_MAKE_PAYMENT_KEY OnValueChanged=@OnSaveButtonClicked Style="padding:0 10px !important;" />
+            }
+        </PageFooter>
+    </BasePage>
+}

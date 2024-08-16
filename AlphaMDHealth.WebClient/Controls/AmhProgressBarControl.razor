@@ -1,0 +1,109 @@
+﻿@using MudBlazor
+@using System.Globalization
+@using AlphaMDHealth.WebClient.Controls
+
+@inherits AmhBaseControl
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <MudProgressLinear Value=@Value
+                           Rounded=@true
+                           Striped=@true
+                           Color="MudBlazor.Color.Primary"
+                           Min=@_resource.MinLength
+                           Max=@GetMaxLength()
+                           Class="my-7">
+        </MudProgressLinear>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private int _value;
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public int Value
+    {
+        get
+        {
+            return _value != default ? _value : Convert.ToInt32(_resource?.MaxLength ?? default);
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(value);
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<int> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Initialize the component and start simulating progress.
+    /// </summary>
+    protected override Task OnInitializedAsync()
+    {
+        if (FieldType == FieldTypes.ProgressIndicatorControl)
+        {
+            SimulateProgress();
+        }
+        return base.OnInitializedAsync();
+    }
+
+    /// <summary>
+    /// Simulate progress by incrementing the value at regular intervals.
+    /// </summary>
+    public async void SimulateProgress()
+    {
+        double step = 2;
+        var maxValue = GetMaxLength();
+        double currentValue = 0;
+        do
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            currentValue += step;
+            if (currentValue > maxValue)
+            {
+                currentValue = maxValue;
+            }
+            _value = (int)currentValue;
+            StateHasChanged();
+            await Task.Delay(100);
+        } while (currentValue <= maxValue);
+    }
+
+    private int GetMaxLength()
+    {
+        int maxValue = Convert.ToInt32(_resource?.MaxLength ?? 0);
+        if (maxValue == 0)
+        {
+            maxValue = 100;
+        }
+        return maxValue;
+    }
+
+    /// <summary>
+    // Flag to track whether the component has been disposed.
+    /// </summary>
+    bool _disposed;
+    public void Dispose() => _disposed = true;
+}

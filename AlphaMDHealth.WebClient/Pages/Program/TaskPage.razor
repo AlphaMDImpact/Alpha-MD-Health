@@ -1,0 +1,78 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.TaskAddEdit.ToString())
+              CurrentPage=@this
+              OnClose=@OnClose
+              PageResources=@_programData?.Resources
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=@(ShowDetailPage && _taskSubFlow == null)
+              ApplyCard=true
+              PageOperation=@GetPageOperationType(_isEditable, TaskID == 0)
+              ApplyStructure=@(_taskSubFlow == null)>
+        <ChildContent>
+            @if (_taskSubFlow != null)
+            {
+                <TaskSubFlowPage TaskID=@_taskSubFlow.TaskID
+                                 IsAccordion="true"
+                                 TaskSubflowID=@_taskSubFlow.TaskSubFlowID
+                                 OnClosed=@OnTaskSubFlowClosedEventCallback />
+            }
+            else
+            {
+                <AmhLanguageTabControl LanguageTabData=@DataFormatter
+                                       DataSource=@_programData?.LanguageDetails
+                                       DataSourceType=@ProgramDetails
+                                       IsControlEnabled=@_isEditable />
+
+                <AmhDropdownControl @bind-Options=@_programData.TaskTypes
+                                    OnValueChanged=@OnTaskTypeChangedAsync
+                                    ResourceKey=@ResourceConstants.R_TASK_TYPE_KEY
+                                    IsControlEnabled=@_isEditable />
+
+                <AmhDropdownControl @bind-Value=@_selectedItemID
+                                    Options=@_programData.Items
+                                    ResourceKey=@ResourceConstants.R_ITEM_KEY
+                                    IsControlEnabled=@_isEditable />
+
+                @if (LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.SubflowsView.ToString()) && TaskID > 0)
+                {
+                    <div class="mt-3">
+                        <AmhTableControl TableHeader=@LibResources.GetResourceValueByKey(_programData.Resources, ResourceConstants.R_ALTERNATE_FLOW_KEY)
+                                         DataSource=@_programData.SubFlows
+                                         DataSourceType=@SubFlowModel
+                                         TableStructure=@GenerateTableStructure()
+                                         OnValueChanged=@((e) => OnSubFlowAddEditClick((SubFlowModel)e))
+                                         ShowAddButton=@LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.SubflowAddEdit.ToString()) />
+                    </div>
+                   
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_taskSubFlow == null)
+            {
+                @if (TaskID > 0 && LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.TaskDelete.ToString()) && _isEditable)
+                {
+                    <AmhButtonControl Class="mt3" ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnDeleteClicked />
+
+                    <AmhMessageControl Class="mt3" ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                       ShowHidePopup=@_hideDeletedConfirmationPopup
+                                       Actions=@_messageButtonActions
+                                       ContentClass="top-center"
+                                       OnValueChanged=@OnDeleteActionClickAsync />
+                }
+                @if (_isEditable)
+                {
+                    <AmhButtonControl Class="mt3" ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveActionClickedAsync />
+                }
+                <AmhButtonControl Class="mt3" ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClicked />
+            }
+        </PageFooter>
+    </BasePage>
+}

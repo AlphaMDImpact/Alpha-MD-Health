@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="50px" height="50px" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>B8FC1F98-57A2-4B0D-BFFE-281C806CE2DC</title>
+    <g id="Provider" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Appointments-provider-year" transform="translate(-25.000000, -498.000000)">
+            <g id="Content" transform="translate(0.000000, 20.000000)">
+                <g id="Next-arrow" transform="translate(50.000000, 503.000000) scale(-1, 1) translate(-50.000000, -503.000000) translate(25.000000, 478.000000)">
+                    <circle id="Oval" fill="#CCE4F6" cx="25" cy="25" r="25"></circle>
+                    <polygon id="Arrow" fill="#0078D3" fill-rule="nonzero" points="20 18.62 21.615 17 29.6 25 29.6 25 29.6 25 21.615 33 20 31.38 26.365 25"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

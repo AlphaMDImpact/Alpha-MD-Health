@@ -1,0 +1,86 @@
+﻿@using System.Text.RegularExpressions;
+@using MudBlazor;
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <div class="input-primary input-primary-mobile" style="display:flex">
+            <MudIcon Style=@($"margin-right:10px;fill:{Value} !important;")
+                     Icon=@Icons.Material.Filled.Square />
+            <MudColorPicker @bind-Text="@Value"
+                            ImmediateText="true"
+                            Placeholder=@_resource.PlaceHolderValue
+                            Disabled="@(!IsControlEnabled)"
+                            DisableUnderLine="true"
+                            DisableToolbar="false"
+                            Editable="true"
+                            Style="margin-top:-5px"
+                            PickerVariant="PickerVariant.Dialog" />
+        </div>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private string _value;
+    /// <summary>
+    /// Control value represents text of Label control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(_value);
+                OnValueChangedAction(_value);
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled)
+        {
+            if (_resource != null && Validator.HasRequiredValidationError(_resource, !string.IsNullOrWhiteSpace(Value)))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (!string.IsNullOrWhiteSpace(Value) && !Regex.IsMatch(Value, Constants.COLOR_REGEX_PATTERN))
+            {
+                ErrorMessage = LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_INVALID_DATA_KEY);
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+}

@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ReasonsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_reasonData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_reasonData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <ReasonPage ReasonID=@_reasonID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_reasonData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_reasonData.Reasons
+                                     DataSourceType=@ReasonModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ReasonsView.ToString())
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_reasonData.FeaturePermissions, AppPermissions.ReasonAddEdit.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((ReasonModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_reasonData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

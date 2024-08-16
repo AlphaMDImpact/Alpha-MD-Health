@@ -1,0 +1,78 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/TrackersAddEdit/{trackerid:short}"
+
+@if (_isDataFetched)
+{
+    @if (_showRangeAddEdit)
+    {
+        <TrackerRangeAddEdit TrackerID=@TrackerID
+                             TrackerRangeID=@_trackerRangeID
+                             OnClose=@OnRangesAddEditClosed />
+    }
+    else
+    {
+        <BasePage @bind-Error=@Error
+                  @bind-Success=@Success
+                  @bind-ShowDetailPage=@ShowDetailPage
+                  CurrentPage=@this
+                  PageOperation=@GetPageOperationType(_isEditable, TrackerID == 0)
+                  PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.TrackersAddEdit.ToString())
+                  OnClose=@OnClose
+                  PageResources=@_trackerData?.Resources
+                  ApplyFixedFooter=true
+                  IsAccordion=@IsAccordion
+                  ApplyCard=true
+                  RegisterComp=@RegisterControl>
+            <ChildContent>
+                <AmhEntryControl @bind-Value=@_trackerData.Tracker.TrackerIdentifier
+                                 ResourceKey=@ResourceConstants.R_TRACKER_IDENTIFIER_KEY
+                                 IsControlEnabled=@_isEditable />
+
+                <AmhDropdownControl @bind-Options=@_trackerData.TrackerTypes
+                                    ResourceKey=@ResourceConstants.R_TRACKER_TYPE_KEY
+                                    IsControlEnabled=@_isEditable />
+
+                <AmhLanguageTabControl LanguageTabData=@DataFormatter
+                                       DataSource=@_trackerData.TrackersI18N
+                                       DataSourceType=@TrackersI18NModel
+                                       IsControlEnabled=@_isEditable />
+
+                @if (_trackerData.Tracker.TrackerID > 0 && _tabsData?.Count > 0)
+                {
+                    <AmhTabControl Options=@_tabsData
+                                   FieldType=@FieldTypes.TabControl
+                                   OnValueChanged=@OnTabChanged />
+                    switch (_selectedTab.GroupName.ToEnum<AppPermissions>())
+                    {
+                        case AppPermissions.TrackerRangesView:
+                            <AmhTableControl TableHeader=@_selectedTab.OptionText
+                                             DataSource=@_trackerData.TrackerRanges.ToList()
+                                             DataSourceType=@TrackerRangeModel
+                                             TableStructure=@GenerateTableStructure()
+                                             ShowSearch=@true
+                                             ShowAddButton=@(LibPermissions.HasPermission(_trackerData.FeaturePermissions, AppPermissions.TrackerRangesAddEdit.ToString()))
+                                             OnValueChanged=@OnTrackerRangeAddEditClick />
+                            break;
+                    }
+                }
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideDeletedConfirmationPopup
+                                   Actions=@_popupActions
+                                   OnValueChanged=@OnDeleteButtonClickAsync />
+
+            </ChildContent>
+            <PageFooter>
+                @if (_trackerData.Tracker.TrackerID > 0 && LibPermissions.HasPermission(_trackerData.FeaturePermissions, AppPermissions.TrackerDelete.ToString()))
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClick />
+                }
+                @if (_isEditable)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+                }
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClickedAsync />
+            </PageFooter>
+        </BasePage>
+    }
+}

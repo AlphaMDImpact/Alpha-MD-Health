@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Consent-icon</title>
+  <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="Consent-icon" fill="#212121" fill-rule="nonzero">
+      <path d="M10,0 C4.483,0 0,4.488 0,10.01 C0,15.532 4.483,20 10,20 C15.517,20 20,15.512 20,10.01 C20,4.508 15.517,0 10,0 Z M14.53,8.53 L9.42,13.64 C9.274,13.786 9.082,13.86 8.89,13.86 C8.698,13.86 8.506,13.787 8.36,13.64 L5.47,10.75 C5.177,10.457 5.177,9.982 5.47,9.689 C5.763,9.396 6.238,9.396 6.531,9.689 L8.89,12.05 L13.47,7.47 C13.763,7.177 14.238,7.177 14.531,7.47 C14.824,7.763 14.823,8.237 14.53,8.53 Z" id="Shape"></path>
+    </g>
+  </g>
+</svg>

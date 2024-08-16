@@ -1,0 +1,94 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@inject IJSRuntime JSRuntime
+@page "/AppointmentView/{appointmentid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageOperation=@GetPageOperationType(_isEditable, AppointmentID == 0)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _isEditable ? AppPermissions.AppointmentAddEdit.ToString() : AppPermissions.AppointmentView.ToString())
+              OnClose=@OnClose
+              PageResources=@_appointmentData.Resources
+              ApplyFixedFooter=true
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhLanguageTabControl LanguageTabData=@_dataFormatter
+                                   DataSource=@_appointmentData.AppointmentDetails
+                                   DataSourceType=@ContentDetailModel
+                                   IsControlEnabled=@_isEditable />
+
+            <AmhDropdownControl @bind-Options=@_appointmentData.AppointmentTypes
+                                ResourceKey=@ResourceConstants.R_APPOINTMENT_TYPE_TEXT_KEY
+                                IsControlEnabled=@_isEditable />
+
+            <AmhDateTimeControl @bind-Value=@_appointmentData.Appointment.FromDateTime
+                                ResourceKey=@ResourceConstants.R_STARTS_TEXT_KEY
+                                IsControlEnabled=@_isEditable
+                                OnValueChanged=@OnDateTimeChanged />
+
+            <AmhDateTimeControl @bind-Value=@_appointmentData.Appointment.ToDateTime
+                                ResourceKey=@ResourceConstants.R_ENDS_TEXT_KEY
+                                IsControlEnabled=@_isEditable
+                                OnValueChanged=@OnDateTimeChanged />
+
+            @if (!string.IsNullOrWhiteSpace(_labelTimeInvalidError))
+            {
+                <AmhLabelControl  ResourceKey=@_labelTimeInvalidError
+                                 IsControlEnabled=@_isEditable 
+                                 Style="font-size:13px; margin-top:-2px;" />
+            }
+
+            <AmhDropdownControl @bind-Options=@_appointmentData.AppointmentParticipantsDropdown
+                                ResourceKey=@ResourceConstants.R_PARTICIPANTS_TEXT_KEY
+                                OnValueChanged=@(e => OnAppointmentParticipantsChanged())
+                                IsControlEnabled=@_isEditable
+                                ErrorMessage=@_participantsErrorLabel />
+
+            <AmhCheckBoxListControl @bind-Options=@_externalParticipantCheck
+                                    ShowHeader=@false
+                                    ResourceKey=@ResourceConstants.R_APPOINTMENT_INVITE_EXTERNAL_KEY
+                                    ValueChanged=@(e => OnExternalParticipantAdded(e))
+                                    IsControlEnabled=@_isEditable />
+            @if (_appointmentData.IsExternalParticipant)
+            {
+                <AmhEntryControl @bind-Value=@_appointmentData.ExternalParticipant.FirstName
+                                 ResourceKey=@ResourceConstants.R_NAME_KEY
+                                 RegexExpression=@LibSettings.GetSettingValueByKey(_appointmentData.Settings, SettingsConstants.S_ALPHA_REGEX_KEY)
+                                 IsControlEnabled=@_isEditable />
+
+                <AmhMobileNumberControl @bind-Value=@_appointmentData.ExternalParticipant.MobileNo
+                                        ResourceKey=@ResourceConstants.R_PHONE_NUMBER_KEY
+                                        CountryCodes=@_appointmentData.CountryCodes
+                                        IsControlEnabled=@(_appointmentData.ExternalParticipant.AppointmentID <= 0 && _isEditable) />
+
+                <AmhEntryControl @bind-Value=@_appointmentData.ExternalParticipant.EmailID
+                                 ResourceKey=@ResourceConstants.R_APPOINTMENT_EMAIL_KEY
+                                 RegexExpression=@LibSettings.GetSettingValueByKey(_appointmentData.Settings, SettingsConstants.S_EMAIL_REGEX_KEY)
+                                 IsControlEnabled=@_isEditable />
+            }
+
+            <AmhMessageControl ResourceKey=@(_isRepeatRequest ? ResourceConstants.R_CAREGIVER_AVAILABLE_ERROR_MESSAGE_KEY : ResourceConstants.R_DELETE_CONFIRMATION_KEY)
+                               ShowHidePopup=@_hideDeletedConfirmationPopup
+                               Actions=@_actionData
+                               OnValueChanged=@OnActionClickAsync
+                               IsControlEnabled=@_isEditable />
+        </ChildContent>
+        <PageFooter>
+            @if (_isEditable)
+            {
+                @if (_appointmentData.Appointment.AppointmentID > 0 && _appointmentData.Appointment.IsInitiator && LibPermissions.HasPermission(_appointmentData.FeaturePermissions, AppPermissions.AppointmentCancelMeeting.ToString()))
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_MEETING_TEXT_KEY OnValueChanged=@OnRemoveClick />
+                }
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelButtonClickAsync />
+        </PageFooter>
+    </BasePage>
+}

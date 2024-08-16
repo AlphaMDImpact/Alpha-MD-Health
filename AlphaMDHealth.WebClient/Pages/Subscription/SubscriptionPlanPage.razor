@@ -1,0 +1,12 @@
+﻿@namespace AlphaMDHealth.WebClient
+@using AlphaMDHealth.Utility
+@inherits BasePage
+@page "/SubscriptionPlanAddEdit"
+
+<BasePage CurrentPage=@this PageResources=@AppState.MasterData?.Resources RegisterComp=@RegisterControl>
+    <h3>SubscriptionPlanAddEdit</h3>
+    <AmhMessageControl ResourceKey=@ErrorCode.NotFound.ToString() />
+</BasePage>
+@code {
+
+}

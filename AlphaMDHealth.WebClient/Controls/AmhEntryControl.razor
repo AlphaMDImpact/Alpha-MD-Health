@@ -1,0 +1,172 @@
+﻿@using System.Globalization;
+@using Microsoft.Fast.Components.FluentUI
+@using System.Text.RegularExpressions;
+
+@inherits AmhBaseControl;
+
+@{
+    For = string.Concat(ResourceKey, "input-field");
+}
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                For=@For
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <FluentTextField @bind-Value=@Value
+                         id=@For
+                         TextFieldType=@TextFieldInputType
+                         Appearance=@FluentInputAppearance.Filled
+                         Immediate=@true
+                         Class="input-primary input-primary-mobile"
+                         Placeholder=@_resource?.PlaceHolderValue
+                         Maxlength=@((int?)_resource?.MaxLength)
+                         Disabled=@(!IsControlEnabled)>
+                           <AmhFieldIcon LeftIcon=@_leftIcon
+                          RightIcon=@GetRightIcon()
+                          RightIconClick=@OnEyeIconCLicked />
+        </FluentTextField>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    bool showPassword;
+    private TextFieldType TextFieldInputType;
+    private bool isComponentInitialized = false;
+
+    private string _value;
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+
+                ValueChanged.InvokeAsync(value);
+                if (isComponentInitialized)
+                {
+                    OnValueChangedAction(_value);
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Regex Value
+    /// </summary>
+    [Parameter]
+    public string RegexExpression { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        TextFieldInputType = GetTextFieldType();
+        return base.OnInitializedAsync();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isComponentInitialized = true;
+        }
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            if (Validator.HasRequiredValidationError(_resource, !string.IsNullOrWhiteSpace(_value)))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (!string.IsNullOrWhiteSpace(_value))
+            {
+                if (Validator.HasMinLengthValidationError(_resource, _value.Length))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_MINIMUM_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength);
+                }
+                else if (Validator.HasRangeValidationError(_resource, _value.Length))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength, _resource.MaxLength);
+                }
+                else if (!string.IsNullOrWhiteSpace(RegexExpression)
+                    && !new Regex(RegexExpression).IsMatch(_value))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_INVALID_DATA_KEY)
+                        , _resource.ResourceValue);
+                }
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+
+    private void OnEyeIconCLicked()
+    {
+        if (FieldType == FieldTypes.PasswordEntryControl)
+        {
+            GetRightIcon();
+            TextFieldInputType = showPassword
+                ? TextFieldType.Password
+                : TextFieldType.Text;
+            showPassword = !showPassword;
+        }
+    }
+
+    private string GetRightIcon()
+    {
+        if (FieldType == FieldTypes.PasswordEntryControl)
+        {
+            _rightIcon = showPassword
+                ? ImageConstants.I_PASSWORD_EYE_TINT_ICON
+                : ImageConstants.I_PASSWORD_EYE_ICON;
+            if (!showPassword) { TextFieldInputType = TextFieldType.Password; }
+        }
+        return _rightIcon;
+    }
+
+    private TextFieldType GetTextFieldType()
+    {
+        switch (FieldType)
+        {
+            case FieldTypes.EmailEntryControl:
+                return TextFieldType.Email;
+            case FieldTypes.PasswordEntryControl:
+                return TextFieldType.Password;
+            case FieldTypes.MobileNumberControl:
+                return TextFieldType.Tel;
+            case FieldTypes.TextEntryControl:
+            default:
+                return TextFieldType.Text;
+        }
+    }
+}

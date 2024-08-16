@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net8.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlphaMDHealth.CommonBusinessLayer\AlphaMDHealth.CommonBusinessLayer.csproj" />
+    <ProjectReference Include="..\AlphaMDHealth.ClientDataLayer\AlphaMDHealth.ClientDataLayer.csproj" />
+    <ProjectReference Include="..\AlphaMDHealth.Model\AlphaMDHealth.Model.csproj" />
+    <ProjectReference Include="..\AlphaMDHealth.Utility\AlphaMDHealth.Utility.csproj" />
+  </ItemGroup>
+</Project>

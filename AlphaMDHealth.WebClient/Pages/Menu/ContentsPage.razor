@@ -1,0 +1,61 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/StaticContentsView"
+@page "/EducationsView"
+@page "/EducationsView/{pageID:long}"
+@page "/MyEducationsView"
+@page "/MyEducationsView/{pageID:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_contentData.ErrCode != ErrorCode.OK)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_contentData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                @if (_showPreview)
+                {
+                    <ContentPreviewPage PageId=@_pageId 
+                                        IsEducationPreview=@IsEducationPage
+                                        PatientEducationIDs=@_educationIDs 
+                                        EducationStatus=@_educationStatus
+                                        IsAccordion=true
+                                        OnClose=@OnPreviewClosedAsync />
+                }
+                else
+                {
+                    <ContentPage PageId=@_pageId
+                                 ShowDetailPage=true
+                                 IsEducationPage=@_isEducationPage
+                                 OnClose=@OnAddEditClosedAsync />
+                }
+            }
+            else
+            {
+                @if (_contentData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_contentData.Pages
+                                     DataSourceType=@ContentPageModel
+                                     TableHeader=@GetTableHeader()
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowViewAll=@_isDashboardView
+                                     ShowSearch=@(!_isDashboardView)
+                                     ShowPagination=@(!_isDashboardView)
+                                     ShowAddButton=@GetAddEditPermission()
+                                     OnValueChanged=@((e) => OnAddEditClickAsync((ContentPageModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_contentData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

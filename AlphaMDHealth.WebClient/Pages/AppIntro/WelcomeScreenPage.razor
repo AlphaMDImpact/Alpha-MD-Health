@@ -1,0 +1,53 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/WelcomeScreenAddEdit"
+@page "/WelcomeScreenAddEdit/{appintroid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.WelcomeScreenAddEdit.ToString())
+              PageOperation=@GetPageOperationType(_isEditable, AppIntroID == 0)
+              OnClose=@OnClose
+              PageResources=@_appIntroData?.Resources
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              ApplyCard=true
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhNumericEntryControl @bind-Value=@_sequenceNo
+                                    ResourceKey=@ResourceConstants.R_SEQUENCE_KEY
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhUploadControl @bind-Value=@_appIntroData.AppIntro.ImageName
+                              ResourceKey=@ResourceConstants.R_UPLOAD_IMAGE_TEXT_KEY
+                              OnValueChanged=@OnImageChanged />
+
+            <AmhLanguageTabControl LanguageTabData=@DataFormatter
+                                   DataSource=@_appIntroData.AppIntros
+                                   DataSourceType=@AppIntroModel
+                                   IsControlEnabled=@_isEditable />
+        </ChildContent>
+        <PageFooter>
+            @if (_appIntroData.AppIntro.IntroSlideID > 0 && LibPermissions.HasPermission(_appIntroData.FeaturePermissions, AppPermissions.WelcomeScreenDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                  OnValueChanged=@OnDeleteClick />
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   Actions=@_messageButtonActions
+                                   ShowHidePopup=@_showDeletedConfirmationPopup
+                                   OnValueChanged=@OnActionClickAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                  OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

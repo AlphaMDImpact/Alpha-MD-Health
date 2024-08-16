@@ -1,0 +1,26 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/VideoCallingView/{appointmentid:long}"
+@if (_isDataFetched)
+{
+    <BasePage CurrentPage=@this PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.VideoCallingView.ToString()) IsPopup=@IsPopup @bind-ShowPopUp=@ShowPopup
+              PopupPagePostion=@PopupPosition.CenterLarge OnClose=@PopUpClosedEventCallbackAsync PageResources=@_appointmentDTO?.Resources RegisterComp=@RegisterControl 
+              @bind-Error=@Error @bind-Success=@Success>
+              <ChildContent>
+
+                @if (_noError)
+                {
+                    @* <CustomVideoCallControl VideoData="@_appointmentDTO" LeaveAsync="OnLeaveMeetingClickedAsync" @ref="_videoCallingControl"/> *@
+                }
+                else
+                {
+                    @*//ErrorControl*@
+                }
+            </ChildContent>
+      
+        @*video component*@
+         <PageFooter>
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelButtonClickAsync />
+         </PageFooter>
+    </BasePage>
+}

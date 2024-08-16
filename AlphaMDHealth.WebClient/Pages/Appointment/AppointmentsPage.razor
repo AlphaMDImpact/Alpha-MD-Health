@@ -1,0 +1,83 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/AppointmentsView"
+@page "/AppointmentsView/{onmenuclicked:bool}"
+@page "/AppointmentsView/{appointmentid:long}"
+@page "/AppointmentsView/{appointmentid:long}/{onmenuclicked:bool}"
+@page "/PatientAppointmentsView"
+@page "/PatientAppointmentsView/{appointmentid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageTitle=@GetPageTitle()
+              ShowPageTitle=@ShowTitle()
+              PageResources=@_appointmentData.Resources
+              ApplyCard=@(!_isDashboardView)
+              ApplyParentStructure=@(!ShowDetailPage)
+              ApplyStructure=@(Parameters.Count < 1)>
+        <PageHeader>
+            @if (!_isPatientAppointments && !ShowDetailPage && HasAddEditPermission())
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_ADD_ACTION_KEY
+                                  OnValueChanged=@(() => {OnAppointmentSelect(0);}) />
+            }
+        </PageHeader>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                @if (_showAppointmentViewPage)
+                {
+                    <AppointmentViewPage AppointmentID=@_appointmentID
+                                         OnMenuClicked=@OnMenuClicked
+                                         ShowDetailPage=true
+                                         OnClose=@OnAddEditClosedAsync />
+                }
+                else if (_showVideoPopup)
+                {
+                    <VideoCallingPage ShowPopup=@_showVideoPopup
+                                      AppointmentID=@_appointmentID
+                                      OnMenuClicked=@OnMenuClicked
+                                      OnClose=@OnAddEditClosedAsync />
+                }
+                else
+                {
+                    <AppointmentPage AppointmentID=@_appointmentID
+                                     ShowDetailPage=true
+                                     OnClose=@OnAddEditClosedAsync />
+                }
+            }
+            else
+            {
+                @if (_appointmentData.ErrCode == ErrorCode.OK)
+                {
+                    if (_isDashboardView || _isPatientAppointments)
+                    {
+                        <AmhTableControl DataSource=@_appointmentData.Appointments
+                                         DataSourceType=@AppointmentModel
+                                         TableHeader=@GetPageTitle()
+                                         TableStructure=@GenerateTableStructure()
+                                         ShowViewAll=@(_isDashboardView)
+                                         ShowSearch=@(!_isDashboardView)
+                                         ShowPagination=@(!_isDashboardView)
+                                         ShowAddButton=@HasAddEditPermission()
+                                         OnValueChanged=@((e) => OnAppointmentClicked((AppointmentModel)e))
+                                         OnViewClicked=@OnViewAllClickedAsync />
+                    }
+                    else
+                    {
+                        <AmhCalendarControl Options=@_appointmentData.AppointmentOptions
+                                            OnValueChanged=@((e)=>{OnAppointmentSelected((OptionModel)e);}) />
+                    }
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_appointmentData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

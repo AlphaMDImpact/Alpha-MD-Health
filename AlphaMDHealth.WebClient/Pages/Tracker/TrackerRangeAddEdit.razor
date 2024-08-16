@@ -1,0 +1,53 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/TrackerRangesAddEdit/{trackerid:short}/{trackerrangeid:short}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.TrackerRangesAddEdit.ToString())
+              PageOperation=@(_trackerData.TrackerRange.TrackerRangeID == 0 ? PageOperationType.Add : PageOperationType.Edit)
+              OnClose=@OnClose
+              PageResources=@_trackerData?.Resources
+              ApplyFixedFooter=true
+              ApplyCard=true
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhNumericEntryControl @bind-Value=@_fromDay
+                                    ResourceKey=@ResourceConstants.R_FROM_DAY_KEY
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhNumericEntryControl @bind-Value=@_forDays
+                                    ResourceKey=@ResourceConstants.R_FOR_DAYS_KEY
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhUploadControl @bind-Value=@_trackerData.TrackerRange.ImageName
+                              ResourceKey=@ResourceConstants.R_BROWSE_ACTION_KEY
+                              IsControlEnabled=@_isEditable/>
+
+            <AmhLanguageTabControl LanguageTabData=@DataFormatter
+                                   DataSource=@_trackerData.TrackerRangesI18N
+                                   DataSourceType=@TrackerRangesI18N
+                                   IsControlEnabled=@_isEditable />
+
+            <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                               ShowHidePopup=@_hideConfirmationPopup
+                               Actions=@_popupActions
+                               OnValueChanged=@DeletePopUpCallbackAsync />
+        </ChildContent>
+        <PageFooter>
+            @if (_trackerData.TrackerRange.TrackerRangeID != 0 && LibPermissions.HasPermission(_trackerData.FeaturePermissions, AppPermissions.TrackerRangesDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClick />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=OnCancelClick />
+        </PageFooter>
+    </BasePage>
+}

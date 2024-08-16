@@ -1,0 +1,193 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@using System.Collections;
+@inherits AmhBaseControl
+@typeparam DataSourceType
+
+@namespace AlphaMDHealth.WebClient
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        @if (ShowHeader)
+        {
+            <div class=@(string.IsNullOrEmpty(CssClass)? (ShowViewAll ?AppState.ClassName( "col-12 ps-3 mx-1 pl-4 pr-4 mt-4 "):""):AppState.ClassName(CssClass)):>
+                <AmhHeaderControl Title=@(ShowHeader && !string.IsNullOrWhiteSpace(TableHeader) ? (ShowCounterFlag? $"{TableHeader} ({(FilteredDataSource == null ? "0" : FilteredDataSource.Count().ToString())})":$"{TableHeader}" ) : string.Empty)
+                                  IsPatientMobileView=@(IsPatientMobileView && !ShowViewAll) ActionButtons=@(ShowViewAll?null:ActionButtons)>
+                    <ActionSection>
+                        @if (ShowViewAll)
+                        {
+                            var action = ActionButtons?.FirstOrDefault(x => x.ButtonResourceKey == ResourceConstants.R_SHOW_MORE_KEY);
+                            @if (action != null)
+                            {
+                                <AmhLabelControl FieldType=@FieldTypes.PrimaryAppSmallHEndVCenterBoldLabelControl
+                                                 Value=@getShowMoreResourceKey()
+                                                 OnValueChanged=@action.ButtonAction
+                                                 Style=@action.Style
+                                                 Class=@action.ButtonClass />
+                            }
+                        }
+                    </ActionSection>
+                </AmhHeaderControl>
+            </div>
+        }
+        <div class=@AppState.ClassName(string.IsNullOrEmpty(CssClass)? (ShowGroupedData ?"col-12 mb-2":(ShowViewAll?"col-12 ps-3 mx-1 pl-4 pr-5 ": "col-12 ps-3 mx-1 p-4")):CssClass)>
+            @if (ShowSearch)
+            {
+                <div class="mb-3">
+                    <AmhEntryControl @bind-Value=@_searchedString
+                                     FieldType=@FieldTypes.TextEntryControl
+                                     Icon=@ImageConstants.I_SEARCH_ICON_SVG
+                                     OnValueChanged=@((e) => OnSearchChanged(e))
+                                     ResourceKey=@ResourceConstants.R_SEARCH_TEXT_KEY
+                                     ShowHeader=false />
+                </div>
+            }
+
+            @if (FilteredDataSource.Count() > 0)
+            {
+
+                @if (IsGroupedData)
+                {
+                    <RadzenPanelMenu Style="background-color:inherit">
+                        <ChildContent>
+                            @foreach (var item in FilteredDataSource)
+                            {
+                                var groupName = GetFieldByName(item, _sourceFields.GroupName)?.ToString();
+                                var childItems = (IEnumerable<DataSourceType>)GetFieldByName(item, _sourceFields.ChildItems);
+                                <AmhHeaderControl Title=@(!string.IsNullOrWhiteSpace(groupName) ? ( ShowCounterFlag ?($"{groupName} ({(childItems == null ? "0" : childItems.Count().ToString())})"):groupName) : string.Empty)>
+                                    <ActionSection>
+                                        @if (ShowMoreGroupedData)
+                                        {
+                                            <AmhLabelControl FieldType=@FieldTypes.PrimaryAppSmallHEndVCenterBoldLabelControl
+                                                             Value=@getShowMoreResourceKey()
+                                                             Style="justify-content:flex-end"
+                                                             OnValueChanged=@(() => OnShowAllClick(item)) />
+                                        }
+                                    </ActionSection>
+                                </AmhHeaderControl>
+                                var data = ((IEnumerable<DataSourceType>)GetFieldByName(item, _sourceFields.ChildItems)).FirstOrDefault();
+                                <AmhListViewControl DataSourceType=@DataSourceType
+                                                    IsGroupedData=@false
+                                                    ShowSearch=@false
+                                                    DataSource=@((IEnumerable<DataSourceType>)GetFieldByName(item, _sourceFields.ChildItems))
+                                                    TableHeader=@groupName
+                                                    ShowHeader=@false
+                                                    ShowGroupedData=@true
+                                                    ShowCounterFlag=@ShowCounterFlag
+                                                    SourceFields=@_sourceFields
+                                                    OnValueChanged=@(e => HandleCardClick(e)) />
+                            }
+                        </ChildContent>
+                    </RadzenPanelMenu>
+                }
+                else
+                {
+                    <RadzenDataList Data=@FilteredDataSource TItem="DataSourceType" style=@GetRadzenDataListStyle()>
+                        <Template Context="item">
+
+                            <RadzenCard Style=@(GetCardStyle(GetFieldByName(item, _sourceFields.BandColor?.ToString())?.ToString()))
+                                        @onclick=@(() => { HandleCardClick(item); }) class="mobile-radzen-card">
+
+                                <!-- Left icon -->
+                                @if (!string.IsNullOrWhiteSpace(_sourceFields.LeftImage) || !string.IsNullOrWhiteSpace(_sourceFields.LeftIcon))
+                                {
+                                    <div class="card-column-1">
+                                        <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.LeftField, _sourceFields.LeftFieldType))
+                                                              ImageHeight=AppImageSize.ImageSizeL
+                                                              ImageWidth=AppImageSize.ImageSizeL
+                                                              Icon=@(GetFieldByName(item, _sourceFields.LeftIcon?.ToString())?.ToString())
+                                                              Value=@(GetFieldByName(item, _sourceFields.LeftImage)?.ToString()) />
+                                    </div>
+                                }
+
+                                <!-- Main content -->
+                                <div class="card-column-2">
+                                    <div class="card-content-row">
+                                        <!-- Left Title -->
+                                        @if (!string.IsNullOrWhiteSpace(_sourceFields.LeftHeader))
+                                        {
+                                            <div>
+                                                <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.LeftHeaderField, _sourceFields.LeftHeaderFieldType))
+                                                                      Value=@(GetFieldByName(item, _sourceFields.LeftHeader)?.ToString()) />
+                                            </div>
+                                        }
+                                        <!-- Right Title -->
+                                        @if (!string.IsNullOrWhiteSpace(_sourceFields.RightHeader))
+                                        {
+                                            <div class="card-description">
+
+                                                <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.RightHeaderField, _sourceFields.RightHeaderFieldType))
+                                                                      Value=@(GetFieldByName(item, _sourceFields.RightHeader)?.ToString()) />
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="card-content-row">
+                                        <!-- Left Description -->
+                                        @if (!string.IsNullOrWhiteSpace(_sourceFields.LeftDescription))
+                                        {
+                                            <div class="card-description">
+                                                <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.LeftDescriptionField, _sourceFields.LeftDescriptionFieldType))
+                                                                      Value=@(GetFieldByName(item, _sourceFields.LeftDescription)?.ToString()) />
+                                            </div>
+                                        }
+
+                                        <!-- Right Description -->
+                                        @if (!string.IsNullOrWhiteSpace(_sourceFields.RightDescription))
+                                        {
+                                            <div class="card-description-right">
+                                                <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.RightDescriptionField, _sourceFields.RightDescriptionFieldType))
+                                                                      Value=@(GetFieldByName(item, _sourceFields.RightDescription)?.ToString()) />
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Right view/icon/html -->
+                                @if (!string.IsNullOrWhiteSpace(_sourceFields.RightImage) || !string.IsNullOrWhiteSpace(_sourceFields.RightIcon) || !string.IsNullOrWhiteSpace(_sourceFields.RightHTMLLabelField))
+                                {
+                                    <div class="card-column-3">
+                                        <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.RightField, _sourceFields.RightFieldType))
+                                                              ImageHeight=AppImageSize.ImageSizeM
+                                                              ImageWidth=AppImageSize.ImageSizeM
+                                                              Icon=@(GetFieldByName(item, _sourceFields.RightIcon)?.ToString())
+                                                              Value=@(GetFieldByName(item, _sourceFields.RightImage)?.ToString())
+                                                              OnDeleteClicked="@(async () => OnClick(item))" />
+                                    </div>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(_sourceFields.RightImageText))
+                                {
+                                    <div class="card-column-3">
+                                        <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.RightField, _sourceFields.RightFieldType))
+                                                              Value=@(GetFieldByName(item, _sourceFields.RightImageText)?.ToString())
+                                                              OnDeleteClicked="@(async () => OnClick(item))" />
+                                    </div>
+                                }
+                            </RadzenCard>
+                        </Template>
+                    </RadzenDataList>
+
+                }
+
+            }
+            else
+            {
+                // no data found
+                @if (ShouldShowNoRecordFound)
+                {
+                    <RadzenCard class="mt-3">
+                        <AmhListViewComponent ResourceKey=@ResourceConstants.R_NO_DATA_FOUND_KEY ShowHeader=false FieldType=FieldTypes.TertiarySmallHVCenterLabelControl />
+                    </RadzenCard>
+                }
+            }
+        </div>
+    </ChildControl>
+</AmhBaseControl>

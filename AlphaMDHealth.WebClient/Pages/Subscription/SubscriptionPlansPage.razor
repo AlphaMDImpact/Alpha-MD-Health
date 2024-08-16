@@ -1,0 +1,72 @@
+﻿@namespace AlphaMDHealth.WebClient
+@using Radzen.Blazor
+@inherits BasePage
+@page "/SubscriptionPlansView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_subscriptionData.Resources
+              ApplyMobileViewBeforLogin=@IsPatientMobileView
+              ApplyFixedFooter=@IsPatientMobileView
+              ApplyCard=@IsPatientMobileView
+              ActionButtons=@(IsPatientMobileView ?_actionButtons:null)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <RazorpayPaymentGateway Value=@_subscriptionData.Plan.Charges
+                                        OnPaymentComplete=@OnPaymentResponseReceivedAsync />
+            }
+            else if (_subscriptionData.ErrCode == ErrorCode.OK && GenericMethods.IsListNotEmpty(_subscriptionData.Plans))
+            {
+                <AmhLabelControl FieldType=@FieldTypes.PrimaryMediumHStartVCenterBoldLabelControl Value=@LibResources.GetResourcePlaceHolderByKey(_subscriptionData.Resources, ResourceConstants.R_SELECT_SUBSCRIPTION_PLAN_KEY) />
+
+                <RadzenDataList WrapItems=@true
+                                AllowPaging=@true
+                                Data=@_subscriptionData.Plans
+                                TItem="PlanModel">
+                    <Template Context="plan">
+                        <RadzenCard Class="rz-border-radius-6"
+                                    Style=@(plan.PlanID == _subscriptionData.UserPlan.PlanID ? "border-color: var(--primary-app-color);border-style: solid;background: var(--tertiary-app-color);" : "")
+                                    @onclick=@(()=>{OnCardClicked(plan);})>
+                            <AmhHeaderControl Title=@(plan.PlanName)>
+                                <ActionSection>
+                                    @if (plan.IsPopularPlan)
+                                    {
+                                        <span class="fa fa-star starchecked" style="color: orange;"></span>
+                                    }
+                                </ActionSection>
+                            </AmhHeaderControl>
+                            <RadzenStack Orientation="Radzen.Orientation.Vertical"
+                                        
+                                         AlignItems="Radzen.AlignItems.Start"
+                                         JustifyContent=@Radzen.JustifyContent.Left
+                                         Gap="1rem">
+                                @((MarkupString)plan.PlanDetails)
+                            </RadzenStack>
+                        </RadzenCard>
+                    </Template>
+                </RadzenDataList>
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@(_subscriptionData.ErrCode == ErrorCode.OK ? ErrorCode.NotFound.ToString() : _subscriptionData.ErrCode.ToString()) />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!ShowDetailPage
+               && _subscriptionData.ErrCode == ErrorCode.OK 
+               && GenericMethods.IsListNotEmpty(_subscriptionData.Plans)
+               && LibPermissions.HasPermission(_subscriptionData.FeaturePermissions, AppPermissions.BuySubscriptionPlan.ToString()))
+            {
+                <AmhButtonControl FieldType=@FieldTypes.PrimaryButtonControl
+                                  ResourceKey=@AppPermissions.BuySubscriptionPlan.ToString()
+                                  Value=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.BuySubscriptionPlan.ToString())
+                                  OnValueChanged=@OnSubscribeAndPayClicked />
+            }
+        </PageFooter>
+    </BasePage>
+}

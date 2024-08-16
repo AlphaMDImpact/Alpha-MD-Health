@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/EducationCategoriesView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_educationCategoryData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_educationCategoryData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <EducationCategoryPage EducationCategoryID=@_educationCategoryID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_educationCategoryData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.EducationCategoriesView.ToString())
+                                     DataSource=@_educationCategoryData.EductaionCatergories
+                                     DataSourceType=@EductaionCatergoryModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_educationCategoryData.FeaturePermissions, AppPermissions.EducationCategoryAddEdit.ToString())
+                                     OnValueChanged=@(e => OnAddEditClick((EductaionCatergoryModel)e))/>
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_educationCategoryData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}                                                         

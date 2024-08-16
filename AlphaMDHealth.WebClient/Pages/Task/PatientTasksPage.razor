@@ -1,0 +1,62 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientTasksView"
+@page "/PatientTasksView/{patienttaskid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(Parameters?.Count < 1)
+              ShowPageTitle=@(_patientTaskData.ErrCode != ErrorCode.OK)
+              ApplyCard=@(_patientTaskData.RecordCount < 1)
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_patientTaskData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                if (_patientTaskID > 0)
+                {
+                    if (ShowQuestionnairePage())
+                    {
+                        <QuestionnaireTaskPage PatientTaskID=@_patientTaskID.ToString()
+                                               IsAccordion=true
+                                               OnClose=@OnAddEditClosedAsync />
+                    }
+                    else
+                    {
+                        <PatientTaskPage PatientTaskID=@_patientTaskID
+                                         ShowDetailPage=true
+                                         OnClose=@OnAddEditClosedAsync />
+                    }
+                }
+                else
+                {
+                    <AssignTaskPage ShowDetailPage=true OnClose=@OnAddEditClosedAsync />
+                }
+            }
+            else
+            {
+                @if (_patientTaskData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientTasksView.ToString())
+                                     DataSource=@_patientTaskData.Tasks
+                                     DataSourceType=@TaskModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowSearch=@(_patientTaskData.RecordCount < 1)
+                                     ShowViewAll=@(_patientTaskData.RecordCount > 0)
+                                     ShowPagination=@(_patientTaskData.RecordCount < 1)
+                                     ShowAddButton=@((_patientTaskData.RecordCount < 1 && LibPermissions.HasPermission(_patientTaskData.FeaturePermissions, AppPermissions.PatientAssignTaskView.ToString())))
+                                     OnValueChanged=@(e => OnAddEditClick((TaskModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_patientTaskData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

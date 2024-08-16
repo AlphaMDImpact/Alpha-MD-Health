@@ -1,0 +1,50 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.MobileMenuGroupAddEdit.ToString())
+              OnClose=@OnClose
+              PageResources=@_menuGroupData.Resources
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              ApplyCard=true
+              PageOperation=@GetPageOperationType(_isEditable, MenuGroupID == 0)>
+        <ChildContent>
+            <AmhEntryControl @bind-Value=@_menuGroupData.MenuGroup.GroupIdentifier
+                             ResourceKey=@ResourceConstants.R_IDENTIFIER_KEY />
+
+            <AmhDropdownControl @bind-Options=@_menuGroupData.MenuNodes @ref=@_multiSelectValue
+                                ResourceKey=@ResourceConstants.R_MENU_NODE_KEY />
+
+            <AmhLanguageTabControl LanguageTabData=@_dataFormatter
+                                   DataSource=@_menuGroupData.MenuGroupDetails
+                                   DataSourceType=@ContentDetailModel
+                                   IsControlEnabled=@_isEditable />
+
+            <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                               ShowHidePopup=@_hideDeletedConfirmationPopup
+                               Actions=@_popupActions
+                               OnValueChanged=@OnActionClickAsync />
+        </ChildContent>
+        <PageFooter>
+            @if (_isEditable && _menuGroupData.MenuGroup.MenuGroupID > 0 && LibPermissions.HasPermission(_menuGroupData.FeaturePermissions, AppPermissions.MobileMenuGroupDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY.ToString()
+                                  OnValueChanged=@OnRemoveClick />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                  OnValueChanged=@((e)=>OnSaveButtonClickedAsync((MouseEventArgs)e)) />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=OnCancelClickAsync />
+        </PageFooter>
+    </BasePage>
+}

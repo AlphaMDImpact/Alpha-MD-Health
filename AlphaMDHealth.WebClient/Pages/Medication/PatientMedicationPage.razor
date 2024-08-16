@@ -1,0 +1,163 @@
+﻿@inherits BasePage
+@namespace AlphaMDHealth.WebClient
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@GetPageTitle()
+              PageResources=@_medicationData.Resources
+              RegisterComp=@RegisterControl
+              IsAccordion=@IsAccordion
+              ApplyFixedFooter=@(IsPatientMobileView?false: ApplyFixedFooter)
+              ApplyCard=true
+              ShowDetailPage=@ShowDetailPage
+              PageOperation=@GetPageOperationType(_isEditable, !(PatientMedicationID != Guid.Empty || ProgramMedicationID > 0))
+              OnClose=@OnClose
+              ActionButtons=@(IsPatientMobileView ?_actionButtons:null)>
+        <ChildContent>
+            <AmhEntryControl @bind-Value=@_medicationData.Medication.ShortName
+                             ResourceKey=@ResourceConstants.R_MEDICINE_NAME_KEY
+                             Icon=@ImageConstants.I_SEARCH_ICON_SVG
+                             IsControlEnabled=@_isEditable
+                             OnValueChanged=@OnSearchValueChanged />
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-6">
+                        <AmhNumericEntryControl @bind-Value=@_dosesValue
+                                                IsControlEnabled=@_isEditable
+                                                DigitsAfterDecimal=2
+                                                ResourceKey=@ResourceConstants.R_DOSES_KEY />
+                    </div>
+                    <div class="col-6">
+                        <AmhDropdownControl @bind-Value=@_selectedDosesUnitValue
+                                            Options=@_medicationData.UnitOptions
+                                            IsControlEnabled=@(_isEditable && _noMedicationFound)
+                                            FieldType=@FieldTypes.SingleSelectDropdownControl
+                                            ResourceKey=@ResourceConstants.R_UNIT_KEY />
+                    </div>
+                </div>
+            </div>
+
+            @if (GenericMethods.IsListNotEmpty(_medicationData.FrequencyTypeOptions))
+            {
+                <AmhCheckBoxListControl @bind-Value=@_medicationData.Medication.Frequency
+                                        Options=@_medicationData.FrequencyTypeOptions
+                                        ResourceKey=@ResourceConstants.R_FREQUENCY_KEY
+                                        IsControlEnabled=@_isEditable />
+            }
+
+            <AmhDropdownControl @bind-Options=@_medicationData.FrequencyOptions
+                                IsControlEnabled=@_isEditable
+                                ResourceKey=@ResourceConstants.R_HOW_OFTEN_KEY
+                                OnValueChanged=@OnFrequencyChanged />
+
+            @if (_medicationData.FrequencyOptions?.FirstOrDefault(x => x.IsSelected)?.GroupName == ResourceConstants.R_ALTERNATE_FOR_KEY)
+            {
+                <AmhNumericEntryControl @bind-Value=@_alternateDays
+                                        IsControlEnabled=@_isEditable
+                                        ResourceKey=@ResourceConstants.R_ALTERNATE_FOR_TEXT_KEY />
+            }
+            @if (ProgramID > 0)
+            {
+                <AmhNumericEntryControl @bind-Value=@_assignAfterDays
+                                        ResourceKey=@ResourceConstants.R_ASSIGN_AFTER_DAYS_KEY
+                                        IsControlEnabled=@_isEditable />
+
+                <AmhNumericEntryControl @bind-Value=@_assignForDays
+                                        ResourceKey=@ResourceConstants.R_SHOW_FOR_DAYS_KEY
+                                        IsControlEnabled=@_isEditable />
+            }
+            else
+            {
+                <AmhDateTimeControl @bind-Value=@_medicationData.Medication.StartDate
+                                    ResourceKey=@ResourceConstants.R_MEDICATION_START_DATE_KEY
+                                    IsControlEnabled=@_isEditable />
+
+                <AmhDateTimeControl @bind-Value=@_medicationData.Medication.EndDate
+                                    ResourceKey=@ResourceConstants.R_MEDICATION_END_DATE_KEY
+                                    IsControlEnabled=@_isEditable />
+            }
+            <AmhCheckBoxListControl ShowHeader=@false
+                                    ResourceKey=@ResourceConstants.R_IS_CRITICAL_KEY
+                                    Options=@GetIsCriticalOption()
+                                    ValueChanged=@OnCriticalChecked
+                                    IsControlEnabled=@_isEditable />
+
+            @if (GenericMethods.IsListNotEmpty(_medicationData.AdditionalNotesOptions))
+            {
+                <AmhRadioButtonListControl @bind-Value=_medicationData.Medication.AdditionalNotes
+                                           Options=@_medicationData.AdditionalNotesOptions
+                                           ResourceKey=@ResourceConstants.R_MEDICATION_NOTE_KEY
+                                           IsControlEnabled=@_isEditable />
+            }
+            <AmhMultilineEntryControl @bind-Value=@_medicationData.Medication.Note
+                                      ResourceKey=@ResourceConstants.R_ADDITIONAL_NOTE_TEXT_KEY
+                                      IsControlEnabled=@_isEditable />
+
+            @if (AppState.IsPatient)
+            {
+                <AmhSwitchControl @bind-Value=@_isToggeled
+                                  ResourceKey=@ResourceConstants.R_SET_REMIDERS_KEY
+                                  OnValueChanged=@OnReminderSet
+                                  IsControlEnabled=@(_isMedicationDateExpired || _medicationData.Medication.PatientMedicationID == Guid.Empty) />
+            }
+
+            @if (AppState.IsPatient && _isToggeled)
+            {
+                @if (GenericMethods.IsListNotEmpty(_reminderListOptions))
+                {
+                    foreach (var reminder in _reminderListOptions)
+                    {
+                        <AmhDateTimeControl FieldType=@FieldTypes.TimeControl
+                                            ResourceKey=@reminder.ResourceKey
+                                            Value=@GetReminderTime(reminder.ResourceID.ToString())
+                                            OnValueChanged=@((e) => OnReminderTimeChanged(e, reminder.ResourceID.ToString()))
+                                            IsControlEnabled=@_isMedicationDateExpired />
+                    }
+                }
+            }
+
+            @if (ProgramID <= 0 && (_medicationData.Medication.PatientMedicationID != Guid.Empty || ProgramMedicationID != 0))
+            {
+                <AmhEntryControl Value=@_medicationData.Medication.AddedByName
+                                 ResourceKey=@ResourceConstants.R_ADDED_BY_KEY
+                                 IsControlEnabled=@false />
+            }
+
+            @if (showMedicinesPopup)
+            {
+                <MedicinesSearchPopupPage IsPopup=@true
+                                          MedicationData=@_medicationData
+                                          ShowPopup=@_medicationData.IsActive
+                                          PopUpClosed=@MedicineOptionsPopUpClosedEventCallback />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!IsPatientMobileView)
+            {
+                @if (_medicationData.Medication.ProgramMedicationID != 0
+               && LibPermissions.HasPermission(_medicationData.FeaturePermissions, AppPermissions.ProgramMedicationDelete.ToString()) &&
+               _medicationData.Medication.PatientID == 0 && _isEditable)
+                {
+                    <AmhButtonControl Class=@(ApplyFixedFooter?"":"mt-3") ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                      OnValueChanged=@OnRemoveClick />
+
+                    <AmhMessageControl Class=@(ApplyFixedFooter?"":"mt-3") ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                       ShowHidePopup=@_hideConfirmationPopup
+                                       Actions=@_actionData
+                                       OnValueChanged=@OnDeleteConfirmationPopUpClickedAsync />
+                }
+
+                @if (_isEditable || (AppState.IsPatient && _isMedicationDateExpired))
+                {
+                    <AmhButtonControl Class=@(ApplyFixedFooter?"":"mt-3") ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                      OnValueChanged=@OnSaveClick />
+                }
+                <AmhButtonControl Class=@(ApplyFixedFooter?"":"mt-3") ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                                  OnValueChanged=OnCancelClickedAsync />
+            }
+        </PageFooter>
+    </BasePage>
+}

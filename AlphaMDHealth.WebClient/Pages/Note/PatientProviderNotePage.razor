@@ -1,0 +1,151 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientProviderNoteAddEdit"
+@page "/PatientProviderNoteAddEdit/{providernoteid:guid}"
+ 
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientProviderNoteAddEdit.ToString())
+              OnClose=@OnClose
+              PageResources=@_patientProviderNoteData.Resources
+              RegisterComp=@RegisterControl
+               ApplyFixedFooter=true
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              PageOperation=@GetPageOperationType(_isEditable, ProviderNoteID == Guid.Empty)>
+        <ChildContent>
+            <AmhDateTimeControl @bind-Value=@(_patientProviderNoteData.PatientProviderNote.NoteDateTime)
+                                ResourceKey=@ResourceConstants.R_DATE_KEY
+                                IsControlEnabled=@_isEditable />
+
+            <AmhDropdownControl @bind-Options=@_patientProviderNoteData.PatientPrograms
+                                IsControlEnabled=@_isEditable
+                                ResourceKey=@ResourceConstants.R_SELECT_PROGRAM_KEY
+                                OnValueChanged=@OnProgramChangedAsync />
+
+            <AmhDropdownControl @bind-Options=_patientProviderNoteData.Providers
+                                IsControlEnabled=@_isEditable
+                                ResourceKey=@ResourceConstants.R_SELECT_PROVIDER_KEY1
+                                OnValueChanged=@OnCareGiverChanged/>
+
+            <AmhDropdownControl @bind-Options=@_patientProviderNoteData.ProgramNotes
+                                IsControlEnabled=@_isEditable
+                                ResourceKey=@ResourceConstants.R_PROVIDER_NOTES_KEY
+                                OnValueChanged=@OnProviderNoteChangeAsync />
+
+            @if (_patientProviderNoteData.ProviderQuestions?.Count > 0)
+            {
+                foreach (var question in _patientProviderNoteData.ProviderQuestions?.ToList().Select((value, i) => new { i, value }))
+                {
+                    var questionValue = question.value;
+                    var key = string.Concat(questionValue.QuestionTypeID, questionValue.QuestionID.ToString());
+                    var index = (question.i).ToString();
+                    var resource = _patientProviderNoteData.Resources.FirstOrDefault(x => x.ResourceKey == key);
+                    if (resource != null)
+                    {
+                        resource.IsRequired = questionValue.IsRequired;
+                        if (questionValue.AnswerPlaceHolder == null)
+                        {
+                            questionValue.AnswerPlaceHolder = _patientProviderNoteData.QuestionnaireQuestionAnswers?.FirstOrDefault(x => x.QuestionID == questionValue?.QuestionID)?.AnswerValue;
+                        }
+                        switch (questionValue.QuestionTypeID)
+                        {
+                            case QuestionType.TextQuestionKey:
+                                <AmhEntryControl @bind-Value=@questionValue.AnswerPlaceHolder
+                                                 ResourceKey=@key
+                                                 UniqueID=@index
+                                                 IsControlEnabled=@_isEditable />
+                                break;
+                            case QuestionType.NumericQuestionKey:
+                                <AmhNumericEntryControl @bind-Value=@_numericValue
+                                                        FieldType=FieldTypes.NumericEntryControl
+                                                        ResourceKey=@key
+                                                        UniqueID=@index
+                                                        IsControlEnabled=@_isEditable />
+                                break;
+                            case QuestionType.MultilineTextQuestionKey:
+                                <AmhMultilineEntryControl @bind-Value=@questionValue.AnswerPlaceHolder
+                                                          ResourceKey=@key
+                                                          UniqueID=@index
+                                                          IsControlEnabled=@_isEditable />
+                                break;
+                            case QuestionType.RichTextQuestionKey:
+                                @((MarkupString)_patientProviderNoteData.QuestionnaireQuestions.FirstOrDefault(x => x.QuestionID == questionValue.QuestionID)?.InstructionsText)
+                                break;
+                            case QuestionType.MultiSelectQuestionKey:
+                                <AmhCheckBoxListControl @bind-Value=@questionValue.AnswerPlaceHolder
+                                                        Options=@CreateOptionList(questionValue)
+                                                        ResourceKey=@key
+                                                        UniqueID=@index
+                                                        IsControlEnabled=@_isEditable />
+                                break;
+                            case QuestionType.SingleSelectQuestionKey:
+                                <AmhRadioButtonListControl @bind-Value=@questionValue.AnswerPlaceHolder
+                                                           Options=@CreateOptionList(questionValue)
+                                                           ResourceKey=@key
+                                                           UniqueID=@index
+                                                           IsControlEnabled=@_isEditable />
+                                break;
+                            case QuestionType.DropDownQuestionKey:
+
+                                <AmhDropdownControl @bind-Value=@questionValue.AnswerPlaceHolder
+                                                    Options=@CreateOptionList(questionValue)
+                                                    ResourceKey=@key
+                                                    UniqueID=@index
+                                                    IsControlEnabled=@_isEditable />
+                                break;
+                            case QuestionType.HorizontalSliderQuestionKey:
+                            case QuestionType.VerticalSliderQuestionKey:
+                                <AmhSliderControl Value=@(double.TryParse(questionValue.AnswerPlaceHolder, out double doubleValue) ? doubleValue : default)
+                                                  Step=@questionValue.SliderSteps
+                                                  ResourceKey=@key
+                                                  UniqueID=@index
+                                                  IsControlEnabled=@_isEditable
+                                                  OnValueChanged=@(e => { questionValue.AnswerPlaceHolder = e?.ToString(); }) />
+                                break;
+                            case QuestionType.DateTimeQuestionKey:
+                            case QuestionType.DateQuestionKey:
+                            case QuestionType.TimeQuestionKey:
+                                <AmhDateTimeControl Value=@(DateTimeOffset.TryParse(questionValue.AnswerPlaceHolder, out DateTimeOffset dtValue) ? dtValue : null)
+                                                    ResourceKey=@key
+                                                    UniqueID=@index
+                                                    IsControlEnabled=@_isEditable
+                                OnValueChanged=@(e => { questionValue.AnswerPlaceHolder = e?.ToString(); }) />
+                                break;
+                            case QuestionType.FilesAndDocumentQuestionKey:
+                                    <AmhUploadControl @bind-Value=@questionValue.AnswerPlaceHolder
+                                                      ResourceKey=@key
+                                                      DescriptionResourceKey=@ResourceConstants.R_CAPTION_KEY
+                                                      UniqueID=@index
+                                                      IsControlEnabled=@_isEditable
+                                                      OnValueChanged=@(e => { OnAttachmentClick(e, string.Concat(key, index)); }) />
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_isEditable && _patientProviderNoteData.PatientProviderNote.ProviderNoteID != Guid.Empty && LibPermissions.HasPermission(_patientProviderNoteData.FeaturePermissions, AppPermissions.PatientProviderNoteDelete.ToString()) && _isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClick />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideDeleteConfirmationPopup
+                                   Actions=@_actionData
+                                   OnValueChanged=@DeletePopUpCallbackAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

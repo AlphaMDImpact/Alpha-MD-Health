@@ -1,0 +1,45 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/SubflowsView"
+@page "/SubflowsView/{subflowid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_programData.Resources
+              ApplyParentStructure=@(!ShowDetailPage)
+              ApplyCard=true
+              ShowPageTitle=@(_programData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <SubFlowPage SubFlowID=_subFlowID
+                             ShowDetailPage=true
+                             OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_programData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSourceType=@SubFlowModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.SubflowsView.ToString())
+                                     DataSource=@_programData.SubFlows
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowSearch=@(_programData.RecordCount < 1)
+                                     ShowViewAll=@(_programData.RecordCount > 0)
+                                     ShowPagination=@(_programData.RecordCount < 1)
+                                     ShowAddButton=@LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.SubflowAddEdit.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((SubFlowModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_programData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

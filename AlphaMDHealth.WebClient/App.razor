@@ -1,0 +1,28 @@
+@inherits BasePage
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IHttpContextAccessor httpContextAccessor
+<div class="base" 
+    style=@CssClassObject(AppState.MasterData)>
+    <AmhLoader />
+    @if (_isDataFetched)
+    {
+        <TheRouter RouteValues="@AppState.RouterData"
+                   AppAssembly="@typeof(Program).Assembly">
+            <Found Context="routeData">
+                <TheRouteView RouteData="@routeData"
+                              DefaultLayout="@typeof(MainLayout)" />
+            </Found>
+            <NotFound>
+                <BasePage PageResources=@AppState.MasterData?.Resources>
+                    <AmhMessageControl ResourceKey=@ErrorCode.Unauthorized.ToString() />
+                </BasePage>
+            </NotFound>
+        </TheRouter>
+        @if (AppState.MasterData?.Settings?.Count > 0 
+            && Convert.ToBoolean(LibSettings.GetSettingValueByKey(AppState.MasterData.Settings, SettingsConstants.S_ANALYTICS_ON_OFF_KEY)))
+        {
+            <NavigationTracker />
+        }
+    }
+</div>

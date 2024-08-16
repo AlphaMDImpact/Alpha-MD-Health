@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="160px" height="160px" viewBox="0 0 160 160" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>FF3E99A6-07B9-4B50-99D6-406E39C33F1A</title>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Update-available" transform="translate(-295.000000, -625.000000)">
+            <g id="Cont" transform="translate(155.000000, 625.000000)">
+                <g id="Update-icon" transform="translate(140.000000, 0.000000)">
+                    <circle id="Oval" fill="#CCE4F6" cx="80" cy="80" r="80"></circle>
+                    <g id="Icon" transform="translate(45.000000, 46.000000)" stroke="#0078D3" stroke-linecap="round" stroke-linejoin="round">
+                        <g id="Group-9" stroke-width="6">
+                            <path d="M0.000777777778,34.0492963 C0.000777777778,15.2452222 15.2452222,0.000777777778 34.0492963,0.000777777778 C46.7478148,0.000777777778 57.8233704,6.95151852 63.6774444,17.2570741" id="Stroke-1"></path>
+                            <path d="M68.0993704,34.0492963 C68.0993704,52.8533704 52.8549259,68.0978148 34.0482593,68.0978148 C22.8897407,68.0978148 12.9808519,62.7285556 6.77159259,54.4322593" id="Stroke-3"></path>
+                            <polyline id="Stroke-5" points="51.2018889 15.5581481 65.3963333 20.9040741 69.5652222 6.64222222"></polyline>
+                            <polyline id="Stroke-7" points="3.39862963 66.6705926 4.45381481 51.5428148 19.1564074 53.6972593"></polyline>
+                        </g>
+                        <polyline id="Stroke-1" stroke-width="5" points="31 24 31 39.4479941 46 39.4479941"></polyline>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

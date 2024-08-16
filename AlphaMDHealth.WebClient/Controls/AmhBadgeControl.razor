@@ -1,0 +1,74 @@
+﻿@using Radzen
+@using Radzen.Blazor
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@false
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <RadzenBadge BadgeStyle=@GetBadgeStyle() Text=@Value class=@Class />
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private string _value;
+
+    /// <summary>
+    /// Control value represents text of Label control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value == null || string.IsNullOrWhiteSpace(_value)
+                ? _resource?.ResourceValue ?? string.Empty
+                : _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private BadgeStyle GetBadgeStyle()
+    {
+        switch (FieldType)
+        {
+            case FieldTypes.PrimaryBadgeControl:
+                return BadgeStyle.Primary;
+            case FieldTypes.SecondaryBadgeControl:
+                return BadgeStyle.Secondary;
+            case FieldTypes.DarkBadgeControl:
+                return BadgeStyle.Dark;
+            case FieldTypes.LightBadgeControl:
+                return BadgeStyle.Light;
+            case FieldTypes.SuccessBadgeControl:
+                return BadgeStyle.Success;
+            case FieldTypes.DangerBadgeControl:
+                return BadgeStyle.Danger;
+            case FieldTypes.WarningBadgeControl:
+                return BadgeStyle.Warning;
+            case FieldTypes.InfoBadgeControl:
+                return BadgeStyle.Info;
+        }
+        return BadgeStyle.Warning;
+    }
+}

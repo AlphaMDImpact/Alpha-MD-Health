@@ -1,0 +1,37 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/SubscaleAddEdit"
+
+@if (_isDataFetched)
+{
+    <BasePage CurrentPage=@this
+              @bind-Error=@Error
+              @bind-Success=@Success
+              ShowDetailPage=@ShowDetailPage
+              PageResources=@_questionnaireData.Resources
+              RegisterComp=@RegisterControl
+              ShowPageTitle=false
+              IsAccordion=@IsAccordion
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.SubscalesView.ToString())>
+        <ChildContent>
+            @if (_questionnaireData.ErrCode == ErrorCode.OK)
+            {
+                <AmhDropdownControl @bind-Options=@_questionnaireData.DropDownOptions
+                                    ShowHeader=@false
+                                    ResourceKey=@ResourceConstants.R_SCORETYPE_TEXT_KEY
+                                    IsControlEnabled=@_isEditable />
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_questionnaireData.ErrCode.ToString() />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_AND_NEXT_ACTION_KEY
+                                  OnValueChanged=@OnSaveButtonClickedAsync Class="mt-2" />
+            }
+        </PageFooter>
+    </BasePage>
+}

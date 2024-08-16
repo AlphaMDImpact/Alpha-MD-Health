@@ -1,0 +1,45 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@_patientTrackerData.PatientTracker.TrackerName
+              PageResources=@_patientTrackerData?.Resources
+              OnClose=@OnClose
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhDateTimeControl @bind-Value=@_patientTrackerData.PatientTracker.CurrentValueInDate
+                                ResourceKey=@ResourceConstants.R_TRACKER_DATE_KEY
+                                IsControlEnabled=@_patientTrackerData.PatientTracker.IsEdit />
+
+            @if (!string.IsNullOrWhiteSpace(_patientTrackerData.PatientTracker.CurrentValue))
+            {
+                if (!string.IsNullOrWhiteSpace(_patientTrackerData.PatientTracker.ImageName) && _patientTrackerData.PatientTracker.InstructionsText != null)
+                {
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <AmhImageControl FieldType=@FieldTypes.CircleImageControl
+                                         ImageWidth=@AppImageSize.ImageSizeXXXL
+                                         ImageHeight=@AppImageSize.ImageSizeXXXL
+                                         Value=@_patientTrackerData.PatientTracker.ImageName
+                                         ShowHeader=@false />
+                    </div>
+                    <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                     Value=@_patientTrackerData.PatientTracker.CaptionText />
+                    <div>
+                        @((MarkupString)_patientTrackerData.PatientTracker.InstructionsText)
+                    </div>
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_patientTrackerData.PatientTracker.IsEdit)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClick />
+        </PageFooter>
+    </BasePage>
+}

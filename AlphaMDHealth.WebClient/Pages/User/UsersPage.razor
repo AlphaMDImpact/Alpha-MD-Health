@@ -1,0 +1,64 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/UsersView"
+@page "/UsersView/{userid:long}"
+@page "/PatientsView"
+@page "/PatientsView/{userid:long}"
+@page "/LinkedUsersView"
+@page "/LinkedUsersView/{userid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageTitle=@GetPageHeader()
+              ApplyCard=@(!_isDashboardView)
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_userData.ErrCode != ErrorCode.OK)
+              PageResources=@_userData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                @if (_isBulkUpload)
+                {
+                    <AddBulkUserPage OnClose=@OnAddEditClosedAsync
+                                     CurrentView=@GetAddEditPage() />
+                }
+                else
+                {
+                    <UserPage UserID=@_userID
+                              OrganizationID=@(IsManageOrganization?OrganizationID:0)
+                              IsAccordion=@IsManageOrganization
+                              CurrentView=@GetAddEditPage()
+                              ShowDetailPage=true
+                              OnClose=@OnAddEditClosedAsync />
+                }
+            }
+            else
+            {
+                @if (_userData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_userData.Users
+                                     DataSourceType=@UserModel
+                                     TableHeader=@GetPageHeader()
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowViewAll=@_isDashboardView
+                                     ShowSearch=@(!_isDashboardView)
+                                     ShowPagination=@(!_isDashboardView)
+                                     ActionButtons=@_actions
+                                     ShowAddButton=@(ShowAddButton() && !_isDashboardView)
+                                     IsEdit=@ShowAddButton()
+                                     OnValueChanged=@(e => OnAddEditClicked((UserModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync
+                                     Icon=@ImageConstants.I_USERS_SVG />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_userData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

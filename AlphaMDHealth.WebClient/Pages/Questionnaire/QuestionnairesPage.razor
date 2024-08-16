@@ -1,0 +1,43 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/QuestionnairesView"
+@page "/QuestionnairesView/{questionnaireid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Success=@Success
+              @bind-Error=@Error
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionnairesView.ToString())
+              PageResources=@_questionnaireData.Resources
+              ApplyStructure=@(Parameters?.Count < 1)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_questionnaireData.ErrCode != ErrorCode.OK)>
+        @if (ShowDetailPage)
+        {
+            <QuestionnaireAddEdit QuestionnaireID=@_questionnaireID OnClose=@OnQuestionnaireClosedAsync />
+        }
+        else
+        {
+            @if (_questionnaireData.ErrCode == ErrorCode.OK)
+            {
+                <AmhTableControl DataSource=@_questionnaireData.Questionnaires
+                                 DataSourceType=@QuestionnaireModel
+                                 TableStructure=@GenerateTableStructure()
+                                 ShowViewAll=@_isDashboardView
+                                 ShowAddButton=@(!_isDashboardView && LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.QuestionnaireAddEdit.ToString()))
+                                 TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionnairesView.ToString())
+                                 ShowSearch=@(!_isDashboardView)
+                                 ShowPagination=@(!_isDashboardView)
+                                 OnValueChanged=@((e) => OnRowClickAsync((QuestionnaireModel)e))
+                                 OnViewClicked=@OnViewAllClickedAsync />
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_questionnaireData.ErrCode.ToString() />
+            }
+        }
+    </BasePage>
+}

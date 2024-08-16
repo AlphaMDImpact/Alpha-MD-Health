@@ -1,0 +1,317 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
+		
+		<OutputType>Exe</OutputType>
+		<RootNamespace>AlphaMDHealth.MobileClient</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<!-- Display name -->
+		<ApplicationTitle>Alpha MD Health</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.alphamd.health</ApplicationId>
+		<ApplicationIdGuid>e64518ac-9d87-4034-8e05-de93f03b826a</ApplicationIdGuid>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>2.0</ApplicationDisplayVersion>
+		<ApplicationVersion>2</ApplicationVersion>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-ios|AnyCPU'">
+		<CreatePackage>false</CreatePackage>
+		<CodesignProvision>AlphaMDHealthDevProfileV1.0</CodesignProvision>
+		<CodesignKey>iPhone Developer</CodesignKey>
+		<CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
+		<EnableSigningChecks>true</EnableSigningChecks>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
+		<RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-ios|AnyCPU'">
+		<CreatePackage>false</CreatePackage>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appicon.svg" Color="#FFFFFF" />
+
+		<MauiIcon Include="Resources\AppIcon\appicon_round.svg" ForegroundFile="Resources\AppIcon\appicon_round.svg" Color="#FFFFFF" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\loginlogo.png" Color="#FFFFFF" BaseSize="128,128" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+	
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <AndroidResource Remove="Behaviours\**" />
+	  <AndroidResource Remove="Controls\OldControls\**" />
+	  <AndroidResource Remove="OldViewCells\**" />
+	  <AndroidResource Remove="Views\**" />
+	  <AndroidResource Remove="Pages\Appointment\**" />
+	  <AndroidResource Remove="Pages\Billings\**" />
+	  <AndroidResource Remove="Pages\Chat\**" />
+	  <AndroidResource Remove="Pages\Consent\**" />
+	  <AndroidResource Remove="Pages\Contact\**" />
+	  <AndroidResource Remove="Pages\Dashboard\**" />
+	  <AndroidResource Remove="Pages\Devices\**" />
+	  <AndroidResource Remove="Pages\Education\**" />
+	  <AndroidResource Remove="Pages\File\**" />
+	  <AndroidResource Remove="Pages\Medication\**" />
+	  <AndroidResource Remove="Pages\OldBasePage\**" />
+	  <AndroidResource Remove="Pages\OldCommon\**" />
+	  <AndroidResource Remove="Pages\Other\**" />
+	  <AndroidResource Remove="Pages\PdfPages\**" />
+	  <AndroidResource Remove="Pages\Program\**" />
+	  <AndroidResource Remove="Pages\ProviderNote\**" />
+	  <AndroidResource Remove="Pages\Questionnaire\**" />
+	  <AndroidResource Remove="Pages\Reading\**" />
+	  <AndroidResource Remove="Pages\Reports\**" />
+	  <AndroidResource Remove="Pages\Task\**" />
+	  <AndroidResource Remove="Pages\Trackers\**" />
+	  <AndroidResource Remove="Pages\User\**" />
+	  <AndroidResource Remove="ViewCells\**" />
+	  <Compile Remove="Behaviours\**" />
+	  <Compile Remove="Controls\OldControls\**" />
+	  <Compile Remove="OldViewCells\**" />
+	  <Compile Remove="Views\**" />
+	  <Compile Remove="Pages\Appointment\**" />
+	  <Compile Remove="Pages\Billings\**" />
+	  <Compile Remove="Pages\Chat\**" />
+	  <Compile Remove="Pages\Consent\**" />
+	  <Compile Remove="Pages\Contact\**" />
+	  <Compile Remove="Pages\Dashboard\**" />
+	  <Compile Remove="Pages\Devices\**" />
+	  <Compile Remove="Pages\Education\**" />
+	  <Compile Remove="Pages\File\**" />
+	  <Compile Remove="Pages\Medication\**" />
+	  <Compile Remove="Pages\OldBasePage\**" />
+	  <Compile Remove="Pages\OldCommon\**" />
+	  <Compile Remove="Pages\Other\**" />
+	  <Compile Remove="Pages\PdfPages\**" />
+	  <Compile Remove="Pages\Program\**" />
+	  <Compile Remove="Pages\ProviderNote\**" />
+	  <Compile Remove="Pages\Questionnaire\**" />
+	  <Compile Remove="Pages\Reading\**" />
+	  <Compile Remove="Pages\Reports\**" />
+	  <Compile Remove="Pages\Task\**" />
+	  <Compile Remove="Pages\Trackers\**" />
+	  <Compile Remove="Pages\User\**" />
+	  <Compile Remove="ViewCells\**" />
+	  <EmbeddedResource Remove="Behaviours\**" />
+	  <EmbeddedResource Remove="Controls\OldControls\**" />
+	  <EmbeddedResource Remove="OldViewCells\**" />
+	  <EmbeddedResource Remove="Views\**" />
+	  <EmbeddedResource Remove="Pages\Appointment\**" />
+	  <EmbeddedResource Remove="Pages\Billings\**" />
+	  <EmbeddedResource Remove="Pages\Chat\**" />
+	  <EmbeddedResource Remove="Pages\Consent\**" />
+	  <EmbeddedResource Remove="Pages\Contact\**" />
+	  <EmbeddedResource Remove="Pages\Dashboard\**" />
+	  <EmbeddedResource Remove="Pages\Devices\**" />
+	  <EmbeddedResource Remove="Pages\Education\**" />
+	  <EmbeddedResource Remove="Pages\File\**" />
+	  <EmbeddedResource Remove="Pages\Medication\**" />
+	  <EmbeddedResource Remove="Pages\OldBasePage\**" />
+	  <EmbeddedResource Remove="Pages\OldCommon\**" />
+	  <EmbeddedResource Remove="Pages\Other\**" />
+	  <EmbeddedResource Remove="Pages\PdfPages\**" />
+	  <EmbeddedResource Remove="Pages\Program\**" />
+	  <EmbeddedResource Remove="Pages\ProviderNote\**" />
+	  <EmbeddedResource Remove="Pages\Questionnaire\**" />
+	  <EmbeddedResource Remove="Pages\Reading\**" />
+	  <EmbeddedResource Remove="Pages\Reports\**" />
+	  <EmbeddedResource Remove="Pages\Task\**" />
+	  <EmbeddedResource Remove="Pages\Trackers\**" />
+	  <EmbeddedResource Remove="Pages\User\**" />
+	  <EmbeddedResource Remove="ViewCells\**" />
+	  <MauiCss Remove="Behaviours\**" />
+	  <MauiCss Remove="Controls\OldControls\**" />
+	  <MauiCss Remove="OldViewCells\**" />
+	  <MauiCss Remove="Views\**" />
+	  <MauiCss Remove="Pages\Appointment\**" />
+	  <MauiCss Remove="Pages\Billings\**" />
+	  <MauiCss Remove="Pages\Chat\**" />
+	  <MauiCss Remove="Pages\Consent\**" />
+	  <MauiCss Remove="Pages\Contact\**" />
+	  <MauiCss Remove="Pages\Dashboard\**" />
+	  <MauiCss Remove="Pages\Devices\**" />
+	  <MauiCss Remove="Pages\Education\**" />
+	  <MauiCss Remove="Pages\File\**" />
+	  <MauiCss Remove="Pages\Medication\**" />
+	  <MauiCss Remove="Pages\OldBasePage\**" />
+	  <MauiCss Remove="Pages\OldCommon\**" />
+	  <MauiCss Remove="Pages\Other\**" />
+	  <MauiCss Remove="Pages\PdfPages\**" />
+	  <MauiCss Remove="Pages\Program\**" />
+	  <MauiCss Remove="Pages\ProviderNote\**" />
+	  <MauiCss Remove="Pages\Questionnaire\**" />
+	  <MauiCss Remove="Pages\Reading\**" />
+	  <MauiCss Remove="Pages\Reports\**" />
+	  <MauiCss Remove="Pages\Task\**" />
+	  <MauiCss Remove="Pages\Trackers\**" />
+	  <MauiCss Remove="Pages\User\**" />
+	  <MauiCss Remove="ViewCells\**" />
+	  <MauiXaml Remove="Behaviours\**" />
+	  <MauiXaml Remove="Controls\OldControls\**" />
+	  <MauiXaml Remove="OldViewCells\**" />
+	  <MauiXaml Remove="Views\**" />
+	  <MauiXaml Remove="Pages\Appointment\**" />
+	  <MauiXaml Remove="Pages\Billings\**" />
+	  <MauiXaml Remove="Pages\Chat\**" />
+	  <MauiXaml Remove="Pages\Consent\**" />
+	  <MauiXaml Remove="Pages\Contact\**" />
+	  <MauiXaml Remove="Pages\Dashboard\**" />
+	  <MauiXaml Remove="Pages\Devices\**" />
+	  <MauiXaml Remove="Pages\Education\**" />
+	  <MauiXaml Remove="Pages\File\**" />
+	  <MauiXaml Remove="Pages\Medication\**" />
+	  <MauiXaml Remove="Pages\OldBasePage\**" />
+	  <MauiXaml Remove="Pages\OldCommon\**" />
+	  <MauiXaml Remove="Pages\Other\**" />
+	  <MauiXaml Remove="Pages\PdfPages\**" />
+	  <MauiXaml Remove="Pages\Program\**" />
+	  <MauiXaml Remove="Pages\ProviderNote\**" />
+	  <MauiXaml Remove="Pages\Questionnaire\**" />
+	  <MauiXaml Remove="Pages\Reading\**" />
+	  <MauiXaml Remove="Pages\Reports\**" />
+	  <MauiXaml Remove="Pages\Task\**" />
+	  <MauiXaml Remove="Pages\Trackers\**" />
+	  <MauiXaml Remove="Pages\User\**" />
+	  <MauiXaml Remove="ViewCells\**" />
+	  <None Remove="Behaviours\**" />
+	  <None Remove="Controls\OldControls\**" />
+	  <None Remove="OldViewCells\**" />
+	  <None Remove="Views\**" />
+	  <None Remove="Pages\Appointment\**" />
+	  <None Remove="Pages\Billings\**" />
+	  <None Remove="Pages\Chat\**" />
+	  <None Remove="Pages\Consent\**" />
+	  <None Remove="Pages\Contact\**" />
+	  <None Remove="Pages\Dashboard\**" />
+	  <None Remove="Pages\Devices\**" />
+	  <None Remove="Pages\Education\**" />
+	  <None Remove="Pages\File\**" />
+	  <None Remove="Pages\Medication\**" />
+	  <None Remove="Pages\OldBasePage\**" />
+	  <None Remove="Pages\OldCommon\**" />
+	  <None Remove="Pages\Other\**" />
+	  <None Remove="Pages\PdfPages\**" />
+	  <None Remove="Pages\Program\**" />
+	  <None Remove="Pages\ProviderNote\**" />
+	  <None Remove="Pages\Questionnaire\**" />
+	  <None Remove="Pages\Reading\**" />
+	  <None Remove="Pages\Reports\**" />
+	  <None Remove="Pages\Task\**" />
+	  <None Remove="Pages\Trackers\**" />
+	  <None Remove="Pages\User\**" />
+	  <None Remove="ViewCells\**" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <Compile Include="Pages\Chat\ChatPage.cs" />
+	  <Compile Include="Pages\Chat\ChatsPage.cs" />
+	  <Compile Include="Pages\Consent\UserConsentsPage.cs" />
+	  <Compile Include="Pages\Dashboard\DashboardPage.cs" />
+	  <Compile Include="Pages\Task\PatientTasksPage.cs" />
+	  <Compile Include="Pages\User\MultipleUsersPage.cs" />
+	  <Compile Include="Views\Chat\ChatsView.cs" />
+	  <Compile Include="Views\Chat\ChatView.cs" />
+	  <Compile Include="Views\Common\HeaderView.cs" />
+	  <Compile Include="Views\Common\MenuCollectionView.cs" />
+	  <Compile Include="Views\Common\MenuView.cs" />
+	  <Compile Include="Pages\Other\LanguageSelectionPage.cs" />
+	  <Compile Include="Views\Common\StaticMessageView.cs" />
+	  <Compile Include="Views\Common\ViewManager.cs" />
+	  <Compile Include="Views\Consent\UserConsentsView.cs" />
+	  <Compile Include="Views\Dashboard\DashboardView.cs" />
+	  <Compile Include="Views\Other\PincodeView.cs" />
+	  <Compile Include="Views\User\MultipleUserView.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="banditoth.MAUI.JailbreakDetector" Version="1.0.0" />
+		<PackageReference Include="Castle.Core" Version="5.1.1" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.1" />
+		<PackageReference Include="CommunityToolkit.Maui.Markup" Version="4.0.0" />
+		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="3.1.1" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="Microsoft.AppCenter" Version="5.0.5" />
+		<PackageReference Include="Microsoft.AppCenter.Analytics" Version="5.0.5" />
+		<PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.5" />
+		<PackageReference Include="Microsoft.AspNet.SignalR.Client" Version="2.4.3" />
+		<PackageReference Include="Controls.UserDialogs.Maui" Version="1.5.4" />
+		<PackageReference Include="Mopups" Version="1.3.1" />
+		<PackageReference Include="nor0x.Maui.ColorPicker" Version="2.0.1" />
+		<PackageReference Include="PancakeViewCompat" Version="7.0.0" />
+		<PackageReference Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
+		<PackageReference Include="SkiaSharp.Extended.UI.Maui" Version="2.0.0" />
+		<PackageReference Include="DevExpress.Maui.Charts" Version="23.2.6" />
+		<PackageReference Include="DevExpress.Maui.Scheduler" Version="23.2.6" />
+		<PackageReference Include="DevExpress.Maui.Controls" Version="23.2.6" />
+		<PackageReference Include="DevExpress.Maui.Editors" Version="23.2.6" />
+		<PackageReference Include="Svg.Skia" Version="1.0.0.18" />
+		<PackageReference Include="YoutubeExplode" Version="6.3.16" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AlphaMDHealth.ClientBusinessLayer\AlphaMDHealth.ClientBusinessLayer.csproj" />
+		<ProjectReference Include="..\AlphaMDHealth.CommonBusinessLayer\AlphaMDHealth.CommonBusinessLayer.csproj" />
+		<ProjectReference Include="..\AlphaMDHealth.Utility\AlphaMDHealth.Utility.csproj" />
+		<ProjectReference Include="..\AlphaMDHealth.Model\AlphaMDHealth.Model.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Components\" />
+	  <Folder Include="OldViewCells\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="AppShell.xaml.cs">
+	    <DependentUpon>%(Filename)</DependentUpon>
+	  </Compile>
+	  <Compile Update="MainPage.xaml.cs">
+	    <DependentUpon>%(Filename)</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="AppShell.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="MainPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.40" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.40" />
+	</ItemGroup>
+
+</Project>

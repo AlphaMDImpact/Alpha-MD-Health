@@ -1,0 +1,201 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl;
+
+<AmhBaseControl ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                ErrorMessage=@ErrorMessage
+                IsValid=@IsValid>
+    <ChildControl>
+        <RadzenTimeline LinePosition=@LinePosition.Start
+                        Orientation=@GetTimelineOrientation()
+                        AlignItems=@AlignItems.Start
+                        Style=@(FieldType == FieldTypes.HorizontalTimelineControl ? "overflow-x: auto;": "")>
+            <Items>
+                @if (Options?.Count > 0)
+                {
+                    @foreach (var timeline in Options)
+                    {
+                        <RadzenTimelineItem PointStyle=PointStyle.Primary
+                                            PointShadow="3"
+                                            PointVariant=Variant.Outlined
+                                            PointSize=PointSize.Medium>
+                            <PointContent>
+                                <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                                 ImageHeight=@AppImageSize.ImageSizeXXS
+                                                 ImageWidth=@AppImageSize.ImageSizeXXS
+                                                 Icon=@timeline.ParentOptionText>
+                                </AmhImageControl>
+                            </PointContent>
+                            <LabelContent>
+                                @if (!string.IsNullOrWhiteSpace(timeline.GroupName))
+                                {
+                                    <RadzenBadge BadgeStyle=BadgeStyle.Warning Text=@timeline.GroupName />
+                                }
+                            </LabelContent>
+                            <ChildContent>
+                                <AmhLabelControl Value=@timeline.OptionText></AmhLabelControl>
+                                @if (!string.IsNullOrWhiteSpace(timeline.ParentOptionText))
+                                {
+                                    @switch (timeline.ParentOptionText.ToEnum<AppPermissions>())
+                                    {
+                                        case AppPermissions.ForgotPasswordView:
+                                            <ForgotPasswordPage />
+                                            break;
+                                        case AppPermissions.RegistrationView:
+                                            <RegistrationPage />
+                                            break;
+                                        case AppPermissions.LoginView:
+                                        default:
+                                            <LoginPage />
+                                            break;
+                                    }
+                                }
+                            </ChildContent>
+
+                        </RadzenTimelineItem>
+                    }
+                }
+                else if (Views?.Count > 0)
+                {
+                    @foreach (var view in Views)
+                    {
+                        <RadzenTimelineItem PointStyle=PointStyle.Primary
+                                            PointShadow="3"
+                                            PointVariant=Variant.Outlined
+                                            PointSize=PointSize.Medium>
+                            <PointContent>
+                                <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                                 ImageHeight=@AppImageSize.ImageSizeXXS
+                                                 ImageWidth=@AppImageSize.ImageSizeXXS
+                                                 Icon=@ImageConstants.I_USER_ID_SVG>
+                                </AmhImageControl>
+                            </PointContent>
+                            <LabelContent>
+                                @if (!string.IsNullOrWhiteSpace(view.FeatureText))
+                                {
+                                    <RadzenBadge BadgeStyle=BadgeStyle.Warning Text=@view.FeatureText />
+                                }
+                            </LabelContent>
+                            <ChildContent>
+                                <ViewMapper FeatureCode=@view.FeatureCode
+                                            FeatureText=@view.FeatureText
+                                            Parameters=@view.Parameters
+                                            PageData=@view.PageData
+                                            IsDashboardPage=@false />
+                            </ChildContent>
+                        </RadzenTimelineItem>
+                    }
+                }
+            </Items>
+        </RadzenTimeline>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+
+    private string _value;
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>
+    /// property of view to render
+    /// </summary>
+    [Parameter]
+    public List<ViewMapper> Views { get; set; }
+
+    private string _select;
+
+    private void OnAccordianOptionChnged(object selectedQuestionnaire)
+    {
+        if (selectedQuestionnaire is string selectedMenu)
+        {
+            _select = selectedMenu;
+        }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    // private List<OptionModel> GetQuestionnaireOptions = new List<OptionModel>()
+    // {
+    //     new OptionModel { OptionID = 1, OptionText=AppPermissions.QuestionnaireAddEdit.ToString()},
+    //     new OptionModel { OptionID = 2, OptionText=AppPermissions.QuestionsView.ToString() },
+    //     new OptionModel { OptionID = 3, OptionText=AppPermissions.QuestionnaireQuestionsView.ToString() },
+    // };
+
+    private Orientation GetTimelineOrientation()
+    {
+        switch (FieldType)
+        {
+            case FieldTypes.HorizontalTimelineControl:
+                return Orientation.Horizontal; ;
+            case FieldTypes.VerticalTimelineControl:
+            default:
+                return Orientation.Vertical;
+        }
+    }
+}
+@*  <RadzenTimeline LinePosition=LinePosition.Center Orientation=@GetTimelineOrientation()>
+        <Items>
+        @foreach (var timeline in Options)
+        {
+        <RadzenTimelineItem PointStyle=PointStyle.Primary PointShadow="3">
+        <LabelContent>
+        <RadzenBadge BadgeStyle=BadgeStyle.Warning Text=@timeline.GroupName />
+        </LabelContent>
+        <ChildContent>
+        <AmhLabelControl Value=@timeline.OptionText></AmhLabelControl>
+        </ChildContent>
+        </RadzenTimelineItem>
+        }
+        <RadzenTimelineItem PointStyle=PointStyle.Primary PointVariant=Variant.Outlined PointSize=PointSize.Large>
+        <PointContent>
+        <AmhImageControl FieldType=@FieldTypes.ImageControl
+        ImageHeight=@AppImageSize.ImageSizeS
+        ImageWidth=@AppImageSize.ImageSizeS
+        Icon=@ImageConstants.I_USER_ID_SVG></AmhImageControl>
+        </PointContent>
+        <ChildContent>
+        <RadzenAccordion>
+        <Items>
+        <RadzenAccordionItem Text="@ResourceConstants.R_TIMELINE_RIGHT_TEXT_2">
+        </RadzenAccordionItem>
+        </Items>
+        </RadzenAccordion>
+        </ChildContent>
+        </RadzenTimelineItem>
+        </Items>
+        </RadzenTimeline> *@

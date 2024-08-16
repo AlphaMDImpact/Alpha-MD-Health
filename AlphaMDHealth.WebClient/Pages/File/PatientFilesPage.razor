@@ -1,0 +1,47 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientFilesView"
+@page "/PatientFilesView/{fileid:guid}"
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(Parameters?.Count < 1)
+              PageResources=@_fileData.Resources
+              ApplyCard=@(IsPatientMobileView ? false : true)
+              ApplyParentStructure=@(!ShowDetailPage)
+              ApplyFixedFooter=@(IsPatientMobileView ? !_isDashboardView : false)
+              ShowPageTitle=@(_fileData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PatientFilePage ShowDetailPage=true FileID=@_fileID OnClose=@OnCloseEventCallbackAsync />
+            }
+            else
+            {
+                @if (_fileData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_fileData.Files
+                                     DataSourceType=@FileModel
+                                     TableHeader=@(LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientFilesView.ToString()))
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowSearch=@(!_isDashboardView)
+                                     ShowViewAll=@_isDashboardView
+                                     SourceFieldStructure=@getViewCellModel()
+                                     IsPatientMobileView=@IsPatientMobileView
+                                     ShowPagination=@(!_isDashboardView)
+                                     ShowAddButton=@(!_isDashboardView && LibPermissions.HasPermission(_fileData.FeaturePermissions, AppPermissions.PatientFileAddEdit.ToString()))
+                                     OnViewClicked=@OnViewAllClickedAsync
+                                     ActionButtons=@_actionButtons
+                                     OnValueChanged=@((e) => OnAddEditClickAsync((FileModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_fileData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

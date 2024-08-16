@@ -1,0 +1,61 @@
+﻿@namespace AlphaMDHealth.WebClient
+@using AlphaMDHealth.Model
+@using Radzen.Blazor
+@inherits BasePage
+@page "/HealthScansView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error @bind-Success=@Success @bind-ShowDetailPage=@ShowDetailPage
+              ApplyStructure=@(Parameters?.Count < 1)
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.HealthScansView.ToString())
+              PageResources=@_healthScanData.Resources
+              ShowPageTitle=@(!ShowDetailPage)>
+        @if (ShowDetailPage)
+        {
+            <CreditTransacationPage TransactionID=@_transactionID OnClose=@OnAddEditClosedAsync />
+        }
+        else if (_healthScanData.ErrCode == ErrorCode.OK)
+        {
+            <RadzenDataList WrapItems=@true
+                            PagerHorizontalAlign=@Radzen.HorizontalAlign.Left
+                            Data=@_healthScanCards
+                            TItem=@CardModel>
+                <Template Context="item">
+                    <RadzenCard class="rz-border-radius-2">
+                        <RadzenRow AlignItems=@Radzen.AlignItems.Start>
+                            <RadzenColumn Size="8" Style="display: flex; justify-content: flex-start;">
+                                <AmhHeaderControl Title=@(item.Header) />
+                            </RadzenColumn>
+                            <RadzenColumn Size="4" Style="display: flex; justify-content: flex-end;">
+                                <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                                 ImageHeight=@AppImageSize.ImageSizeL
+                                                 ImageWidth=@AppImageSize.ImageSizeL
+                                                 Icon=@item.ImageBase64
+                                                 BackgroundColor="#EBF1FC" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow>
+                            <AmhLabelControl FieldType=@FieldTypes.PrimaryLargeHStartVCenterLabelControl Value=@item.SubHeader />
+                        </RadzenRow>
+                    </RadzenCard>
+                </Template>
+            </RadzenDataList>
+
+            @if (LibPermissions.HasPermission(_healthScanData.FeaturePermissions, AppPermissions.CreditHistoryView.ToString()))
+            {
+                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.CreditHistoryView.ToString())
+                                 DataSource=@_healthScanData.ExternalServiceTransactions
+                                 DataSourceType=@HealthScanModel
+                                 TableStructure=@GenerateTableStructure()
+                                 ShowAddButton=@LibPermissions.HasPermission(_healthScanData.FeaturePermissions, AppPermissions.CreditAddEdit.ToString())
+                                 OnValueChanged=@(e=>OnAddEditClicked((HealthScanModel)e)) />
+            }
+        }
+        else
+        {
+            <AmhMessageControl ResourceKey=@_healthScanData.ErrCode.ToString() />
+        }
+    </BasePage>
+}

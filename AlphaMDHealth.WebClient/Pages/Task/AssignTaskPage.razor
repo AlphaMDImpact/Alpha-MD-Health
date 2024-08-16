@@ -1,0 +1,41 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientAssignTaskView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientAssignTaskView.ToString())
+              RegisterComp=@RegisterControl
+              PageResources=@_patientTaskData.Resources
+              OnClose=@OnClose
+              ApplyFixedFooter=true
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              PageOperation=@PageOperationType.Add>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=@_patientTaskData.TaskTypes
+                                OnValueChanged=@OnTaskTypeChangedAsync
+                                ResourceKey=@ResourceConstants.R_TASK_TYPE_KEY />
+
+            <AmhDropdownControl @bind-Options=@_patientTaskData.Items
+                                ResourceKey=@ResourceConstants.R_ITEM_KEY />
+
+            <AmhDateTimeControl @bind-Value=_patientTaskData.Task.FromDate
+                                ResourceKey=@ResourceConstants.R_START_DATE_KEY />
+
+            <AmhDateTimeControl @bind-Value=_patientTaskData.Task.ToDate
+                                ResourceKey=@ResourceConstants.R_END_DATE_KEY />
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                              OnValueChanged=@OnSaveActionClickedAsync />
+
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCancelClick />
+        </PageFooter>
+    </BasePage>
+}

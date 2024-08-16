@@ -1,0 +1,62 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@inject NavRefreshService NavRefreshServ
+@inherits LayoutComponentBase
+@namespace AlphaMDHealth.WebClient
+<NavigationComponent @ref=@_navigator IsFirstRender="false" />
+
+<RadzenPanelMenu DisplayStyle=@(SidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.IconAndText) ShowArrow="true">
+
+    <RadzenPanelMenuItem id="LeftMenuOrganizationMenu"
+                         Text=@_selectedMenuTitle
+                         class="top-menu"
+                         Click=@OrganisationMenuClick Expanded=true>
+        @if (_organisationMenus?.Count() > 0)
+        {
+            var selectedMenu = _organisationMenus.FirstOrDefault(x => x.IsActive && x.MenuLocation == MenuLocation.Left);
+            @if (!_isBranch && selectedMenu == null && AppState.MasterData.Menus.All(x => !x.IsActive))
+            {
+                selectedMenu = _organisationMenus.FirstOrDefault(x => x.TargetID == AppState.RouterData.SelectedRoute.FeatureId && x.MenuLocation == MenuLocation.Left);
+            }
+            @if (!_isBranch && selectedMenu == null && AppState.MasterData.Menus.All(x => !x.IsActive))
+            {
+                selectedMenu = _organisationMenus.FirstOrDefault(x => x.TargetID == AppState.RouterData.Routes.FirstOrDefault(x => x.Page == AppState.MasterData.DefaultRoute).FeatureId);
+            }
+            @foreach (var menu in _organisationMenus)
+            {
+                var route = AppState.RouterData?.Routes?.FirstOrDefault(x => x.FeatureId == menu.TargetID);
+                <RadzenPanelMenuItem id=@string.Concat("LeftMenuOrganizationMenu", route?.Page)
+                                     Text=@menu.PageHeading
+                                     Click=@(async (e)=>{ await OnOrganisationFeatureMenuClickAsync(menu);})
+                                     Selected=@(menu.TargetID == selectedMenu?.TargetID) />
+            }
+        }
+    </RadzenPanelMenuItem>
+
+    @if (_groupItems?.Count() > 0)
+    {
+        @foreach (var item in _groupItems)
+        {
+            @if (_isOrganisation && !_isOpen)
+            {
+                var branchName = item.FirstOrDefault()?.BranchName;
+                <RadzenPanelMenuItem id=@string.Concat("LeftMenuBranchMenu", item.Key)
+                                     Text=@branchName
+                                     Icon=@AppState.GetImageInitials(branchName)
+                                     ExpandedChanged=@(async (e)=>{ BranchMenuExpandedChanged(e, item.Key);})
+                                     Click=@(async (e)=>{ await BranchMenuClickAsync(item.Key);}) />
+
+            }
+            @if (_isBranch)
+            {
+                var deptName = item.FirstOrDefault()?.DepartmentName;
+                <RadzenPanelMenuItem id=@string.Concat("LeftMenuBranchMenu", item.Key)
+                                     Text=@deptName
+                                     Icon=@AppState.GetImageInitials(deptName)
+                                     ExpandedChanged=@(async (e)=>{ DepartmentMenuExpandedChanged(e, item.Key);})
+                                     Click=@(async (e)=>{ await DepartmentMenuClickAsync(item.Key);}) />
+            }
+        }
+    }
+
+</RadzenPanelMenu>

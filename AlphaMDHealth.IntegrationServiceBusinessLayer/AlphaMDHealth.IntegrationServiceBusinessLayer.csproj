@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.20.0" />
+	<PackageReference Include="FM.LiveSwitch" Version="1.19.3.51543" />
+	<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
+    <PackageReference Include="OpenTok" Version="3.14.0" />
+    <PackageReference Include="SendGrid" Version="9.29.3" />
+    <PackageReference Include="Twilio" Version="7.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlphaMDHealth.IntegrationServiceDataLayer\AlphaMDHealth.IntegrationServiceDataLayer.csproj" />
+    <ProjectReference Include="..\AlphaMDHealth.Model\AlphaMDHealth.Model.csproj" />
+    <ProjectReference Include="..\AlphaMDHealth.Utility\AlphaMDHealth.Utility.csproj" />
+  </ItemGroup>
+
+</Project>

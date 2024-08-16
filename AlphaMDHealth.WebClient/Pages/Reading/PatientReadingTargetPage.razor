@@ -1,0 +1,40 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientReadingTargetAddEdit.ToString())
+              PageResources=@_targetData?.Resources
+              RegisterComp=@RegisterControl
+              OnClose=@OnClose
+              ApplyFixedFooter=true
+              ApplyCard=true
+              ShowDetailPage=@ShowDetailPage
+              IsAccordion=@IsAccordion
+              PageOperation=@GetPageOperationType(true, !(_targetData.PatientReadingTarget != null && (_targetData.PatientReadingTarget.TargetMinValue != 0 || _targetData.PatientReadingTarget.TargetMaxValue != 0)))>
+        <ChildContent>
+            <AmhDropdownControl ResourceKey=@ResourceConstants.R_SELECT_READING_TYPE_KEY
+                                @bind-Options=@_targetData.ReadingOptions
+                                OnValueChanged=@OnReadingTypeChange />
+
+            <AmhNumericEntryControl @bind-Value=@_targetMinValueString
+                                    ResourceKey=@ResourceConstants.R_READING_TARGET_MIN_VALUE_KEY
+                                    DigitsAfterDecimal=@(_decimalPrecision > 0 ? _decimalPrecision : 0) />
+            @if (!string.IsNullOrWhiteSpace(_showErrorMessageLabel))
+            {
+                <AmhLabelControl FieldType=@FieldTypes.ErrorHStartVCenterLabelControl
+                                 Value=@_showErrorMessageLabel />
+            }
+            <AmhNumericEntryControl @bind-Value=@_targetMaxValueString
+                                    ResourceKey=@ResourceConstants.R_READING_TARGET_MAX_VALUE_KEY
+                                    DigitsAfterDecimal=@(_decimalPrecision > 0 ? _decimalPrecision : 0) />
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=OnCanceledClickAsync />
+        </PageFooter>
+    </BasePage>
+}

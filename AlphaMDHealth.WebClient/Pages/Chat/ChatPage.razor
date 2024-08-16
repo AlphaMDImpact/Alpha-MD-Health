@@ -1,0 +1,182 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@inject IJSRuntime JSRuntime
+@page "/ChatView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              ShowPageTitle=@false
+              Class="h-100 justify-content-between d-flex flex-column"
+              FooterClass="w-100"
+              PageResources=@_chatData.Resources>
+        <ChildContent>
+            @if (_chatData.ErrCode == ErrorCode.OK && !_noChatFound)
+            {
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   Actions=@_actionData
+                                   ShowHidePopup=@_hideConfirmationPopup
+                                   OnValueChanged=@DeletePatientTrackerPopUpCallbackAsync />
+
+                <div class="col-auto d-flex">
+                    <AmhImageControl FieldType=@FieldTypes.SquareWithBorderAndBackgroundImageControl
+                                     ImageWidth=@AppImageSize.ImageSizeL
+                                     ImageHeight=@AppImageSize.ImageSizeL
+                                     Value=@(_chatData.Chat.ImageName) />
+                    <div class="mt-3 mx-2">
+                        <AmhLabelControl Value=@_chatData.Chat.FirstName
+                                         FieldType=@FieldTypes.PrimarySmallHVCenterBoldLabelControl
+                                         ResourceKey=@FieldTypes.PrimarySmallHVCenterBoldLabelControl.ToString() />
+                    </div>
+                </div>
+
+                <div class="scrollBar">
+                    @if (_chatData.ChatDetails != null)
+                    {
+                        @foreach (var attachmentData in _chatData.ChatAttachments.ToList())
+                        {
+                            <div class=@("mb-3 " +(attachmentData.IsSent ? AppState.ClassName("col-xl-5 offset-xl-7 col-md-8 offset-md-4 d-flex justify-content-end chat-id", "col-xl-6 offset-xl-6 col-md-8 offset-md-4 d-flex justify-content-end px-0 chat-id") :"col-xl-4 col-md-7 d-flex justify-content-start chat-id" ))>
+                                <div class="w-available"
+                                     @onclick="() => OnFileClicked(attachmentData)"
+                                     style=@("order:2; " + (attachmentData.IsSent ? AppState.ClassName("width:78%","width:60%"):""))>
+                                    <div class=@(string.Concat("col-12 message px-3 pb-2 ",(attachmentData.IsSent ? AppState.ClassName("parent-right-bg-color right-arrow","left-arrow") : AppState.ClassName("parent-left-bg-color left-arrow","right-arrow"))))>
+                                        @if (attachmentData.IsSent)
+                                        {
+                                            <span />
+                                        }
+                                        else
+                                        {
+                                            <AmhLabelControl FieldType=FieldTypes.PrimaryAppSmallHStartVCenterBoldLabelControl
+                                                             Value=@attachmentData.AddedBy
+                                                             Class="text-start truncate" />
+                                        }
+                                        <AmhLabelControl FieldType=@(attachmentData.IsSent ?FieldTypes.LightSmallHEndVCenterLabelControl:FieldTypes.TertiarySmallHStartVCenterLabelControl)
+                                                         Value=@attachmentData.Text
+                                                         Class=@(string.Concat((attachmentData.IsActive ?"unset-italic ": "set-italic "),attachmentData.FileExtension!=AppFileExtensions.none.ToString()?"truncate":"")) />
+                                        @if (attachmentData.FileExtension != AppFileExtensions.none.ToString())
+                                        {
+                                            <div class="col-12 px-0 d-flex align-items-center margin-top-xs cursor-pointer"
+                                                 style="border-radius:8px;border:1px solid #e1e1e1;background-color:#ffffff">
+                                                @if (!string.IsNullOrWhiteSpace(attachmentData.FileValue) && CheckIfImage(attachmentData))
+                                                {
+                                                    <AmhImageControl FieldType=@FieldTypes.SquareWithBorderImageControl
+                                                                     ImageHeight=@AppImageSize.ImageSizeXXL
+                                                                     ImageWidth=@AppImageSize.ImageSizeXXL
+                                                                     Value=@attachmentData.FileValue />
+                                                }
+                                                else
+                                                {
+                                                    <AmhImageControl FieldType=@FieldTypes.SquareWithBorderImageControl
+                                                                     ImageHeight=@AppImageSize.ImageSizeXXL
+                                                                     ImageWidth=@AppImageSize.ImageSizeXXL
+                                                                     Icon=@(string.IsNullOrWhiteSpace(attachmentData.FileValue) ? ImageConstants.I_DEFAULT_UPLOAD_ICON : GetFileIcon(attachmentData.FileExtension) ) />
+                                                }
+                                            </div>
+                                        }
+                                        <AmhLabelControl FieldType=FieldTypes.PrimaryAppSmallHEndVCenterLabelControl
+                                                         Value=@attachmentData.AddedOnDate
+                                                         Class=@string.Concat((attachmentData.IsSent?"white-body-large-regular ":"primary-text-body-large-regular "),"text-align") />
+                                    </div>
+                                </div>
+                                @if (attachmentData.IsSent && attachmentData.IsActive && attachmentData.IsDeleteAllowed
+                                    && LibPermissions.HasPermission(_chatData.FeaturePermissions, AppPermissions.ChatDelete.ToString()))
+                                {
+                                    <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                                     ImageHeight=@AppImageSize.ImageSizeS
+                                                     ImageWidth=@AppImageSize.ImageSizeS
+                                                     Icon=@ImageConstants.I_DELETE_ICON_SVG
+                                                     ShowHeader="false"
+                                                     OnValueChanged=@(e => { OnDeleteButtonClick(attachmentData);}) />
+
+                                }
+                            </div>
+                        }
+                    }
+                    @if (_showPreview)
+                    {
+                        <AmhAttachmentPreviewControl ShowPopup=@_showPreview
+                                                     DataSource=@_currentFile
+                                                     ResourceKey=@ResourceConstants.R_CAPTION_KEY
+                                                     IsControlEnabled=@false
+                                                     OnActionClick=@OnPreviewActionClicked />
+                    }
+                </div>
+
+                @if (_attachmentSelected)
+                {
+                    <BasePage CurrentPage=@this
+                              PageTitle=@LibResources.GetResourceValueByKey(_chatData.Resources, ResourceConstants.R_UPLOAD_DOCUMENT_TEXT_KEY)
+                              IsPopup=@true
+                              @bind-ShowPopup=@_attachmentSelected
+                              OnClose=@OnAttachmentCancel
+                              PopupPagePostion=@PopupPosition.End
+                              RegisterComp=@RegisterControl
+                              PageResources=@_chatData.Resources>
+                        @if (_showAttachmentFile)
+                        {
+                            <AmhAttachmentPreviewControl ShowPopup=@_showAttachmentFile
+                                                         DataSource=@_currentFile
+                                                         ResourceKey=@ResourceConstants.R_CAPTION_KEY
+                                                         IsControlEnabled=@true
+                                                         OnActionClick=@OnAttachmentSendAsync />
+                        }
+                        else
+                        {
+                            <AmhUploadControl FieldType=@FieldTypes.UploadControl
+                                              OnValueChanged=@OnImageChanged
+                                              DescriptionResourceKey=@ResourceConstants.R_CAPTION_KEY
+                                              ResourceKey=@ResourceConstants.R_UPLOAD_DOCUMENT_TEXT_KEY />
+                        }
+                    </BasePage>
+                }
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@(_noChatFound ? @ResourceConstants.R_NO_DATA_FOUND_KEY : _chatData.ErrCode.ToString()) />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!_noChatFound && _chatData.Chats?.Count > 0)
+            {
+                @if (LibPermissions.HasPermission(_chatData.FeaturePermissions, AppPermissions.ChatAddEdit.ToString()) && _chatData.Chats[0].IsRelationExists)
+                {
+                    <div class="col-12 chatFooter">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex mx-2">
+                                <AmhImageControl FieldType=@FieldTypes.SquareImageControl
+                                                 ImageHeight=@AppImageSize.ImageSizeM
+                                                 ImageWidth=AppImageSize.ImageSizeM
+                                                 Icon=@ImageConstants.I_ATTACH_ICON_WEB_SVG
+                                                 ShowHeader="false"
+                                                 OnValueChanged=@OnAttachmentClick />
+                            </div>
+                            <div class="flex-grow-1 px-0">
+                                <AmhMultilineEntryControl @bind-Value=@_chatData.ChatDetail.ChatText
+                                                          FieldType=@FieldTypes.MultiLineEntryControl
+                                                          MaxLine="1"
+                                                          ResourceKey=@ResourceConstants.R_CAPTION_KEY
+                                                          ShowHeader=false />
+                            </div>
+                            <div class="justify-content-between  mx-2">
+                                <AmhButtonControl Class="floClass"
+                                                  FieldType=FieldTypes.PrimaryExButtonControl
+                                                  Icon=@ImageConstants.I_SEND_SVG
+                                                  ResourceKey=@ResourceConstants.R_SEND_ACTION_KEY
+                                                  OnValueChanged=@OnSendButtonClickedAsync />
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+        <span class="mt-2">
+            <AmhBadgeControl ResourceKey=@(_chatData.Chats[0].IsRelationExists ? ResourceConstants.R_DISABLE_CHAT_TEXT_KEY: ResourceConstants.R_RELATION_EXPIRED_KEY)
+                             FieldType=@FieldTypes.WarningBadgeControl />
+        </span>
+                }
+            }
+        </PageFooter>
+    </BasePage>
+}

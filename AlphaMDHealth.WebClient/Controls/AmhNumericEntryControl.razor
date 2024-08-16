@@ -1,0 +1,232 @@
+﻿@using System.Globalization;
+@using Microsoft.Fast.Components.FluentUI;
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <div class=@AppState.ClassName("input-primary input-primary-mobile "+ @_disabledClass)>
+            @if (!string.IsNullOrWhiteSpace(_leftIcon))
+            {
+                <span class=@AppState.ClassName("col-1 " + @_disabledClass)
+                      style="padding: 3px;margin-left:7px;float:inline-start;width: fit-content; margin-top:5px;">
+                    <AmhFieldIcon LeftIcon=@_leftIcon LeftIconClick=@OnLeftIconClick />
+                </span>
+            }
+            <input @bind-value=@Value
+                   id=@string.Concat(ResourceKey, "input-field")
+                   type=@_inputType
+                   class=@AppState.ClassName($"col-{entryCell} input-numeric")
+                   Placeholder=@_resource?.PlaceHolderValue
+                   disabled=@(!IsControlEnabled)
+                   oninput=@GetOnInputJavascriptCode() />
+            @if (!string.IsNullOrWhiteSpace(_rightIcon))
+            {
+                <span class=@AppState.ClassName("col-1" + @_disabledClass)
+                      style="padding: 3px ;margin-right:7px;float:inline-end; width: fit-content; margin-top:5px;">
+                    <AmhFieldIcon RightIcon=@_rightIcon RightIconClick=@OnRightIconClick />
+                </span>
+            }
+        </div>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    bool showPin;
+    private string _inputType;
+    private string _disabledClass;
+    private int entryCell;
+
+    private double? _value;
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public double? Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(value);
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<double?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// StepValue for increment or decrement
+    /// </summary>
+    [Parameter]
+    public double StepValue { get; set; }
+
+    /// <summary>
+    /// DigitsAfterDecimal
+    /// </summary>
+    [Parameter]
+    public int DigitsAfterDecimal { get; set; } = 2;
+
+    protected override Task OnInitializedAsync()
+    {
+        _disabledClass = IsControlEnabled ? "" : "disabled-numeric-input";
+        return base.OnInitializedAsync();
+    }
+
+    private string GetOnInputJavascriptCode()
+    {
+        switch (FieldType)
+        {
+            case FieldTypes.CounterEntryControl:
+            case FieldTypes.DecimalEntryControl:
+                return "this.value = this.value.replace(" + Constants.DecimalRegexReplaceString + ", '');if ("
+                + Constants.DecimalRegexCheck1String + DigitsAfterDecimal + Constants.DecimalRegexCheck2String
+                + ".test(this.value)) {if (this.value> " + _resource?.MaxLength + ") this.value = this.value.slice(0, -1);} else {this.value = this.value.slice(0, -1); }";
+            case FieldTypes.NumericEntryControl:
+            case FieldTypes.PinCodeControl:
+            default:
+                return $"this.value = this.value.replace({Constants.NumericRegexReplaceString}, ''); "
+                + $"if (this.value> {_resource?.MaxLength}) this.value = this.value.slice(0, -1); ";
+        }
+    }
+
+    public override void OnFieldTypeChanged()
+    {
+        if (FieldType == FieldTypes.CounterEntryControl)
+        {
+            _leftIcon = ImageConstants.WEB_IMAGE_PATH + ImageConstants.I_MINUS_SVG;
+            _rightIcon = ImageConstants.WEB_IMAGE_PATH + ImageConstants.I_PLUS_SVG;
+        }
+        else
+        {
+            GetRightIcon();
+        }
+        entryCell = 11;
+        if (!string.IsNullOrWhiteSpace(_leftIcon))
+        {
+            entryCell -= 1;
+        }
+        if (!string.IsNullOrWhiteSpace(_rightIcon))
+        {
+            entryCell -= 1;
+        }
+        _inputType = FieldType == FieldTypes.PinCodeControl ? Constants.PASSWORD_STRING : Constants.TEXT_STRING;
+        GetPinCodeLength();
+        base.OnFieldTypeChanged();
+    }
+
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            if (Validator.HasRequiredValidationError(_resource, _value.HasValue))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (_value.HasValue)
+            {
+                var minLegth = FieldType == FieldTypes.PinCodeControl ? _resource.MinLength.ToString().Length : _resource.MinLength;
+                var maxLength = FieldType == FieldTypes.PinCodeControl ? _resource.MaxLength.ToString().Length : _resource.MaxLength;
+                if (Validator.HasMinLengthValidationError(_resource, _value.Value) || Validator.HasRangeValidationError(_resource, _value.Value))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_LENGTH_VALIDATION_KEY)
+                        , minLegth, maxLength);
+                }
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+
+    private void OnRightIconClick()
+    {
+        if (IsControlEnabled && FieldType == FieldTypes.CounterEntryControl)
+        {
+            var val = (_value.HasValue ? _value : 0) + StepValue;
+            if (val <= _resource?.MaxLength)
+            {
+                Value = val;
+            }
+        }
+        else if (IsControlEnabled && FieldType == FieldTypes.PinCodeControl)
+        {
+            showPin = !showPin;
+            _inputType = showPin
+                ? Constants.TEXT_STRING
+                : Constants.PASSWORD_STRING;
+            GetRightIcon();
+        }
+    }
+
+    private void OnLeftIconClick()
+    {
+        if (IsControlEnabled && FieldType == FieldTypes.CounterEntryControl)
+        {
+            var val = (_value.HasValue ? _value : 0) - StepValue;
+            if (val >= _resource?.MinLength)
+            {
+                Value = val;
+            }
+        }
+    }
+
+    private string GetRightIcon()
+    {
+        if (FieldType == FieldTypes.PinCodeControl)
+        {
+            _rightIcon = showPin
+                ? ImageConstants.I_PASSWORD_EYE_TINT_ICON
+                : ImageConstants.I_PASSWORD_EYE_ICON;
+        }
+        return _rightIcon;
+    }
+
+    private void GetPinCodeLength()
+    {
+        if (FieldType == FieldTypes.PinCodeControl)
+        {
+            var maxlength = _resource?.MaxLength;
+            var minlength = _resource?.MinLength;
+            if (maxlength != null && minlength != null)
+            {
+                string maxLengthStr = "";
+                string minLenghtStr = "1";
+                for (var i = 0; i < maxlength; i++)
+                {
+                    maxLengthStr += "9";
+                }
+                for (var j = 0; j < minlength - 1; j++)
+                {
+                    minLenghtStr += "0";
+                }
+                _resource.MaxLength = string.IsNullOrWhiteSpace(maxLengthStr) ? 0 : Convert.ToInt64(maxLengthStr);
+                _resource.MinLength = string.IsNullOrWhiteSpace(minLenghtStr) ? 0 : Convert.ToInt64(minLenghtStr);
+            }
+        }
+    }
+}

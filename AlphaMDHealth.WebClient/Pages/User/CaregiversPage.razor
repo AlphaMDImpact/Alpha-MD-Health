@@ -1,0 +1,46 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/CaregiversView"
+@page "/CaregiversView/{patientcaregiverid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(Parameters?.Count < 1)
+              ShowPageTitle=@(_caregiverData.ErrCode != ErrorCode.OK)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_caregiverData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <CaregiverPage PatientCaregiverID=@_patientCaregiverID
+                               ShowDetailPage=true
+                               OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_caregiverData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.CaregiversView.ToString())
+                                     DataSource=@_caregiverData.Caregivers
+                                     DataSourceType=@CaregiverModel
+                                     TableStructure=@GenerateTableStructure()                                    
+                                     ShowSearch=@(_caregiverData.RecordCount <1)
+                                     ShowViewAll=@(_caregiverData.RecordCount > 0)
+                                     ShowPagination=@(_caregiverData.RecordCount <1)
+                                     ShowAddButton=@(_caregiverData.RecordCount <1 && LibPermissions.HasPermission(_caregiverData.FeaturePermissions, AppPermissions.CaregiverAddEdit.ToString()))
+                                     OnValueChanged=@(e => OnAddEditClick((CaregiverModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_caregiverData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>AppleHealth-Icon</title>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#FF61AD" offset="0%"></stop>
+            <stop stop-color="#FF2719" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Results-steps" transform="translate(-263.000000, -1031.000000)">
+            <g id="Data" transform="translate(38.000000, 457.000000)">
+                <g id="List" transform="translate(2.000000, 508.000000)">
+                    <g id="Group-11" transform="translate(28.000000, 24.000000)">
+                        <g id="Group-10" transform="translate(0.000000, 39.000000)">
+                            <g id="AppleHealth-Icon" transform="translate(195.000000, 3.000000)">
+                                <rect id="Rectangle" x="0" y="0" width="30" height="30"></rect>
+                                <path d="M21.993425,2 C18.9880422,2 16.5580973,3.02217262 15.0516797,5.20827017 C15.0343942,5.23335475 15.0172951,5.25849845 15.0003822,5.28370077 C14.9830474,5.25900192 14.9657788,5.23360592 14.9483203,5.20827017 C13.4428373,3.02352889 11.0152132,2 8.54453077,2 C6.126286,2 3.99071586,2.92955521 2.45947274,4.46444414 C0.926887908,6.00067799 0,8.14297611 0,10.5650244 C0,14.0664572 1.6302086,17.5958316 4.22641067,20.6629264 C6.98812544,23.9255543 10.8435427,26.6653202 15.0007086,28.2927224 C18.414424,27.1316097 22.4771593,24.1946859 25.5136453,20.6074496 C28.1397517,17.5050265 30,13.9153706 30,10.5650244 C30,8.17424195 29.096965,6.05604406 27.6641423,4.52406092 C26.1959728,2.95428469 24.1715124,2 21.993425,2 Z" fill="url(#linearGradient-1)" fill-rule="nonzero"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

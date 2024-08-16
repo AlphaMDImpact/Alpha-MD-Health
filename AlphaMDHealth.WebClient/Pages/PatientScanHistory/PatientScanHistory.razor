@@ -1,0 +1,76 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@using Radzen.Blazor
+@page "/PatientScanHistoryView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_patientScanHistoryData.ErrCode != ErrorCode.OK)
+              PageResources=@_patientScanHistoryData.Resources
+              ApplyCard=@false
+              ApplyParentStructure=@(!ShowDetailPage)
+              ApplyStructure=@(_patientScanHistoryData.RecordCount < 1)>
+        <ChildContent>
+            @if (_isDataFetched)
+            {
+                @if (IsPatientMobileView)
+                {
+                    <AmhHeaderControl Title=@(LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures,AppPermissions.PatientScanHistoryView.ToString()))
+                                      IsPatientMobileView=@true ActionButtons=@_actionButtons>
+                    </AmhHeaderControl>
+                }
+                <div class="row">
+                    <RadzenDataList WrapItems=@true
+                                    PagerHorizontalAlign=@Radzen.HorizontalAlign.Left
+                                    Data=@_healthScanCards
+                                    TItem=@CardModel>
+                        <Template Context="item">
+                            <RadzenCard class="col-sm-6 col-lg-4" Style="border-radius:20px;margin-top:30px;flex:none;">
+                                <RadzenRow AlignItems=@Radzen.AlignItems.Start JustifyContent=@Radzen.JustifyContent.Start Style="display:flex;">
+                                    <RadzenColumn>
+                                        <AmhImageControl FieldType=@FieldTypes.SquareImageControl
+                                                         BackgroundColor="#EBF1FC"
+                                                         Icon=@item.ImageBase64
+                                                         ImageHeight=AppImageSize.ImageSizeM 
+                                                         ImageWidth=AppImageSize.ImageSizeM />
+                                    </RadzenColumn>
+                                    <RadzenColumn>
+                                        <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl Value=@item.Header />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow>
+                                    <AmhLabelControl FieldType=@FieldTypes.PrimaryLargeHStartVCenterLabelControl
+                                                     Value=@item.SubHeader
+                                                     Style="font-size:5rem;font-weight:bolder" />
+                                </RadzenRow>
+                            </RadzenCard>
+                        </Template>
+                    </RadzenDataList>
+                </div>
+
+                @if (_patientScanHistoryData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhListViewControl DataSource=@_patientScanHistoryData.PatientScanHistoryData
+                                        DataSourceType=@PatientScanHistoryModel
+                                        SourceFields=@GenerateTableStructure()
+                                        ShowHeader=@false
+                                        ShowSearch=@false />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_patientScanHistoryData.ErrCode.ToString() />
+                }
+                @if (_showLoadMore)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_LOAD_MORE_KEY
+                                      Style="margin:1rem 0 6rem 0;width:90%;margin-left:5%;"
+                                      OnValueChanged=@OnLoadMoreClicked />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

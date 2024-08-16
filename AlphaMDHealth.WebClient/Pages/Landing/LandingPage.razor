@@ -1,0 +1,32 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@* @page "/LandingView" *@
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              ApplyStructure=@false
+              Class="h-100 justify-content-center; align-items-center;"
+              PageResources=@AppState?.MasterData?.Resources>
+        <ChildContent>
+            @{
+                var views = AppState?.MasterData?.Menus?.Where(x => x.MenuLocation == MenuLocation.Header && x.ScrollToPage)?.ToList();
+            }
+            @if (GenericMethods.IsListNotEmpty(views))
+            {
+                @foreach (var menu in views)
+                {
+                    <div id=@string.Concat("LandingView-", menu.MenuID)>
+                        <ContentPreviewPage PageId=@menu.TargetID />
+                    </div>
+                }
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_NO_DATA_FOUND_KEY />
+            }
+        </ChildContent>
+    </BasePage>
+}

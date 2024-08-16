@@ -1,0 +1,69 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+@inject IJSRuntime JSRuntiem
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                Title=@string.Format(LibResources.GetResourceValueByKey(ConditionPageResources, ResourceConstants.R_CONDITION_KEY), ConditionNumber)
+                UniqueID=@UniqueID>
+    <ChildControl>
+        <div style="display: flex; align-items: baseline;" class="justify-content-between">
+            <div style="display: flex; align-items: baseline; gap: 10px;" class="col-10 justify-content-between">
+
+                <AmhLabelControl UniqueID=@UniqueID
+                                 FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                 ResourceKey=@ResourceConstants.R_BETWEEN_VALUE_CONDITION_KEY />
+
+                <AmhNumericEntryControl @ref=@InputRef
+                                        Style=" width:20%"
+                                        Class="text-center"
+                                        UniqueID=@UniqueID
+                                        FieldType=@FieldTypes.DecimalEntryControl
+                                        ResourceKey=@ResourceConstants.R_CONDITION_VALUE_1_KEY
+                                        Value=GetEntryValue1()
+                                        OnValueChanged=@OnValue1Changed />
+
+                <AmhLabelControl UniqueID=@UniqueID
+                                 FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                 ResourceKey=@ResourceConstants.R_BETWEEN_AND_CONDITION_KEY />
+
+                <AmhNumericEntryControl FieldType=@FieldTypes.DecimalEntryControl
+                                        @ref=@InputRef2
+                                        Style=" width:20%"
+                                        Class="text-center"
+                                        UniqueID=@UniqueID
+                                        ResourceKey=@ResourceConstants.R_CONDITION_VALUE_2_KEY
+                                        Value=@GetEntryValue2()
+                                        OnValueChanged=@OnValue2Changed />
+                @if (IsForScorePage)
+                {
+                    <AmhLabelControl UniqueID=@UniqueID
+                                     Value=@LibResources.GetResourceValueByKey(ConditionPageResources, ResourceConstants.R_THEN_VALUE_KEY)
+                                     FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl />
+
+                    <AmhNumericEntryControl UniqueID=@UniqueID
+                                            @ref=@InputRef3
+                                            Style=" width:20%"
+                                            ResourceKey=@ResourceConstants.R_VALUE_KEY
+                                            Value=@GetScoreValue()
+                                            OnValueChanged=@OnScoreValueChange />
+                }
+            </div>
+            @if (QuestionnaireData.Question.QuestionID > 0 && (LibPermissions.HasPermission(QuestionnaireData.FeaturePermissions, AppPermissions.QuestionnaireQuestionDelete.ToString()) || LibPermissions.HasPermission(QuestionnaireData.FeaturePermissions, AppPermissions.QuestionScoreDelete.ToString())))
+            {
+                <AmhButtonControl UniqueID=@UniqueID
+                                  Class="col-2"
+                                  ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                  OnValueChanged=@(() => OnDeleteButtonClicked(Convert.ToInt32(ConditionNumber))) />
+            }
+
+        </div>
+        @if (!IsForScorePage)
+        {
+            <AmhDropdownControl @bind-Options=@ConditionDataSource
+                                @ref=@_actionDropdown
+                                ResourceKey=@ResourceConstants.R_ACTION_KEY
+                                UniqueID=@UniqueID
+                                OnValueChanged=@OnQuestionTypeChanged />
+        }
+    </ChildControl>
+</AmhBaseControl>

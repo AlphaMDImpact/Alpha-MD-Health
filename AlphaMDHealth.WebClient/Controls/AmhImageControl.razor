@@ -1,0 +1,217 @@
+﻿@using AlphaMDHealth.Utility;
+@using MudBlazor;
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <MudAvatar @onclick=@OnImageClicked
+                   Class=@(GetClassToApply() + " "+ Class)
+                   Rounded=@(FieldType.ToString().Contains("Square"))
+                   Square=@(FieldType == FieldTypes.ImageControl)
+                   Style=@GetImageStyle()
+                   Variant=@(FieldType.ToString().Contains("Border") ? Variant.Outlined : Variant.Filled)>
+            @if (_isInitial)
+            {
+                @Value
+            }
+            else
+            {
+                <MudImage ObjectFit=ObjectFit.Cover Src=@RenderSource() Style="object-fit: contain;" />
+            }
+        </MudAvatar>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private bool _isInitial;
+
+    private string _value;
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private AppImageSize _imageWidth;
+    /// <summary>
+    /// Width of image
+    /// </summary>
+    [Parameter]
+    public AppImageSize ImageWidth
+    {
+        get { return _imageWidth; }
+        set
+        {
+            if (_imageWidth != value)
+            {
+                _imageWidth = value;
+            }
+        }
+    }
+
+    private AppImageSize _imageHeight;
+
+    /// <summary>
+    /// Height of image
+    /// </summary>
+    [Parameter]
+    public AppImageSize ImageHeight
+    {
+        get { return _imageHeight; }
+        set
+        {
+            if (_imageHeight != value)
+            {
+                _imageHeight = value;
+            }
+        }
+    }
+
+    private string _backgroundColor;
+
+    /// <summary>
+    /// background color of image
+    /// </summary>
+    [Parameter]
+    public string BackgroundColor
+    {
+        get { return _backgroundColor; }
+        set
+        {
+            if (_backgroundColor != value)
+            {
+                _backgroundColor = value;
+            }
+        }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        RenderSource();
+        return base.OnInitializedAsync();
+    }
+
+    private string RenderSource()
+    {
+        string imageSource = string.Empty;
+        if ((Source != null && Source.Length > 0) || !string.IsNullOrWhiteSpace(_value) || !string.IsNullOrWhiteSpace(_leftIcon))
+        {
+            if (Source != null && Source.Length > 0)
+            {
+                imageSource = string.Concat("data:", ImageConstants.IMAGE_BASE64_PNG_PREFIX, Convert.ToBase64String(Source));
+            }
+            else if (!string.IsNullOrWhiteSpace(_value))
+            {
+                if (GenericMethods.IsPathString(_value))
+                {
+                    imageSource = _value;
+                }
+                else if (_value.Length > 100)
+                {
+                    if (_value.Contains("data:"))
+                    {
+                        imageSource = _value;
+                    }
+                    else
+                    {
+                        imageSource = string.Concat("data:", ImageConstants.IMAGE_BASE64_PNG_PREFIX, _value);
+                    }
+                }
+                else
+                {
+                    _isInitial = true;
+                    imageSource = _value;
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(_leftIcon))
+            {
+                imageSource = _leftIcon;
+            }
+        }
+        return imageSource;
+    }
+
+    private string GetImageStyle()
+    {
+        string style = string.Empty;
+        if (_imageHeight == AppImageSize.ImageNoSize)
+        {
+            style += $"height:unset;";
+        }
+        else if (_imageHeight != AppImageSize.ImageNone)
+        {
+            style += $"height:{(int)_imageHeight}px;";
+        }
+        else
+        {
+            style += "height:100%;";
+        }
+
+        if (_imageWidth == AppImageSize.ImageNoSize)
+        {
+            style += $"width:unset;";
+        }
+        else if (_imageWidth != AppImageSize.ImageNone)
+        {
+            style += $"width:{(int)_imageWidth}px;";
+        }
+        else
+        {
+            style += "width:100%;";
+        }
+
+        if (!string.IsNullOrEmpty(_backgroundColor))
+        {
+            style += $"background-color:{_backgroundColor.ToString().ToLower()} !important";
+        }
+        return style;
+    }
+
+    private string GetClassToApply()
+    {
+        var className = "amh-image-control ";
+        if (FieldType.ToString().Contains("Background"))
+        {
+            className += "amh-image-control-with-background ";
+        }
+        if (FieldType.ToString().Contains("Border"))
+        {
+            className += "amh-image-control-with-border ";
+        }
+        return AppState.ClassName(className + Class);
+    }
+
+    private void OnImageClicked(object sender)
+    {
+        OnValueChangedAction(sender);
+    }
+}

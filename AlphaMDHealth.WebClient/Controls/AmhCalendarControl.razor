@@ -1,0 +1,63 @@
+﻿@using Microsoft.Fast.Components.FluentUI
+@using Radzen
+@using Radzen.Blazor
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@false
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <RadzenScheduler SlotRender=@OnSlotRender
+                         TItem=@OptionModel
+                         Data=@Options
+                         SelectedIndex="0"
+                         SlotSelect=@OnSlotSelected
+                         AppointmentSelect=@OnAppointmentSelected
+                         StartProperty=@nameof(OptionModel.From)
+                         EndProperty=@nameof(OptionModel.To)
+                         TextProperty=@nameof(OptionModel.OptionText)
+                         TodayText=@GetResourceValue(ResourceConstants.R_TODAY_TEXT_KEY)>
+            <RadzenDayView Text=@GetResourceValue(ResourceConstants.R_DAY_TEXT_KEY) />
+            <RadzenWeekView Text=@GetResourceValue(ResourceConstants.R_WEEK_TEXT_KEY) />
+            <RadzenMonthView Text=@GetResourceValue(ResourceConstants.R_MONTH_TEXT_KEY) />
+        </RadzenScheduler>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    protected void OnSlotRender(SchedulerSlotRenderEventArgs args)
+    {
+        if (args.Start.Date == DateTime.Today)
+        {
+            args.Attributes["style"] = $"background: var(--tertiary-app-color);";
+        }
+    }
+
+    protected void OnSlotSelected(SchedulerSlotSelectEventArgs args)
+    {
+        if (IsControlEnabled)
+        {
+            OnValueChangedAction(new OptionModel { From = args.Start, To = args.End });
+        }
+    }
+
+    protected void OnAppointmentSelected(SchedulerAppointmentSelectEventArgs<OptionModel> args)
+    {
+        if (IsControlEnabled)
+        {
+            OnValueChangedAction(args.Data);
+        }
+    }
+}

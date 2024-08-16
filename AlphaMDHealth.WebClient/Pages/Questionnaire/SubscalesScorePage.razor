@@ -1,0 +1,50 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/SubscalesScoreAddEdit"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              OnClose=@OnClose
+              CurrentPage=@this
+              PageResources=@_questionnaireData.Resources
+              RegisterComp=@RegisterControl
+              IsAccordion=@IsAccordion
+              PageOperation=@GetPageOperationType(_isEditable, SubscaleRangeID == 0)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.SubscaleAddEdit.ToString())>
+        <ChildContent>
+            <AmhNumericEntryControl @bind-Value=@_minValue
+                                    IsControlEnabled=@_isEditable
+                                    ResourceKey=@ResourceConstants.R_MIN_TEXT_KEY />
+
+            <AmhNumericEntryControl @bind-Value=@_maxValue
+                                    IsControlEnabled=@_isEditable
+                                    ResourceKey=@ResourceConstants.R_MAX_TEXT_KEY />
+
+            <AmhLanguageTabControl LanguageTabData=@_dataFormatter
+                                   DataSource=@_questionnaireData.PageDetails
+                                   IsControlEnabled=@_isEditable
+                                   DataSourceType=@ContentDetailModel />
+        </ChildContent>
+        <PageFooter>
+                    @if (_isEditable && SubscaleRangeID != 0)
+                    {
+                        <AmhButtonControl Class="mt-3" ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                            OnValueChanged=@OnRemoveClick />
+
+                        <AmhMessageControl Class="mt-3" ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                            ShowHidePopup=@_hideConfirmationPopup
+                                            Actions=@_actionData
+                                            OnValueChanged=@PopUpCallbackAsync />
+                    }
+                    @if (_isEditable)
+                    {
+                        <AmhButtonControl Class="mt-3" ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                            OnValueChanged=@OnSaveClickedAsync />
+                    }
+                    <AmhButtonControl Class="mt-3" ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                                        OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

@@ -1,0 +1,43 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/FilesCategoriesView"
+@page "/FilesCategoriesView/{filecategoryid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_fileCategoryData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_fileCategoryData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <FileCategoryPage FileCategoryID=@_fileCategoryID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_fileCategoryData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.FilesCategoriesView.ToString())
+                                     DataSource=@_fileCategoryData.FileCategories
+                                     DataSourceType=@FileCategoryModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowViewAll=@(_fileCategoryData.RecordCount > 0)
+                                     OnViewClicked=@OnViewAllClickedAsync
+                                     ShowSearch=@(_fileCategoryData.RecordCount < 1)
+                                     OnValueChanged=@((e) => OnAddEditClick((FileCategoryModel)e))
+                                     ShowAddButton=@((_fileCategoryData.RecordCount < 1) && LibPermissions.HasPermission(_fileCategoryData.FeaturePermissions, AppPermissions.FileCategoryAddEdit.ToString()))
+                                     ShowPagination=@(_fileCategoryData.RecordCount < 1) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_fileCategoryData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

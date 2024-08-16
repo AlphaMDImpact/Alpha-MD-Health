@@ -1,0 +1,70 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ChatsView"
+@page "/ChatsView/{toid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ChatsView.ToString())
+              ShowPageTitle=@(!_isDashBoardView)
+              ApplyStructure=@(Parameters?.Count < 1)
+              ApplyCard=true
+              PageResources=@_chatData.Resources>
+        <PageHeader>
+            @if (!_isDashBoardView && LibPermissions.HasPermission(_chatData.FeaturePermissions, AppPermissions.NewChatView.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_ADD_ACTION_KEY
+                                  Icon=@ImageConstants.I_ADD_ICON_12_12
+                                  OnValueChanged=@OnAddButtonClick />
+            }
+        </PageHeader>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <NewChatPage OnClose=@OnClosedEventCallbackAsync />
+            }
+            else
+            {
+                <div class=@(_isDashBoardView?"":"mb-3 d-flex justify-content-between border background-white;")>
+                    <div class=@(_isDashBoardView?"":"col-lg-4 col-md-4 px-3")
+                         style=@(_isDashBoardView?"":"height:80vh; overflow:auto; margin-top:15px")>
+                        @if (_chatData.ErrCode == ErrorCode.OK)
+                        {
+                            <AmhTableControl DataSource=@_chatData.Chats
+                                             DataSourceType=@ChatModel
+                                             ShowAddButton=false
+                                             ShowHeader=true
+                                             TableStructure=@GenerateTableStructure()
+                                             ShowSearch=@(!_isDashBoardView)
+                                             ShowViewAll=@(_isDashBoardView)
+                                             OnViewClicked=@OnViewAllClickedAsync
+                                             OnValueChanged=@((e) => OnChatViewClickAsync((ChatModel)e))
+                                             SelectedId=@(ToID >0? Convert.ToString(ToID):null)
+                                             TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ChatsView.ToString())
+                                             ShowPagination=@(!_isDashBoardView) />
+                        }
+                        else
+                        {
+                            <AmhMessageControl ResourceKey=@_chatData.ErrCode.ToString() />
+                        }
+                    </div>
+                    @if (!_isDashBoardView)
+                    {
+                        <div class="chat-border" />
+                        <div class="flex-grow-1 px-2 background-white" style="height:80vh;margin-top:15px;">
+                            <ChatPage @ref=@_chatPage
+                                      ChatID=@_chatData.Chat.ChatID
+                                      ToID=@_chatData.Chat.ToID
+                                      IsFromChat=@true
+                                      OnSendClicked=@OpenChatEventCallbackAsync />
+                        </div>
+                    }
+                </div>
+            }
+        </ChildContent>
+    </BasePage>
+}

@@ -1,0 +1,44 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientProviderNotesView"
+@page "/PatientProviderNotesView/{providernoteid:guid}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(Parameters?.Count < 1)             
+              PageResources=@_noteData.Resources
+              ApplyCard=@(!_isDashboardView)
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_noteData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PatientProviderNotePage IsAccordion=true ProviderNoteID=@_providerNoteID OnClose=@OnCloseEventCallbackAsync />
+            }
+            else
+            {
+                @if (_noteData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_noteData.Providers
+                                     DataSourceType=@OptionModel
+                                     TableHeader=@(LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientProviderNotesView.ToString()))
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowSearch=@(!_isDashboardView)
+                                     ShowViewAll=@_isDashboardView
+                                     ShowPagination=@(!_isDashboardView)
+                                     ShowAddButton=@(!_isDashboardView && LibPermissions.HasPermission(_noteData.FeaturePermissions, AppPermissions.PatientProviderNoteAddEdit.ToString()))
+                                     OnValueChanged=@((e) => OnAddEditClickAsync((OptionModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_noteData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

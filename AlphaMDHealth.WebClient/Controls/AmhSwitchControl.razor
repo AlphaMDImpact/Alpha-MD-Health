@@ -1,0 +1,62 @@
+﻿@using AlphaMDHealth.WebClient.Controls
+@using System.Globalization;
+@using MudBlazor
+
+@inherits AmhBaseControl
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <MudSwitch @bind-Checked=@Value
+                   Disabled=@(!IsControlEnabled)
+                   LabelPosition=@LabelPosition.Start
+                   Color=@MudBlazor.Color.Success
+                   UnCheckedColor=@MudBlazor.Color.Error>
+            @* <ChildContent>
+                <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl Value=@_resource.ResourceValue IsControlEnabled=@IsControlEnabled />
+            </ChildContent> *@
+        </MudSwitch>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private bool _value;
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public bool Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(value);
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> ValueChanged { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+}

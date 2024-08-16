@@ -1,0 +1,71 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inject IJSRuntime JSRuntime
+@inherits BasePage
+@page "/PatientFileAddEdit"
+@page "/PatientFileAddEdit/{fileid:guid}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientFileAddEdit.ToString())
+              OnClose=@OnClose
+              PageResources=@_fileData?.Resources
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=@true
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              PageOperation=@GetPageOperationType(_isEditable, FileID == Guid.Empty)
+              ApplyMobileViewBeforLogin=@IsPatientMobileView
+              ActionButtons=@(IsPatientMobileView ?_actionButtons:null)>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=_fileData.CategoryOptions
+                                ResourceKey=@ResourceConstants.R_SELECT_File_CATEGORY_KEY
+                                OnValueChanged=@(e => {_description = _fileData?.CategoryOptions?.FirstOrDefault(x => x.IsSelected)?.GroupName;})
+                                IsControlEnabled=@_isEditable />
+
+            @if (!string.IsNullOrWhiteSpace(_description))
+            {
+                <AmhMultilineEntryControl Value=@_description
+                                          ResourceKey=@ResourceConstants.R_FILE_DESCRIPTION_KEY
+                                          IsControlEnabled=@false />
+            }
+
+            <AmhUploadControl Files=@_files
+                              DescriptionResourceKey=@ResourceConstants.R_DOCUMENT_CAPTION_KEY
+                              ResourceKey=@ResourceConstants.R_DOCUMENT_TEXT_KEY
+                              IsControlEnabled=@_isEditable
+                              IsPatientMobileView=@IsPatientMobileView
+                              OnValueChanged=@(e => OnImageChange((AttachmentModel)e)) />
+
+
+        </ChildContent>
+        <PageFooter>
+            <AmhMessageControl ShowHidePopup=@_hideDeletedConfirmationPopup
+                               ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                               Actions=@_actionData
+                               OnValueChanged=@OnDeleteConfirmationPopUpClickedAsync />
+            @if (!IsPatientMobileView)
+            {
+              
+                @if (_fileData.File.FileID != Guid.Empty && _fileData.File.AddedByID == AppState.webEssentials.GetPreferenceValue<long>(StorageConstants.PR_ACCOUNT_ID_KEY, 0)
+               && LibPermissions.HasPermission(_fileData.FeaturePermissions, AppPermissions.PatientFileDelete.ToString()))
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                      OnValueChanged=@OnRemoveClick />
+
+                }
+
+                @if (_isEditable)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                      OnValueChanged=@OnSaveClickedAsync />
+                }
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                                  OnValueChanged=OnCancelClickedAsync />
+            }
+        </PageFooter>
+    </BasePage>
+}
+

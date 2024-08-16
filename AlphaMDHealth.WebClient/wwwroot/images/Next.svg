@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="101px" height="101px" viewBox="0 0 101 101" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>Next</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <circle id="path-1" cx="36.5" cy="36.5" r="36.5"></circle>
+        <filter x="-32.9%" y="-23.3%" width="171.2%" height="171.2%" filterUnits="objectBoundingBox" id="filter-2">
+            <feMorphology radius="0.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="2" dy="9" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="7" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Home-page" transform="translate(-1316.000000, -2246.000000)">
+            <g id="Landing" transform="translate(-1181.000000, 0.000000)">
+                <g id="Main">
+                    <g>
+                        <g id="Slideshow" transform="translate(941.000000, 2011.000000)">
+                            <g id="Next" transform="translate(1568.000000, 240.000000)">
+                                <g id="Oval" opacity="0.7">
+                                    <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                                    <use stroke="#DADADA" stroke-width="1" fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                                </g>
+                                <polyline id="Stroke-1" stroke="#1474A4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" transform="translate(37.000000, 36.701229) rotate(180.000000) translate(-37.000000, -36.701229) " points="43 25 31 36.7012291 43 48.4024583"></polyline>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,109 @@
+﻿@namespace AlphaMDHealth.WebClient
+@using System.Globalization
+
+<AmhEntryControl @bind-Value=@Value
+                 Icon=@ImageConstants.I_PASSWORD_LOCK_ICON
+                 ResourceKey=@ResourceConstants.R_VERIFICATION_KEY />
+
+@if (!string.IsNullOrWhiteSpace(_timerString) && _timerContent?.Length > 0)
+{
+    var timerLabel = @_timerContent[0] + @_timerString + @_timerContent[1];
+    <AmhLabelControl Value=@timerLabel Class="mt-3"
+                     FieldType=@FieldTypes.PrimarySmallHVCenterLabelControl />
+}
+else
+{
+    <AmhLabelControl ResourceKey=@ResourceConstants.R_RESEND_OTP_ACTION_KEY Class="mt-3"
+                     OnValueChanged=@OnResendClickAsync />
+}
+
+@code {
+    private Timer _timer;
+    private string _timerString = string.Empty;
+    private string[] _timerContent;
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public BaseDTO PageData { get; set; }
+
+    /// <summary>
+    /// On advance value change event
+    /// </summary>
+    [Parameter]
+    public EventCallback<BaseDTO> OnResendClicked { get; set; }
+
+    private string _value;
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        _timerContent = LibResources.GetResourceValueByKey(PageData.Resources, ResourceConstants.R_OTP_CODE_COUNTDOWN_MESSAGE_KEY).Split("{0}");
+        StartResendOtpTimer();
+        return base.OnInitializedAsync();
+    }
+
+    private async Task OnResendClickAsync()
+    {
+        await OnResendClicked.InvokeAsync(PageData);
+        if (PageData.ErrCode == ErrorCode.OK || PageData.ErrCode == ErrorCode.SMSAuthentication)
+        {
+            StartResendOtpTimer();
+        }
+    }
+
+    private void StartResendOtpTimer()
+    {
+        int count = Convert.ToInt16(LibSettings.GetSettingValueByKey(PageData.Settings, SettingsConstants.S_OTP_RESEND_DURATION_KEY), CultureInfo.InvariantCulture) * 60;
+        _timerString = count.ToString(CultureInfo.InvariantCulture);
+        _timer = new Timer(new TimerCallback(_ =>
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+            count--;
+            _timerString = count > 0 ? count.ToString(CultureInfo.InvariantCulture) : null;
+            InvokeAsync(() => StateHasChanged()).ConfigureAwait(true);
+        }), null, 1000, 1000);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_timer != null)
+        {
+            _timer.Dispose();
+        }
+    }
+}

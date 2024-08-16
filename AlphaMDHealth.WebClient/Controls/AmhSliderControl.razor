@@ -1,0 +1,210 @@
+﻿@using AlphaMDHealth.WebClient.Controls
+@using System.Globalization;
+@using MudBlazor
+
+@inherits AmhBaseControl
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <div id=@FieldType class=@AppState.ClassName("amh-slider-control margin-horizontal-sm ")>
+            <MudSlider @bind-Value=@Value
+                       Min=@_resource?.MinLength
+                       Max=@_resource?.MaxLength
+                       Step=@_stepSize
+                       Vertical=@_verticalOrientation
+                       Disabled=@(!IsControlEnabled)
+                       Size=@Size.Medium
+                       TickMarks="true"
+                       ValueLabel="true"
+                       TickMarkLabels=@_labels
+                       Color=@MudBlazor.Color.Dark>
+            </MudSlider>
+        </div>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private double? _stepSize;
+    private bool _verticalOrientation;
+    private string[]? _labels;
+    private double? _value;
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public double? Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Control value represents step size of a control
+    /// </summary>
+    [Parameter]
+    public double? Step
+    {
+        get
+        {
+            return _stepSize;
+        }
+        set
+        {
+            if (value != _stepSize)
+            {
+                _stepSize = value;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<double?> ValueChanged { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        OnParametersSet();
+        SetControlOrientation();
+        CreateLabelsArray();
+        return base.OnInitializedAsync();
+    }
+
+    private void SetControlOrientation()
+    {
+        if (FieldType == FieldTypes.VerticalSliderControl)
+        {
+            _verticalOrientation = true;
+        }
+    }
+
+    private void CreateLabelsArray()
+    {
+        if (_resource != null)
+        {
+            if (Step == null)
+            {
+                _stepSize = Convert.ToDouble((_resource.MaxLength - _resource.MinLength) / 10);
+                var scaleSize = _stepSize * 2.0;
+                var labelLength = Convert.ToInt32((_resource.MaxLength - _resource?.MinLength) / _stepSize) + 1;
+
+                _labels = new string[labelLength];
+
+                for (double i = 0; i < labelLength; i++)
+                {
+                    if (i == 0)
+                    {
+                        _labels[Convert.ToInt32(i)] = _resource.MinLength.ToString();
+                    }
+                    else if (i == labelLength - 1)
+                    {
+                        _labels[Convert.ToInt32(i)] = _resource.MaxLength.ToString();
+                    }
+                    else if (i % (scaleSize / _stepSize) == 0.0)
+                    {
+                        _labels[Convert.ToInt32(i)] = string.Format("{0:F2}", (_resource.MinLength + (i * _stepSize)));
+                    }
+                    else
+                    {
+                        if (FieldType == FieldTypes.VerticalSliderControl)
+                        {
+                            _labels[Convert.ToInt32(i)] = "-";
+                        }
+                        else
+                        {
+                            _labels[Convert.ToInt32(i)] = "⃓";
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var scaleSize = _stepSize * 2.0;
+                var labelLength = Convert.ToInt32((_resource.MaxLength - _resource?.MinLength) / _stepSize) + 1;
+
+                _labels = new string[labelLength];
+
+                for (double i = 0; i < labelLength; i++)
+                {
+                    if (i == 0)
+                    {
+                        _labels[Convert.ToInt32(i)] = _resource.MinLength.ToString();
+                    }
+                    else if (i == labelLength - 1)
+                    {
+                        _labels[Convert.ToInt32(i)] = _resource.MaxLength.ToString();
+                    }
+                    else if (i % (scaleSize / _stepSize) == 0.0)
+                    {
+                        _labels[Convert.ToInt32(i)] = string.Format("{0:F2}", (_resource.MinLength + (i * _stepSize)));
+                    }
+                    else
+                    {
+                        if (FieldType == FieldTypes.VerticalSliderControl)
+                        {
+                            _labels[Convert.ToInt32(i)] = "-";
+                        }
+                        else
+                        {
+                            _labels[Convert.ToInt32(i)] = "⃓";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            if (Validator.HasRequiredValidationError(_resource, _value.HasValue))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (_value.HasValue)
+            {
+                if (Validator.HasMinLengthValidationError(_resource, _value.Value))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_MINIMUM_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength);
+                }
+                else if (Validator.HasRangeValidationError(_resource, _value.Value))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength, _resource.MaxLength);
+                }
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+}

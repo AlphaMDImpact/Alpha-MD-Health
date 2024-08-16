@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Organisation-icon</title>
+    <g id="Welcome" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Cards-&amp;-Badges" transform="translate(-356.000000, -4347.000000)" fill="#b0b0b0" fill-rule="nonzero">
+            <g id="Organisation-icon" transform="translate(356.000000, 4347.000000)">
+                <polygon id="Path" points="18 13 18 9 2 9 2 13 4 13 4 11 9 11 9 13 11 13 11 11 16 11 16 13"></polygon>
+                <path d="M14,4 C14,1.794 12.206,0 10,0 C7.794,0 6,1.794 6,4 C6,6.206 7.794,8 10,8 C12.206,8 14,6.206 14,4 Z" id="Path"></path>
+                <circle id="Oval" cx="10" cy="17" r="3"></circle>
+                <circle id="Oval" cx="3" cy="17" r="3"></circle>
+                <circle id="Oval" cx="17" cy="17" r="3"></circle>
+            </g>
+        </g>
+    </g>
+</svg>

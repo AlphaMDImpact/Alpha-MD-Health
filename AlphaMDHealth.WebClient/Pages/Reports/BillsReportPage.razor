@@ -1,0 +1,71 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/BillingReportsView"
+@page "/BillingReportsView/{patientid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_billingData.ErrCode != ErrorCode.OK)
+              PageResources=@_billingData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PatientBillPage PatientID=@_patientID
+                                 PatientBillID=@_patientBillID
+                                 OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_billingData.ErrCode == ErrorCode.OK)
+                {
+                    <div class="row mb-4">
+                        <div class="col-sm">
+                            <AmhDateTimeControl @bind-Value=@_fromDate
+                                                ResourceKey=@ResourceConstants.R_Report_From_Date_Key
+
+                                                IsControlEnabled=@true />
+                        </div>
+                        <div class="col-sm">
+                            <AmhDateTimeControl @bind-Value=@_toDate
+                                                ResourceKey=@ResourceConstants.R_Report_TO_Date_Key
+                                                IsControlEnabled=@true />
+                        </div>
+                        <div class="col-sm search-align">
+                            <AmhButtonControl ResourceKey=@ResourceConstants.R_SEARCH_TEXT_KEY
+                                              OnValueChanged=@OnSearchClickAsync />
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        @foreach (var item in _billingCards)
+                        {
+                            <div class="col-sm mx-3 pb-2 border-bottom">
+                                <AmhLabelControl FieldType=@FieldTypes.PrimaryAppMediumHVCenterLabelControl
+                                                 Value=@item.Header />
+                                <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHVCenterLabelControl
+                                                 Value=@item.SubHeader />
+                            </div>
+                        }
+                    </div>
+                    <AmhTableControl DataSource=@_billingData.PatientBills
+                                     DataSourceType=@PatientBillModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.BillingReportsView.ToString())
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowSearch=@(!_isDashboardView)
+                                     ShowViewAll=@_isDashboardView
+                                     ShowAddButton=@(!_isDashboardView && LibPermissions.HasPermission(_billingData.FeaturePermissions, AppPermissions.BillingItemAddEdit.ToString()))
+                                     ShowPagination=@(!_isDashboardView)
+                                     OnValueChanged=@((e) => OnAddEditClick((PatientBillModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_billingData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

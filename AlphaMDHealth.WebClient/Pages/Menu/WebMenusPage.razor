@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/WebMenusView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_menuData.ErrCode != ErrorCode.OK)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_menuData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <WebMenuPage MenuID=@_menuID OnClose=@OnAddEditClosed />
+            }
+            else
+            {
+                @if (_menuData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.WebMenusView.ToString())
+                                     DataSource=@_menuData.Menus
+                                     DataSourceType=@MenuModel
+                                     TableStructure=@GenerateTableStructure()
+                                     OnValueChanged=@((e) => OnAddEditClick((MenuModel)e))
+                                     ShowAddButton=@LibPermissions.HasPermission(_menuData.FeaturePermissions, AppPermissions.WebMenuAddEdit.ToString()) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_menuData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

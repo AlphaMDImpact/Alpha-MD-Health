@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40px" height="40px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Arrow-menu-grey</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Arrow-menu-grey">
+            <rect id="Rectangle" x="0" y="0" width="40" height="40"></rect>
+            <polygon id="Shape" fill="#8F92A1" fill-rule="nonzero" transform="translate(20.000000, 19.420000) scale(-1, 1) rotate(90.000000) translate(-20.000000, -19.420000) " points="10.82 12 20 21.18 29.18 12 32 14.84 20 26.84 8 14.84"></polygon>
+        </g>
+    </g>
+</svg>

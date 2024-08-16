@@ -1,0 +1,89 @@
+﻿@using Microsoft.Fast.Components.FluentUI
+@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+@using System.Globalization
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                For=@For
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <FluentAccordion @bind-ActiveId=@_value
+                         ExpandMode=AccordionExpandMode.Single
+                         OnAccordionItemChange=@OnAccordionItemChanged>
+            @if (Options?.Count > 0)
+            {
+                foreach (var item in Options)
+                {
+                    <FluentAccordionItem Id=@item.OptionID.ToString()
+                                         Heading=@item.OptionText
+                                         Class="accordion-text"
+                                         Expanded=@(Convert.ToInt64(_value) == item.OptionID)>
+                        @if (!item.IsDisabled)
+                        {
+                            <AmhFieldIcon LeftIcon="@($"{ImageConstants.WEB_IMAGE_PATH}{ImageConstants.I_CHECK_MARK}")" />
+                        }
+                        else
+                        {
+                            <AmhFieldIcon LeftIcon="@($"{ImageConstants.WEB_IMAGE_PATH}{ImageConstants.I_INFO_ICON}")" />
+                        }
+                        @AccordionContent
+                    </FluentAccordionItem>
+                }
+            }
+        </FluentAccordion>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private string _value;
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public RenderFragment AccordionContent { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_value))
+        {
+            Value = Options?.FirstOrDefault()?.OptionID.ToString() ?? string.Empty;
+        }
+        return base.OnInitializedAsync();
+    }
+
+    protected void OnAccordionItemChanged(FluentAccordionItem item)
+    {
+        OnValueChanged.InvokeAsync(item.Id);
+    }
+}

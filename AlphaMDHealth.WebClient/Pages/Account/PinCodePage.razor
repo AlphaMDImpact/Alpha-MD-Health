@@ -1,0 +1,33 @@
+﻿@inherits BasePage
+@page "/PinCodeView"
+@page "/PincodeLoginView"
+@namespace AlphaMDHealth.WebClient
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              CurrentPage=@this
+              PageResources=@_pinCodeData.Resources
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhNumericEntryControl @bind-Value=@_pinCode
+                                    Icon=@ImageConstants.I_PASSWORD_LOCK_ICON
+                                    ResourceKey=@ResourceConstants.R_PINCODE_KEY />
+            @if (_isPinCodeSetup)
+            {
+                <AmhNumericEntryControl @bind-Value=@_confirmPinCode
+                                        Icon=@ImageConstants.I_PASSWORD_LOCK_ICON
+                                        ResourceKey=@ResourceConstants.R_CONFIRM_PINCODE_KEY />
+            }
+            <AmhButtonControl ResourceKey=@(_isPinCodeSetup ? ResourceConstants.R_SET_BUTTON_KEY : ResourceConstants.R_LOGIN_ACTION_KEY)
+                              Class="mt-3 mb-3"
+                              OnValueChanged=@OnSetButtonClickAsync />
+            @if (!_isPinCodeSetup)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_FORGOT_PINCODE_LINK_KEY
+                                  Class="mt-3 mb-3"
+                                  OnValueChanged=@OnForgotPinCodeLinkClickAsync />
+            }
+        </ChildContent>
+    </BasePage>
+}

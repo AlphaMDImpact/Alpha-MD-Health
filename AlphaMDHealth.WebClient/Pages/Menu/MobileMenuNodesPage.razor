@@ -1,0 +1,44 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/MobileMenuNodesView"
+@page "/MobileMenuNodesView/{menunodeid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_mobileMenuNodeData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_mobileMenuNodeData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <MobileMenuNodePage MenuNodeID=@_menuNodeID
+                                    OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_mobileMenuNodeData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_mobileMenuNodeData.MobileMenuNodes
+                                     DataSourceType=@MobileMenuNodeModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.MobileMenuNodesView.ToString())
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowViewAll=@(_mobileMenuNodeData.RecordCount > 0)
+                                     ShowSearch=@(_mobileMenuNodeData.RecordCount < 1)
+                                     ShowPagination=@(_mobileMenuNodeData.RecordCount < 1)
+                                     ShowAddButton=@(_mobileMenuNodeData.RecordCount < 1 && LibPermissions.HasPermission(_mobileMenuNodeData.FeaturePermissions, AppPermissions.MobileMenuNodeAddEdit.ToString()))
+                                     OnValueChanged=@(async (e) => await OnAddEditClickedAsync((MobileMenuNodeModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_mobileMenuNodeData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

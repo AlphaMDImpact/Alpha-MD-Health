@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="160px" height="160px" viewBox="0 0 160 160" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Task-complete</title>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Questionnaire-done" transform="translate(-295.000000, -608.000000)">
+            <g id="Cont" transform="translate(82.000000, 608.000000)">
+                <g id="Task-complete" transform="translate(213.000000, 0.000000)">
+                    <circle id="Oval" fill="#41AD49" cx="80" cy="80" r="80"></circle>
+                    <polyline id="Stroke-1" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(80.000000, 80.162679) rotate(-5.000000) translate(-80.000000, -80.162679) " points="50 77.6540559 71.671303 99.3253589 110 61"></polyline>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<AzureFunctionsVersion>v3</AzureFunctionsVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.4.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AlphaMDHealth.ClientBusinessLayer\AlphaMDHealth.ClientBusinessLayer.csproj" />
+		<ProjectReference Include="..\AlphaMDHealth.Model\AlphaMDHealth.Model.csproj" />
+		<ProjectReference Include="..\AlphaMDHealth.Utility\AlphaMDHealth.Utility.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="host.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="local.settings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>

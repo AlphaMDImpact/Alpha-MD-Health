@@ -1,0 +1,100 @@
+﻿@inherits AmhBaseControl;
+@namespace AlphaMDHealth.WebClient
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                BaseClass=@BaseClass
+                Class=@Class
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        @if (FieldType == FieldTypes.BadgeCountControl)
+        {
+            <AmhBadgeCountControl FieldType=@FieldType ResourceKey=@ResourceKey UniqueID=@UniqueID Source=@Source Icon=@Icon Value=@(_value!= null ? Convert.ToDouble(_value) : 0) OnValueChanged=Onclick />
+        }
+        else if (FieldType.ToString().EndsWith(FieldTypes.BadgeControl.ToString()))
+        {
+            <AmhBadgeControl FieldType=@FieldType ResourceKey=@ResourceKey UniqueID=@UniqueID Source=@Source Icon=@Icon Value=@Value OnValueChanged=Onclick />
+        }
+        else if (FieldType.ToString().EndsWith(FieldTypes.ImageControl.ToString()))
+        {
+            <AmhImageControl FieldType=@FieldType ResourceKey=@ResourceKey UniqueID=@UniqueID Source=@Source Icon=@Icon Value=@Value ImageHeight=@ImageHeight ImageWidth=@ImageWidth OnValueChanged=Onclick />
+        }
+        else
+        {
+
+            <AmhLabelControl FieldType=@FieldType ResourceKey=@ResourceKey UniqueID=@UniqueID Source=@Source Icon=@Icon Value=@Value OnValueChanged=Onclick />
+        }
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    [Parameter]
+    public EventCallback<object> OnDeleteClicked { get; set; }
+
+    private AppImageSize _imageWidth;
+    /// <summary>
+    /// Width of image
+    /// </summary>
+    [Parameter]
+    public AppImageSize ImageWidth
+    {
+        get { return _imageWidth; }
+        set
+        {
+            if (_imageWidth != value)
+            {
+                _imageWidth = value;
+            }
+        }
+    }
+
+    private AppImageSize _imageHeight;
+
+    /// <summary>
+    /// Height of image
+    /// </summary>
+    [Parameter]
+    public AppImageSize ImageHeight
+    {
+        get { return _imageHeight; }
+        set
+        {
+            if (_imageHeight != value)
+            {
+                _imageHeight = value;
+            }
+        }
+    }
+
+    private string _value;
+    /// <summary>
+    /// Control value as string
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (_value != value)
+            {
+                _value = value;
+            }
+        }
+    }
+
+    private void Onclick()
+    {
+        OnDeleteClicked.InvokeAsync();
+    }
+
+}

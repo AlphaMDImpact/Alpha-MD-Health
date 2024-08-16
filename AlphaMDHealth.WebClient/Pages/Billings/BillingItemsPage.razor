@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/BillingItemsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error 
+              @bind-Success=@Success 
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_billingItemData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_billingItemData.ErrCode != ErrorCode.OK)>
+              <ChildContent>
+                    @if (ShowDetailPage)
+                    {
+                        <BillingItemPage BillingItemID=@_billingItemID OnClose=@OnAddEditClosedAsync />
+                    }
+                    else
+                    {
+                        @if (_billingItemData.ErrCode == ErrorCode.OK)
+                        {
+                            <AmhTableControl DataSource=@_billingItemData.BillingItems
+                                             DataSourceType=@BillingItemModel
+                                             TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.BillingItemsView.ToString())
+                                             TableStructure=@GenerateTableStructure()
+                                             ShowAddButton=@LibPermissions.HasPermission(_billingItemData.FeaturePermissions, AppPermissions.BillingItemAddEdit.ToString())
+                                             OnValueChanged=@((e) => OnAddEditClick((BillingItemModel)e)) />
+                        }
+                        else
+                        {
+                            <AmhMessageControl ResourceKey=@_billingItemData.ErrCode.ToString()></AmhMessageControl>
+                        }
+                    }
+              </ChildContent>
+    </BasePage>
+}

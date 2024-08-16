@@ -1,0 +1,84 @@
+﻿    @namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/QuestionnaireAddEdit/{questionnaireid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionnaireAddEdit.ToString())
+              PageResources=@_questionnaireData.Resources
+              OnClose=@OnClose
+              PageOperation=@GetPageOperationType(true, QuestionnaireID == 0)
+              ApplyFixedFooter=true>
+        <ChildContent>
+            <AmhAccordianControl Value=@_selectedStep
+                                 @bind-Options=@_getQuestionnaireOptions
+                                 OnValueChanged=@OnAccordianOptionChnged>
+                <AccordionContent>
+                    @switch (_selectedStep)
+                    {
+                        case Constants.NUMBER_ONE:
+                            <QuestionnairePage QuestionnaireID=@_questionnaireID
+                                               OnClose=@OnClose
+                                               ShowPageTitle=false
+                                               IsAccordion=true
+                                               ShowDetailPage=ShowDetailPage
+                                               SaveNextClicked=@((e)=>{OnSaveAndNextInvoked(e, 1);}) />
+                            break;
+                        case Constants.NUMBER_TWO:
+                            <QuestionsPage QuestionnaireID=@_questionnaireID
+                                           ShowPageTitle=false
+                                           IsAccordion=true
+                                           ShowDetailPage=ShowDetailPage
+                                           SaveNextClicked=@((e)=>{OnSaveAndNextInvoked(e, 2);}) />
+                            break;
+                        case Constants.NUMBER_THREE:
+                            <QuestionnaireQuestionsPage QuestionnaireID=@_questionnaireID
+                                                        ShowPageTitle=false
+                                                        IsAccordion=true
+                                                        ShowDetailPage=ShowDetailPage
+                                                        SaveNextClicked=@((e)=>{OnSaveAndNextInvoked(e, 3);}) />
+                            break;
+                        case Constants.NUMBER_FOUR:
+                            <SubscalesPage QuestionnaireID=@_questionnaireID
+                                           ShowPageTitle=false
+                                           IsAccordion=true
+                                           ShowDetailPage=ShowDetailPage
+                                           SaveNextClicked=@((e)=>{OnSaveAndNextInvoked(e, 4);}) />
+                            break;
+                        case Constants.NUMBER_FIVE:
+                            <QuestionScoresPage QuestionnaireID=@_questionnaireID
+                                                ShowPageTitle=false
+                                                ShowDetailPage=ShowDetailPage
+                                                IsAccordion=true
+                                                SaveNextClicked=@((e)=>{OnSaveAndNextInvoked(e, 5);}) />
+                            break;
+                        case Constants.NUMBER_SIX:
+                            <SubscalesScoresPage QuestionnaireID=@_questionnaireID
+                                                 ShowPageTitle=false
+                                                 ShowDetailPage=ShowDetailPage
+                                                 IsAccordion=true />
+                            break;
+                    }
+                </AccordionContent>
+            </AmhAccordianControl>
+        </ChildContent>
+        <PageFooter>
+            @if (IsPublishUnPublishAllowed())
+            {
+                <AmhButtonControl ResourceKey=@(_questionnaireData.Questionnaire.IsPublished ? ResourceConstants.R_UNPUBLISH_KEY : ResourceConstants.R_PUBLISH_KEY)
+                                  OnValueChanged=@OnPublishButtonClick />
+
+                <AmhMessageControl ResourceKey=@(_questionnaireData.Questionnaire.IsPublished ? ResourceConstants.R_UNPUBLISH_CONFIRMATION_KEY : ResourceConstants.R_PUBLISH_CONFIRMATION_KEY)
+                                   ShowHidePopup=@_hidePublishUnpublishConfirmation
+                                   Actions=@_popupActions
+                                   OnValueChanged=@OnPublishUnpublishActionClick />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

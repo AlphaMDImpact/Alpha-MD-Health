@@ -1,0 +1,148 @@
+﻿@using System.Globalization;
+@using MudBlazor;
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        @foreach (var item in Options)
+        {
+            <MudCheckBox T="Boolean"
+                         Style=@GetStyle()
+                         Class="my-0 ml-0 mr-2"
+                         Checked=CheckBox[Options.IndexOf(item)]
+                         Disabled=@(item.IsDisabled || (!IsControlEnabled))
+                         Label=@item.OptionText
+                         CheckedChanged="((isChecked) => CheckBoxValueChanged(isChecked, Options.IndexOf(item)))" />
+        }
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private List<bool> CheckBox { get; set; } = new List<bool>();
+
+    private string _value;
+    /// <summary>
+    /// Control value represents text of Label control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        CheckBox = GetControlValue();
+        Value = SetControlValue();
+        return base.OnInitializedAsync();
+    }
+
+    private string GetStyle()
+    {
+        if (FieldType == FieldTypes.HorizontalCheckBoxControl)
+        {
+            return "display:inline-block;";
+        }
+        return string.Empty;
+    }
+
+    private List<bool> GetControlValue()
+    {
+        var selectedValues = new List<bool>();
+        if (Options?.Count > 0)
+        {
+            var selectedIds = FetchOptionIDsFromValue(Value);
+            selectedValues = (from item in Options
+                              select item.IsSelected || (selectedIds?.Contains(item.OptionID) ?? false)
+                             ).ToList();
+        }
+        return selectedValues;
+    }
+
+    private string SetControlValue()
+    {
+        var value = string.Empty;
+        if (Options?.Count > 0 && CheckBox?.Count > 0)
+        {
+            var selectedIDs = new List<string>();
+            for (int i = 0; i < CheckBox.Count; i++)
+            {
+                if (CheckBox[i])
+                {
+                    selectedIDs.Add(Options[i].OptionID.ToString());
+                }
+            }
+            value = string.Join(Constants.PIPE_SEPERATOR, selectedIDs);
+        }
+        return value;
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            if (Validator.HasRequiredValidationError(_resource, !string.IsNullOrWhiteSpace(Value)))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (!string.IsNullOrWhiteSpace(Value))
+            {
+                var checkedCount = CheckBox.Count(x => x == true);
+                if (Validator.HasMinLengthValidationError(_resource, checkedCount))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_MINIMUM_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength);
+                }
+                else if (Validator.HasRangeValidationError(_resource, checkedCount))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength, _resource.MaxLength);
+                }
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+
+    private void CheckBoxValueChanged(bool isChecked, int index)
+    {
+        CheckBox[index] = isChecked;
+        Options[index].IsSelected = isChecked;
+        Value = SetControlValue();
+    }
+}

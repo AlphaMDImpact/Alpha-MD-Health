@@ -1,0 +1,166 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@(IsComingFromQuestionnaireTaskPage ? string.Empty : LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientReadingAddEdit.ToString()))
+              OnClose=@OnClose
+              PageResources=@_readingData?.Resources
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=@true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              ApplyCard=true
+              ActionButtons=@(IsPatientMobileView ?_actionButtons:null)
+              PageOperation=@GetPageOperationType(_isEditable, PatientReadingID == Guid.Empty)>
+        <ChildContent>
+            @if (GenericMethods.IsListNotEmpty(_readingData.FilterOptions) && ShowCategory)
+            {
+                <AmhDropdownControl @bind-Options=@_readingData.FilterOptions
+                                    ResourceKey=@ResourceConstants.R_READING_TYPE_KEY
+                                    FieldType=@FieldTypes.SingleSelectDropdownControl
+                                    UniqueID="CategoryFilter"
+                                    OnValueChanged=@OnReadingCategoryClicked />
+            }
+            <AmhDropdownControl @bind-Options=@_readingData.ReadingParentOptions
+                                ResourceKey=@ResourceConstants.R_MEASUREMENT_TYPE_TEXT_KEY
+                                UniqueID="ReadingParentOptions"
+                                OnValueChanged=@OnReadingTypeChanged
+                                IsControlEnabled=@_isEditable />
+            @if (_selectedParentReadingID > 0)
+            {
+                @if (IsNutritionType())
+                {
+                    <AmhRadioButtonListControl @bind-Options=@_foodEntryOptions
+                                               ResourceKey=@ResourceConstants.R_PAGE_TYPE_KEY
+                                               OnValueChanged=@OnNutritionEntryTypeChanged
+                                               IsControlEnabled=@_isEditable />
+                    @if (_foodEntryOptions?.Any(x => x.IsSelected && x.GroupName == ResourceConstants.R_MANUAL_TEXT_KEY) ?? false)
+                    {
+                        <AmhEntryControl @bind-Value=@_sourceName
+                                         Icon=@ImageConstants.I_SEARCH_ICON_SVG
+                                         ResourceKey=@ResourceConstants.R_ENTER_FOOD_TEXT_KEY
+                                         IsControlEnabled=@_isEditable />
+                    }
+                    else
+                    {
+                        <div class="vertical-negative-margin">
+                            <AmhEntryControl @bind-Value=@_sourceName
+                                             Icon=@ImageConstants.I_SEARCH_ICON_SVG
+                                             ResourceKey=@ResourceConstants.R_SEARCH_FOOD_TEXT_KEY
+                                             IsControlEnabled=@_isEditable
+                                             OnValueChanged=@OnSearchValueChanged />
+                        </div>
+                    }
+                    <AmhNumericEntryControl @bind-Value=@_sourceQuantity
+                                            ResourceKey=@ResourceConstants.R_PORTION_SIZE_TEXT_KEY
+                                            DigitsAfterDecimal=2
+                                            IsControlEnabled=@_isEditable
+                                            OnValueChanged=@OnPortionValueChanged />
+                }
+                var childReadings = GetChildReadings(_selectedParentReadingID);
+                if (_readingData.ReadingOptions != null)
+                {
+                    @foreach (var data in _readingData.ReadingOptions)
+                    {
+                        double? value = null;
+                        if (double.TryParse(data.OptionText, out double result))
+                        {
+                            value = result;
+                        }
+                        var resourceKey = _readingData?.Resources.FirstOrDefault(x => x.ResourceKeyID == data.OptionID).ResourceKey;
+                        var groupDesc = _readingData.Resources.FirstOrDefault(r => r.GroupID == data.ParentOptionID)?.GroupDesc;
+                        var resource = _readingData?.Resources.FirstOrDefault(x => x.ResourceKey == resourceKey);
+                        switch (groupDesc)
+                        {
+                            case GroupConstants.RS_SINGLE_SELECT_READING_VALUE_TYPE_GROUP:
+                                <AmhRadioButtonListControl @bind-Value=@data.OptionText
+                                                           FieldType=@FieldTypes.HorizontalRadioButtonControl
+                                                           ResourceKey=@resourceKey
+                                                           ShowHeader=@true
+                                                           Options=@GetOptionsBasedOnGroupName(data.ParentOptionID, data.OptionText)
+                                                           IsControlEnabled=@_isEditable />
+                                break;
+                            case GroupConstants.RS_DROPDOWN_READING_VALUE_TYPE_GROUP:
+                                <AmhDropdownControl @bind-Value=@data.OptionText
+                                                    FieldType=@FieldTypes.SingleSelectEditableDropdownControl
+                                                    ResourceKey=@resourceKey
+                                                    Options=@GetOptionsBasedOnGroupName(data.ParentOptionID, data.OptionText)
+                                                    IsControlEnabled=@_isEditable />
+                                break;
+                            case GroupConstants.RS_TEXT_READING_VALUE_TYPE_GROUP:
+                                <AmhEntryControl @bind-Value=@data.OptionText
+                                                 ResourceKey=@resourceKey
+                                                 FieldType=@FieldTypes.TextEntryControl
+                                                 IsControlEnabled=@_isEditable />
+                                break;
+                            case GroupConstants.RS_COUNTER_READING_VALUE_TYPE_GROUP:
+                            case GroupConstants.RS_DAILY_COUNTER_READING_VALUE_TYPE_GROUP:
+                                <AmhNumericEntryControl @bind-Value=@value
+                                                        FieldType=@FieldTypes.CounterEntryControl
+                                                        ResourceKey=@resourceKey
+                                                        StepValue=1
+                                                        OnValueChanged=@(e =>{OnNumericEntryChange(e,data.OptionID);}) />
+                                break;
+                            default:
+                                <AmhNumericEntryControl @bind-Value=@value
+                                                        FieldType=@FieldTypes.DecimalEntryControl
+                                                        ResourceKey=@resourceKey
+                                                        DigitsAfterDecimal=@Convert.ToInt16(data.SequenceNo)
+                                                        OnValueChanged=@(e =>{OnNumericEntryChange(e,data.OptionID);})
+                                                        IsControlEnabled=@_isEditable />
+                                break;
+                        }
+                    }
+                }
+            }
+            <AmhDateTimeControl @bind-Value=@_readingData.ListData[0].ReadingDateTime
+                                ResourceKey=@ResourceConstants.R_DATE_TIME_TEXT_KEY
+                                IsControlEnabled=@_isEditable />
+            @if (_readingData.ListData?[0].PatientReadingID != Guid.Empty)
+            {
+                <AmhEntryControl @bind-Value=@_readingData.ListData[0].AddedByText
+                                 ResourceKey=@ResourceConstants.R_ADDED_BY_KEY
+                                 IsControlEnabled=@false />
+            }
+            <AmhMultilineEntryControl @bind-Value=@_readingData.ListData[0].ReadingNotes
+                                      IsControlEnabled=@_isEditable
+                                      ResourceKey=@ResourceConstants.R_NOTE_TEXT_KEY />
+            @if (_searchFoodData.IsActive)
+            {
+                <FoodOptionsPopupPage IsPopup=@true
+                                      ReadingData=@_searchFoodData
+                                      ShowPopup=@_searchFoodData.IsActive
+                                      PopUpClosed=@FoodOptionsPopUpClosedEventCallbackAsync />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!IsPatientMobileView)
+            {
+                @if (!IsComingFromQuestionnaireTaskPage)
+                {
+                    @if (_isDeletable)
+                    {
+                        <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                        OnValueChanged=@OnRemoveClick />
+
+                        <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                        ShowHidePopup=@_hideDeletedConfirmationPopup
+                        Actions=@_popupActions
+                        OnValueChanged=@OnActionClickAsync />
+                    }
+                    @if (_isEditable)
+                    {
+                        <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                        OnValueChanged=@SavePatientReadingData />
+                    }
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                    OnValueChanged=@OnCancelClickedAsync />
+                }
+            }
+        </PageFooter>
+    </BasePage>
+}

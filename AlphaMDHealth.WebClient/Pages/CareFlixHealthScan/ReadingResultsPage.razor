@@ -1,0 +1,23 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if(_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyCard=@(_readingData.RecordCount <= 0)
+              ShowPageTitle=@(!ShowDetailPage)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ReadingResults.ToString())
+              PageResources=@_readingData.Resources
+              ApplyParentStructure=@(!ShowDetailPage)
+              ApplyStructure=@(Parameters?.Count < 1)>
+        <ChildContent>
+            <AmhTableControl    DataSourceType=@PatientReadingDTO
+                                DataSource=@_readingData.ReadingDTOs
+                                SourceFieldStructure=@GetViewCellModel()
+                                ShowSearch=@false />
+        </ChildContent>
+    </BasePage>
+}

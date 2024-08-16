@@ -1,0 +1,50 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+ 
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ReadingScanVitals.ToString())
+              OnClose=@OnClose
+              PageResources=@_readingData?.Resources
+              RegisterComp=@RegisterControl
+              ShowDetailPage=@ShowDetailPage>
+        <ChildContent>
+            @if (!_isNotScanVitalsPage)
+            {
+                <AmhDateTimeControl @bind-Value=@_readingData.User.Dob ResourceKey=@ResourceConstants.R_DATE_OF_BIRTH_FOR_SCANS_KEY IsControlEnabled=false />     
+                <AmhNumericEntryControl @bind-Value=@_height ResourceKey=@ResourceConstants.R_HEIGHT_FOR_SCANS_KEY IsControlEnabled=true />
+                <AmhNumericEntryControl @bind-Value=@_weight ResourceKey=@ResourceConstants.R_WEIGHT_FOR_SCANS_KEY IsControlEnabled=true />
+                <AmhDropdownControl @bind-Options=_readingData.Genders ResourceKey=@ResourceConstants.R_GENDER_KEY IsControlEnabled=false />
+            }
+            else
+            {
+                <AmhRadioButtonListControl @bind-Value=_readingData.PostureID
+                                            Options=@_readingData.Posture
+                                           ResourceKey=@ResourceConstants.R_SCANS_POSTURE_KEY
+                                           IsControlEnabled=true />
+                <AmhRadioButtonListControl @bind-Value=_readingData.ScanTypeID
+                                           Options=@_readingData.ScanType
+                                           ResourceKey=@ResourceConstants.R_SCANS_TYPE_KEY
+                                           IsControlEnabled=true />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!_isNotScanVitalsPage)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_NEXT_ACTION_KEY
+                OnValueChanged=@OnNextlClickedAsync />
+            }
+            else
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_START_SCAN_KEY
+                                  OnValueChanged=@OnStartScanClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}
+

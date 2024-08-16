@@ -1,0 +1,131 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inject IJSRuntime JSruntime
+@using Radzen
+@using Radzen.Blazor
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    @if (_readingID > 0)
+    {
+        <BasePage @bind-Error=@Error
+                  @bind-Success=@Success
+                  @bind-ShowDetailPage=@ShowDetailPage
+                  CurrentPage=@this
+                  PageTitle=@(_readingDetailsData.ChartMetaData[0].IsGroupValue ? _readingDetailsData?.ChartMetaData?[0].ReadingParent : _readingDetailsData?.ChartMetaData?[0].Reading)
+                  ShowPageTitle=@(!ShowDetailPage)
+                  PageResources=@_readingDetailsData?.Resources
+                  ActionButtons=@(IsPatientMobileView ?_actionButtons:null)
+                  ApplyStructure=@false>
+            <PageHeader>
+                @if (!AppState.IsPatient)
+                {
+                    <AmhDropdownControl @bind-Options=@_readingDetailsData.FilterOptions
+                                        UniqueID="DurationFilter"
+                                        FieldType=@FieldTypes.SingleSelectDropdownControl
+                                        OnValueChanged=@OnDurationSelectionValueChanged />
+                }
+                
+                @if (IsTargetAddEditAllowed() && !AppState.IsPatient)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_SET_TARGET_KEY
+                                      FieldType=@FieldTypes.PrimaryBorderTransparentExButtonControl
+                                      OnValueChanged=@(()=>{ OnAddEditClick.Invoke(null, true);}) />
+                }
+                @if (IsAddAllowed() && !AppState.IsPatient)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_ADD_ACTION_KEY
+                                      FieldType=@FieldTypes.PrimaryBorderTransparentExButtonControl
+                                      OnValueChanged=@(() => { OnAddEditClick.Invoke(null, false); }) />
+                }
+            </PageHeader>
+            <ChildContent>
+                @if (_isDataFetched && GenericMethods.IsListNotEmpty(_readingDetailsData.SummaryDataOptions))
+                {
+                        <RadzenStack Orientation=@Orientation.Vertical>
+                            <RadzenStack Orientation=@Orientation.Horizontal>
+                                @if (GenericMethods.IsListNotEmpty(_readingDetailsData.SummaryDataOptions))
+                                {
+                                    @foreach (OptionModel summaryItem in _readingDetailsData.SummaryDataOptions)
+                                    {
+                                        @if (!string.IsNullOrWhiteSpace(summaryItem.OptionText)
+                                        && (_readingDetailsData.ChartMetaData?.Any(x => (x.ReadingID == _readingID || x.ReadingParentID == _readingID) && x.ReadingDateTime.HasValue && x.ReadingDateTime.Value != default) ?? false))
+                                        {
+                                            @if (AppState.IsPatient)
+                                            {
+                                                <div class="mt-4 px-3">
+                                                    <div class="d-flex flex-column align-items-center text-center">
+                                                        <div class="mb-2">
+                                                            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl Value=@summaryItem.GroupName />
+                                                        </div>
+                                                        <div>
+                                                            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHVCenterBoldLabelControl Value=@summaryItem.OptionText />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                                                                 Value=@summaryItem.GroupName />
+
+                                                <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                                                                 Value=@summaryItem.OptionText />
+                                            }
+                                        }
+                                    }
+                                }
+
+                            </RadzenStack>
+                            @if (AppState.IsPatient)
+                            {
+                            <div class="col-12 ps-3 mx-1 p-4">
+                                    <AmhDropdownControl @bind-Options=@_readingDetailsData.FilterOptions
+                                                        UniqueID="DurationFilter"
+                                                        FieldType=@FieldTypes.SingleSelectDropdownControl
+                                                        OnValueChanged=@OnDurationSelectionValueChanged />
+                            </div>
+                            }
+                            @if (_readingDetailsData.ChartData != null && AppState.IsPatient)
+                            {
+                            <div class="col-12 ps-3 mx-1 p-4">
+                                <AmhChartControl Value=@_readingDetailsData.ChartData
+                                                 FieldType=@GetGraphFieldType()
+                                                 OnButtonClicked=@OnPrevOrNextButtonClicked />
+                            </div>
+                            }
+                            else
+                            {
+                                <AmhChartControl Value=@_readingDetailsData.ChartData
+                                             FieldType=@GetGraphFieldType()
+                                             OnButtonClicked=@OnPrevOrNextButtonClicked />
+                            }
+                        @if (GenericMethods.IsListNotEmpty(_readingDetailsData.ListData))
+                            {
+                                @if (_readingDetailsData.ChartMetaData[0].ShowInData)
+                                {
+                                    <AmhTableControl DataSource=@_readingDetailsData.ListData
+                                                     DataSourceType=@PatientReadingUIModel
+                                                     ShowSearch=@false
+                                                     ShowPagination=@false
+                                                     ShowHeader=@false
+                                                     SourceFieldStructure=@getViewCellModel()
+                                                     IsPatientMobileView=@IsPatientMobileView
+                                                     TableStructure=@GenerateTableStructure()
+                                                     OnValueChanged=@((e)=>OnAddEditClick((PatientReadingUIModel)e,false)) />
+                                }
+                            }
+                            else
+                            {
+                                <AmhMessageControl ResourceKey=@(_readingDetailsData.ErrCode == ErrorCode.OK ? ResourceConstants.R_NO_DATA_FOUND_KEY : _readingDetailsData.ErrCode.ToString()) />
+                            }
+                        </RadzenStack>                   
+                }
+            </ChildContent>
+        </BasePage>
+    }
+    else
+    {
+        <AmhMessageControl ResourceKey=@ResourceConstants.R_NO_DATA_FOUND_KEY />
+    }
+}

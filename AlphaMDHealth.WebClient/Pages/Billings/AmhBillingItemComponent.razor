@@ -1,0 +1,165 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+
+<AmhBaseControl>
+    <ChildControl>
+        <AmhDropdownControl @ref=@InputRef
+                            @bind-Options=@BillingItemDropDownSource
+                            ResourceKey=@ResourceConstants.R_ITEM_KEY
+                            ShowHeader=@true
+                            IsControlEnabled=@_isDropDownEnable
+                            OnValueChanged=@OnBillingItemTypeChanged />
+
+        <AmhNumericEntryControl ResourceKey=@ResourceConstants.R_AMOUNT_KEY
+                                Value=@GetEntryValue1()
+                                IsControlEnabled=@false />
+
+        @if (IsControlEnabled)
+        {
+            <AmhImageControl FieldType=@FieldTypes.ImageControl
+                             ImageHeight=AppImageSize.ImageSizeL
+                             ImageWidth=AppImageSize.ImageSizeXXS
+                             Icon=@ImageConstants.I_DELETE_SVG
+                             OnValueChanged=@(async () => { await OnDeleteButtonClicked(Convert.ToInt32(ConditionNumber)); }) />
+        }
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private AmhDropdownControl InputRef { get; set; }
+    private bool _isDropDownEnable = true;
+    private string _amount;
+    private string _billingItem;
+
+    /// <summary>
+    /// Condition Number
+    /// </summary>
+    [Parameter]
+    public string ConditionNumber { get; set; }
+
+    /// <summary>
+    /// Bill DTO
+    /// </summary>
+    [Parameter]
+    public BillingItemDTO BillData { get; set; }
+
+    /// <summary>
+    /// DropDown Source
+    /// </summary>
+    [Parameter]
+    public List<OptionModel> BillingItemDropDownSource { get; set; }
+
+    /// <summary>
+    /// List used for component looping
+    /// </summary>
+    [Parameter]
+    public List<PatientBillItemModel> NumericList { get; set; }
+
+    /// <summary>
+    /// Event call back when Component deleted
+    /// </summary>
+    [Parameter]
+    public EventCallback<int> DeleteButtonClicked { get; set; }
+
+    /// <summary>
+    /// Event callback for drop down changed
+    /// </summary>
+    [Parameter]
+    public EventCallback<long> DropChangedEvent { get; set; }
+
+    /// <summary>
+    /// Condition Data
+    /// </summary>
+    [Parameter]
+    public PatientBillItemModel ConditionData { get; set; }
+
+    /// <summary>
+    /// Patient Bill ID
+    /// </summary>
+    [Parameter]
+    public Guid PatientBillID { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _billingItem = BillingItemDropDownSource.Find(x => x.IsSelected)?.OptionID.ToString() ?? string.Empty;
+        await base.OnInitializedAsync();
+    }
+
+    private void OnBillingItemTypeChanged(object optionID)
+    {
+        if (optionID is string str && !string.IsNullOrWhiteSpace(str))
+        {
+            var selectedId = Convert.ToInt64(optionID);
+            BillingItemDropDownSource.FirstOrDefault(x => x.OptionID == selectedId).IsSelected = true;
+            _isDropDownEnable = false;
+            foreach (var x in BillingItemDropDownSource)
+            {
+                if (x.OptionID == selectedId)
+                {
+                    _amount = x.ParentOptionID.ToString();
+                }
+            }
+            ValueSetter(NumericList, selectedId);
+
+            foreach (var item in BillData.PatientBillItems)
+            {
+                if (item.BillingItemID == selectedId && item.IsActive == false && PatientBillID == Guid.Empty)
+                {
+                    item.IsActive = true;
+                    BillData.PatientBills.RemoveAll(x => x.BillingItemID == 0);
+                    break;
+                }
+                else if (item.BillingItemID == 0)
+                {
+                    item.BillingItemID = Convert.ToInt16(optionID);
+                    item.Amount = BillingItemDropDownSource?.FirstOrDefault(x => x.OptionID == selectedId)?.ParentOptionID??0;
+                    item.PatientBillID = PatientBillID;
+                    item.IsActive = true;
+                    break;
+                }
+            }
+            DropChangedEvent.InvokeAsync(selectedId);
+            StateHasChanged();
+        }
+    }
+
+    private double GetEntryValue1()
+    {
+        if (BillData.PatientBillItems.Count > 0)
+        {
+            if (BillData.PatientBillItems.LastOrDefault().IsSynced == true)
+            {
+                _isDropDownEnable = false;
+            }
+            return ConditionData.Amount;
+        }
+        return 0;
+    }
+
+    private void ValueSetter(List<PatientBillItemModel> BillingItems, long optionID)
+    {
+        foreach (var item in BillingItems)
+        {
+            if (item.BillingItemID == 0)
+            {
+                item.BillingItemID = (short)optionID;
+                item.Amount = BillingItemDropDownSource?.FirstOrDefault(x => x.OptionID == optionID)?.ParentOptionID??0;
+                item.PatientBillID = PatientBillID;
+            }
+        }
+    }
+
+    private async Task OnDeleteButtonClicked(int optionID)
+    {
+        await DeleteButtonClicked.InvokeAsync(optionID);
+    }
+
+    /// <summary>
+    /// use for validation
+    /// </summary>
+    /// <returns>validation status true/false</returns>
+    public override bool ValidateControl(bool IsButtonClick)
+    {
+        return InputRef.ValidateControl(IsButtonClick);
+    }
+}

@@ -1,0 +1,82 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/WebMenuAddEdit/{menunodeid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error @bind-Success=@Success
+              CurrentPage=@this
+              PageOperation=@GetPageOperationType(_isEditable, MenuNodeID == 0)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.MobileMenuNodeAddEdit.ToString())
+              OnClose=@OnClose
+              PageResources=@_mobileMenuNodeData?.Resources
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              ApplyCard=true
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhEntryControl @bind-Value=@_mobileMenuNodeData.MobileMenuNode.NodeName
+                             ResourceKey=@ResourceConstants.R_NODE_NAME_KEY />
+
+            <AmhDropdownControl @bind-Options=@_mobileMenuNodeData.MenuFeatures
+                                ResourceKey=@ResourceConstants.R_NODE_TARGET_KEY />
+
+            <AmhLabelControl ResourceKey=@ResourceConstants.R_NODE_LEFT_HEADER_KEY />
+
+            <AmhDropdownControl @bind-Value=@_selectedLeftMenuAction
+                                Options=@_mobileMenuNodeData.MenuActions
+                                ResourceKey=@ResourceConstants.R_MENU_ACTION_KEY
+                                IsControlEnabled=@_isEditable />
+
+            <AmhDropdownControl @bind-Value=@_selectedLeftMenuNode
+                                Options=@_mobileMenuNodeData.ExistingMobileMenuNodes
+                                ResourceKey=@ResourceConstants.R_MENU_NODES_KEY
+                                IsControlEnabled=@_isEditable />
+
+            <AmhRadioButtonListControl @bind-Value=@_leftIconOrLabel
+                                       Options=@_renderTypes
+                                       ResourceKey=@ResourceConstants.R_DISPLAY_TYPE_KEY
+                                       ShowHeader=@false
+                                       IsControlEnabled=@_isEditable />
+
+            <AmhLabelControl ResourceKey=@ResourceConstants.R_NODE_RIGHT_HEADER_KEY />
+
+            <AmhDropdownControl @bind-Value=@_selectedRightMenuAction
+                                Options=@_mobileMenuNodeData.MenuActions
+                                ResourceKey=@ResourceConstants.R_MENU_ACTION_KEY
+                                IsControlEnabled=@_isEditable />
+
+            <AmhDropdownControl @bind-Value=@_selectedRightMenuNode
+                                Options=@_mobileMenuNodeData.ExistingMobileMenuNodes
+                                ResourceKey=@ResourceConstants.R_MENU_NODES_KEY
+                                IsControlEnabled=@_isEditable />
+
+            <AmhRadioButtonListControl @bind-Value=@_rightIconOrLabel
+                                       Options=@_renderTypes
+                                       ResourceKey=@ResourceConstants.R_DISPLAY_TYPE_KEY
+                                       ShowHeader=@false
+                                       IsControlEnabled=@_isEditable />
+
+        </ChildContent>
+        <PageFooter>
+            @if (_mobileMenuNodeData.MobileMenuNode.MobileMenuNodeID > 0 && LibPermissions.HasPermission(_mobileMenuNodeData.FeaturePermissions, AppPermissions.MobileMenuNodeDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                  OnValueChanged=@OnRemoveClick />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideConfirmationPopup
+                                   Actions=@_actionButtons
+                                   OnValueChanged=@OnDeleteConfirmationPopUpClickedAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                  OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

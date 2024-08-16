@@ -1,0 +1,98 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/EducationAddEdit"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageOperation=@GetPageOperationType(_isEditable, PageId == 0)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, (IsEducationPage? AppPermissions.EducationAddEdit.ToString(): AppPermissions.StaticContentAddEdit.ToString()))
+              ShowPageTitle=@(!_showPreview)
+              PageResources=@_contentData.Resources
+              ApplyFixedFooter=(!_showPreview)
+              OnClose=@OnClose
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            @if (_showPreview)
+            {
+                <ContentPreviewPage PageId=@PageId
+                                    IsEducationPreview=@IsEducationPage
+                                    OnClose=@OnPreviewClosedAsync />
+            }
+            else
+            {
+                <AmhUploadControl @bind-Value=@_contentData.Page.ImageName
+                                  ResourceKey=@ResourceConstants.R_SELECT_ICON_KEY
+                                  IsControlEnabled=@_isEditable />
+
+                @if (IsEducationPage)
+                {
+                    <AmhDropdownControl @bind-Options=@_contentData.EducationCategory
+                                        ResourceKey=@ResourceConstants.R_CATEGORY_KEY
+                                        IsControlEnabled=@_isEditable />
+                }
+                <AmhRadioButtonListControl @bind-Value=@_selectedPageType
+                                           Options=@_contentData.PageTypes
+                                           ResourceKey=@ResourceConstants.R_PAGE_TYPE_KEY
+                                           OnValueChanged=@OnPageTypeChanged
+                                           IsControlEnabled=@_isEditable />
+                @if (IsEducationPage)
+                {
+                    <AmhEntryControl @bind-Value=@_contentData.Page.PageTags
+                                     ResourceKey=@ResourceConstants.R_TAGS_KEY
+                                     IsControlEnabled=@_isEditable />
+                }
+
+                <AmhLanguageTabControl LanguageTabData=@_dataFormatter
+                                       DataSource=@_contentData.PageDetails
+                                       DataSourceType=@ContentDetailModel
+                                       IsControlEnabled=@_isEditable />
+                @if (_contentData.Page.IsPdf)
+                {
+                    <AmhUploadControl @bind-Value=@_contentData.Page.PDFName
+                                      ResourceKey=@ResourceConstants.R_PDF_KEY
+                                      IsControlEnabled=@_isEditable />
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!_showPreview)
+            {
+                @if (_isEditable)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                      OnValueChanged=@OnSaveButtonClickedAsync />
+                }
+                @if (_contentData.Page.PageID > 0)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_PREVIEW_KEY
+                                      OnValueChanged=@OnPreviewClick />
+                    @if (_isEditable)
+                    {
+                        if (LibPermissions.HasPermission(_contentData.FeaturePermissions, _contentData.Page.IsEducation
+                        ? AppPermissions.EducationPublish.ToString()
+                        : AppPermissions.StaticContentPublish.ToString()))
+                        {
+                            <AmhButtonControl ResourceKey=@(_contentData.Page.IsPublished? ResourceConstants.R_UNPUBLISH_KEY: ResourceConstants.R_PUBLISH_KEY)
+                                              OnValueChanged=@OnPublishUnpublishClick />
+                            <div style="margin-left:0px; margin-right:0px">
+
+                                <AmhMessageControl ResourceKey=@(_contentData.Page.IsPublished? ResourceConstants.R_UNPUBLISH_CONFIRMATION_KEY: ResourceConstants.R_PUBLISH_CONFIRMATION_KEY)
+                                                   ShowHidePopup=@_showPublishUnpublishConfirmation
+                                                   Actions=@_popupActions
+                                                   OnValueChanged=@OnPublishUnpublishActionClick ContentClass="top-center" />
+                            </div>
+                      }
+                  }
+                }
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                                  OnValueChanged=@OnCancelClickedAsync />
+            }
+        </PageFooter>
+    </BasePage>
+}

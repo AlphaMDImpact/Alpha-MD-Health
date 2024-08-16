@@ -1,0 +1,1266 @@
+﻿@using MudBlazor;
+@using System.Globalization;
+@inject IJSRuntime JSRuntime;
+@inherits BasePage
+@* @page "/LandingView"
+ *@
+@namespace AlphaMDHealth.WebClient
+
+@if (_isDataFetched)
+{
+    <BasePage CurrentPage=@this
+              ApplyStructure=@false
+              Class="h-100 justify-content-center; align-items-center;"
+              PageResources=@_authData.Resources
+              RegisterComp=@RegisterControl>
+        <AmhCarouselControl DataSourceType="OptionModel"
+                            DataSource=@_carouselItems
+                            SourceFields=@MapSourceField()
+                            BaseClass="h-100">
+        </AmhCarouselControl>
+
+        <AmhButtonControl @bind-Value=@_primaryButton
+                          FieldType=@FieldTypes.PrimaryButtonControl
+                          Icon=@ImageConstants.I_USERS_SVG
+                          ResourceKey=@FieldTypes.PrimaryButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.SecondaryButtonControl
+                          ResourceKey=@FieldTypes.SecondaryButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.TertiaryButtonControl
+                          ResourceKey=@FieldTypes.TertiaryButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.DeleteButtonControl
+                          ResourceKey=@FieldTypes.DeleteButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.PrimaryTransparentButtonControl
+                          Icon=@ImageConstants.I_USER_ID_SVG
+                          ResourceKey=@FieldTypes.PrimaryTransparentButtonControl.ToString() />
+
+        <AmhButtonControl FieldType=@FieldTypes.SecondaryTransparentButtonControl
+                          ResourceKey=@FieldTypes.SecondaryTransparentButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.TertiaryTransparentButtonControl
+                          ResourceKey=@FieldTypes.TertiaryTransparentButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.DeleteTransparentButtonControl
+                          ResourceKey=@FieldTypes.DeleteTransparentButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.PrimaryBorderTransparentButtonControl
+                          Icon=@ImageConstants.I_USER_ID_SVG
+                          ResourceKey=@FieldTypes.PrimaryBorderTransparentButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.SecondaryBorderTransparentButtonControl
+                          ResourceKey=@FieldTypes.SecondaryBorderTransparentButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.TertiaryBorderTransparentButtonControl
+                          ResourceKey=@FieldTypes.TertiaryBorderTransparentButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.DeleteBorderTransparentButtonControl
+                          ResourceKey=@FieldTypes.DeleteBorderTransparentButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.PrimaryExButtonControl
+                          Icon=@ImageConstants.I_USER_ID_SVG
+                          ResourceKey=@FieldTypes.PrimaryExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.SecondaryExButtonControl
+                          ResourceKey=@FieldTypes.SecondaryExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.TertiaryExButtonControl
+                          ResourceKey=@FieldTypes.TertiaryExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.DeleteExButtonControl
+                          ResourceKey=@FieldTypes.DeleteExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.PrimaryTransparentExButtonControl
+                          Icon=@ImageConstants.I_USER_ID_SVG
+                          ResourceKey=@FieldTypes.PrimaryTransparentExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.SecondaryTransparentExButtonControl
+                          ResourceKey=@FieldTypes.SecondaryTransparentExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.TertiaryTransparentExButtonControl
+                          ResourceKey=@FieldTypes.TertiaryTransparentExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.DeleteTransparentExButtonControl
+                          ResourceKey=@FieldTypes.DeleteTransparentExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.PrimaryBorderTransparentExButtonControl
+                          Icon=@ImageConstants.I_USER_ID_SVG
+                          ResourceKey=@FieldTypes.PrimaryBorderTransparentExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.SecondaryBorderTransparentExButtonControl
+                          ResourceKey=@FieldTypes.SecondaryBorderTransparentExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.TertiaryBorderTransparentExButtonControl
+                          ResourceKey=@FieldTypes.TertiaryBorderTransparentExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl FieldType=@FieldTypes.DeleteBorderTransparentExButtonControl
+                          ResourceKey=@FieldTypes.DeleteBorderTransparentExButtonControl.ToString()
+                          OnValueChanged=@OnButtonClickAsync />
+
+        <AmhButtonControl @bind-Value=@_primaryButton
+                          FieldType=@FieldTypes.MenuButtonControl
+                          Options=@optionsList
+                          OnValueChanged=@OndropdownButtonClicked />
+
+        @*
+    <AmhDropdownControl FieldType=@FieldTypes.SingleSelectDropdownControl
+    ResourceKey=@FieldTypes.SingleSelectDropdownControl.ToString()
+    Options=@_listoptions
+    OnValueChanged=@OnListOptionChanged />
+
+    @if (_cardList?.Count > 0)
+    {
+    <AmhListViewControl DataSourceType=@DemoModel
+    DataSource=@_cardList
+    SourceFields=@_sourceFields
+    IsGroupedData=@_isGroupedData
+    ShowSearch=@_showSearchBar
+    OnShowAllClicked=@(e=>OnShowAllClickedAsync(e))
+    OnValueChanged=@(e=>OnCardViewClickAsync(e)) />
+    }
+
+    <AmhTimelineControl @bind-Options=@timelineList
+    FieldType=@FieldTypes.VerticalTimelineControl
+    ResourceKey=@FieldTypes.VerticalTimelineControl.ToString()
+    IsControlEnabled=@true>
+    </AmhTimelineControl>
+
+    <AmhTimelineControl FieldType=@FieldTypes.HorizontalTimelineControl
+    ResourceKey=@FieldTypes.HorizontalTimelineControl.ToString()
+    Options=@timelineList
+    IsControlEnabled=@true />
+    <AmhAccordianControl @bind-Value=@accID Options=@optionsList OnValueChanged=@OnAccordianOptionChnged>
+    <AccordionContent>
+    @if (accID == "1")
+    {
+    <button style="color: black; width: 50%;">dj9isd ifh izdsh ofdsfodsfdf o</button>
+    }
+    else
+    {
+    <button style="color: black; width: 50%;">@($"sstest opter {accID}")</button>
+    }
+    </AccordionContent>
+    </AmhAccordianControl>
+
+    <AmhRadioButtonListControl FieldType=@FieldTypes.VerticalRadioButtonControl
+    ResourceKey=@FieldTypes.VerticalRadioButtonControl.ToString()
+    @bind-Options=@optionsList />
+
+    <AmhRadioButtonListControl @bind-Value=@radioButtonOptions
+    FieldType=@FieldTypes.HorizontalRadioButtonControl
+    ResourceKey=@FieldTypes.VerticalRadioButtonControl.ToString()
+    Options=@optionsList />
+
+    <AmhRadioButtonListControl @bind-Value=@radioButtonOptions
+    FieldType=@FieldTypes.HorizontalRadioButtonControl
+    ResourceKey=@FieldTypes.VerticalRadioButtonControl.ToString()
+    Options=@optionsList
+    IsControlEnabled=false />
+
+    <AmhMessageControl FieldType=@FieldTypes.MessageControl ResourceKey=@FieldTypes.MessageControl.ToString() Actions=@_messageButtonActions OnValueChanged=@OnMessageActionClicked />
+    <AmhMessageControl FieldType=@FieldTypes.CloseButtonMessageControl ResourceKey=@FieldTypes.CloseButtonMessageControl.ToString() OnValueChanged=@OnMessageActionClicked />
+    <AmhMessageControl FieldType=@FieldTypes.TopHeadingMessageControl ResourceKey=@FieldTypes.TopHeadingMessageControl.ToString() OnValueChanged=@OnMessageActionClicked />
+    <AmhMessageControl FieldType=@FieldTypes.TopHeadingWithCloseButtonMessageControl Icon=@ImageConstants.I_DOC_UPLOAD_ICON ResourceKey=@FieldTypes.TopHeadingWithCloseButtonMessageControl.ToString() OnValueChanged=@OnMessageActionClicked />
+
+    <AmhUploadControl Files=@_singleFile
+    FieldType=@FieldTypes.UploadControl
+    ResourceKey="SingleUploadControl" />
+
+    <AmhUploadControl Files=@_multipleFile
+    FieldType=@FieldTypes.UploadControl
+    ResourceKey="MultipleUploadControl"
+    UniqueID="1"/>
+
+    <AmhUploadControl Files=@_multipleFile1
+    FieldType=@FieldTypes.UploadControl
+    UniqueID="2"
+    ResourceKey="MultipleUploadControl"
+    DescriptionResourceKey=@ResourceConstants.R_USER_NAME_KEY />
+
+    <AmhUploadControl Files=@_singleFile
+    FieldType=@FieldTypes.UploadControl
+    IsControlEnabled=@false
+    ResourceKey="SingleUploadControl"/>
+
+    <AmhUploadControl Files=@_multipleFile
+    FieldType=@FieldTypes.UploadControl
+    UniqueID="3"
+    IsControlEnabled=@false
+    ResourceKey="MultipleUploadControl"/>
+
+
+    <AmhDateTimeControl @bind-Value=@_dateTimePickerControl
+    FieldType=@FieldTypes.DateTimeControl
+    ResourceKey=@FieldTypes.DateTimeControl.ToString() />
+
+    <AmhDateTimeControl @bind-Value=@_disableddateTimePickerControl
+    FieldType=@FieldTypes.DateTimeControl
+    ResourceKey="DisabledDateTimeControl"
+    IsControlEnabled=@false />
+
+    <AmhDateTimeControl @bind-Value=@_datePickerControl
+    FieldType=@FieldTypes.DateControl
+    ResourceKey=@FieldTypes.DateControl.ToString() />
+
+    <AmhDateTimeControl @bind-Value=@_datePickerControl
+    FieldType=@FieldTypes.DateControl
+    ResourceKey="DisabledDateControl"
+    IsControlEnabled=@false />
+
+    <AmhDateTimeControl @bind-Value=@_timePickerControl
+    FieldType=@FieldTypes.TimeControl
+    ResourceKey=@FieldTypes.TimeControl.ToString() />
+
+    <AmhDateTimeControl @bind-Value=@_timePickerControl
+    FieldType=@FieldTypes.TimeControl
+    ResourceKey="DisabledTimeControl"
+    IsControlEnabled=@false />
+
+    <AmhBadgeControl @bind-Value=@badgeValue
+    FieldType=@FieldTypes.PrimaryBadgeControl
+    ResourceKey="DisabledTimeControl" />
+
+    <AmhBadgeControl @bind-Value=@badgeValue
+    FieldType=@FieldTypes.SecondaryBadgeControl
+    ResourceKey="DisabledTimeControl" />
+
+    <AmhBadgeControl @bind-Value=@badgeValue
+    FieldType=@FieldTypes.SuccessBadgeControl
+    ResourceKey="DisabledTimeControl" />
+
+    <AmhBadgeControl @bind-Value=@badgeValue
+    FieldType=@FieldTypes.DangerBadgeControl
+    ResourceKey="DisabledTimeControl" />
+
+    <AmhBadgeControl @bind-Value=@badgeValue
+    FieldType=@FieldTypes.WarningBadgeControl
+    ResourceKey="DisabledTimeControl" />
+
+    <AmhBadgeControl @bind-Value=@badgeValue
+    FieldType=@FieldTypes.InfoBadgeControl
+    ResourceKey="DisabledTimeControl" />
+
+    <AmhBadgeControl @bind-Value=@badgeValue
+    FieldType=@FieldTypes.LightBadgeControl
+    ResourceKey="DisabledTimeControl" />
+
+    <AmhBadgeControl @bind-Value=@badgeValue
+    FieldType=@FieldTypes.DarkBadgeControl
+    ResourceKey="DisabledTimeControl" />
+
+    <AmhProgressBarControl @bind-value=@_progressbarvalue
+    FieldType=@FieldTypes.ProgressBarControl
+    ResourceKey=@FieldTypes.ProgressBarControl.ToString() />
+
+    <AmhProgressBarControl @bind-Value=@_progressindicatorvalue
+    FieldType=@FieldTypes.ProgressIndicatorControl
+    ResourceKey=@FieldTypes.ProgressIndicatorControl.ToString() />
+
+    <AmhDropdownControl @bind-Value=@_chartTypeValue
+    FieldType=@FieldTypes.SingleSelectDropdownControl
+    ResourceKey=@FieldTypes.SingleSelectDropdownControl.ToString()
+    Options=@_chartTypes
+    IsControlEnabled=@true
+    OnValueChanged=@OnChartSelectionValueChanged />
+
+    <AmhTabControl @bind-Value=@_durationTabID
+    FieldType=@FieldTypes.TabControl
+    Options=@_chartDurations
+    ResourceKey=@FieldTypes.TabControl.ToString()
+    OnValueChanged="@OnDurationSelectionValueChanged" />
+
+    @if (_chartDataSource != null && _chartTypeValue != null && _durationTabID != null)
+    {
+    if (_type == FieldTypes.LineGraphControl)
+    {
+    <AmhChartControl @bind-Value=@_chartDataSource @ref="_amhChartControl"
+    FieldType=@FieldTypes.LineGraphControl
+    ResourceKey=@FieldTypes.LineGraphControl.ToString()
+    OnButtonClicked="OnPrevOrNextButtonClicked">
+    </AmhChartControl>
+    }
+    else if (_type == FieldTypes.BarGraphControl)
+    {
+    <AmhChartControl @bind-Value=@_chartDataSource @ref="_amhChartControl"
+    FieldType=@FieldTypes.BarGraphControl
+    ResourceKey=@FieldTypes.BarGraphControl.ToString()
+    OnButtonClicked="OnPrevOrNextButtonClicked">
+    </AmhChartControl>
+    }
+    }
+    <AmhTabControl @bind-Value=@tabID
+    FieldType=@FieldTypes.TabControl
+    Options=@optionsList
+    ResourceKey=@FieldTypes.TabControl.ToString() />
+
+    <AmhTabControl @bind-Value=@tabID
+    FieldType=@FieldTypes.TabControl
+    Options=@optionsList
+    ResourceKey=@FieldTypes.TabControl.ToString()
+    IsControlEnabled=@false />
+
+    <AmhCalendarControl FieldType=@FieldTypes.CalendarControl
+    ResourceKey=@FieldTypes.CalendarControl.ToString()
+    Options=@_calendardata
+    OnValueChanged=@OnAppointmentSelect />
+
+    <AmhColorPickerControl @bind-Value=@_colorPicker
+    FieldType=@FieldTypes.ColorPickerControl
+    ResourceKey=@FieldTypes.ColorPickerControl.ToString() />
+
+    <AmhColorPickerControl @bind-Value=@_disableColorPicker
+    FieldType=@FieldTypes.ColorPickerControl
+    ResourceKey="DisableColorPickerControl"
+    IsControlEnabled=@false />
+
+
+
+    <AmhSliderControl @bind-Value=@_sliderValue
+    FieldType=@FieldTypes.HorizontalSliderControl
+    ResourceKey=@FieldTypes.HorizontalSliderControl.ToString() />
+
+    <AmhSliderControl @bind-Value=@_sliderValue
+    FieldType=@FieldTypes.HorizontalSliderControl
+    ResourceKey=@FieldTypes.HorizontalSliderControl.ToString()
+    IsControlEnabled=@false />
+
+    <AmhSliderControl @bind-Value=@_sliderValue
+    FieldType=@FieldTypes.VerticalSliderControl
+    ResourceKey=@FieldTypes.VerticalSliderControl.ToString()
+    IsControlEnabled=@false />
+
+    <AmhSliderControl @bind-Value=@_sliderValue
+    FieldType=@FieldTypes.VerticalSliderControl
+    ResourceKey=@FieldTypes.VerticalSliderControl.ToString() />
+
+    <AmhEntryControl @bind-Value=@radioButtonOptions
+    FieldType=@FieldTypes.TextEntryControl
+    ResourceKey=@FieldTypes.TextEntryControl.ToString() />
+
+    <AmhCheckBoxListControl @bind-Value=@_checkBoxValue
+    FieldType=@FieldTypes.VerticalCheckBoxControl
+    ResourceKey=@FieldTypes.VerticalCheckBoxControl.ToString()
+    Options=@optionsList />
+
+    <AmhCheckBoxListControl @bind-Value=@_checkBoxValue
+    FieldType=@FieldTypes.HorizontalCheckBoxControl
+    ResourceKey=@FieldTypes.HorizontalCheckBoxControl.ToString()
+    Options=@optionsList />
+
+    <AmhCheckBoxListControl @bind-Value=@_checkBoxValue
+    FieldType=@FieldTypes.HorizontalCheckBoxControl
+    ResourceKey=@FieldTypes.HorizontalCheckBoxControl.ToString()
+    Options=@optionsList
+    IsControlEnabled=false />
+
+    <AmhEntryControl @bind-Value=@_textEntryWithIconValue
+    FieldType=@FieldTypes.TextEntryControl
+    Icon=@string.Concat(ImageConstants.I_USER_ID_SVG, Constants.PIPE_SEPERATOR, ImageConstants.I_USER_ID_SVG)
+    ResourceKey=@FieldTypes.TextEntryControl.ToString() />
+
+    <AmhEntryControl @bind-Value=@_textEntryValue
+    FieldType=@FieldTypes.TextEntryControl
+    ResourceKey=@FieldTypes.TextEntryControl.ToString()
+    RegexExpression=@("^(?=.*[a-zA-Z])(?=.*[0-9])[A-Za-z0-9]+$") />
+
+    <AmhEntryControl @bind-Value=@_emailEntryValue
+    FieldType=@FieldTypes.EmailEntryControl
+    Icon=@string.Concat(string.Empty,Constants.PIPE_SEPERATOR, ImageConstants.I_USER_ID_SVG)
+    ResourceKey=@FieldTypes.EmailEntryControl.ToString()
+    IsControlEnabled=@false />
+
+    <AmhEntryControl @bind-Value=@_emailEntryValue
+    FieldType=@FieldTypes.EmailEntryControl
+    Icon=@string.Concat(string.Empty,Constants.PIPE_SEPERATOR, ImageConstants.I_USER_ID_SVG)
+    ResourceKey=@FieldTypes.EmailEntryControl.ToString()
+    RegexExpression=@_regexValue.ToString() />
+
+    <AmhEntryControl @bind-Value=@_passwordEntryValue
+    FieldType=@FieldTypes.PasswordEntryControl
+    Icon=@ImageConstants.I_USER_ID_SVG
+    ResourceKey=@FieldTypes.PasswordEntryControl.ToString() />
+
+    <AmhMultilineEntryControl @bind-Value=@_textEditorValue
+    FieldType=@FieldTypes.MultiLineEntryControl
+    MaxLine="5"
+    ResourceKey=@FieldTypes.MultiLineEntryControl.ToString() />
+
+    <AmhMultilineEntryControl Value=@("eh3wrw\nre\n4sr\ne4r\na4e\n4r\nae4\nr\nawer33e4tg retetwdeh3wrw\nre\n4sr\ne4r\na4e\n4r\nae4\nr\nawer33e4tg retetwd")
+    FieldType=@FieldTypes.MultiLineEntryControl
+    MaxLine="5"
+    ResourceKey=@FieldTypes.MultiLineEntryControl.ToString()
+    IsControlEnabled=@false />
+
+    <AmhNumericEntryControl @bind-Value=@_numericEntryWithIconValue
+    FieldType=@FieldTypes.NumericEntryControl
+    Icon=@string.Concat(ImageConstants.I_USER_ID_SVG, Constants.PIPE_SEPERATOR, ImageConstants.I_USER_ID_SVG)
+    ResourceKey=@FieldTypes.NumericEntryControl.ToString() />
+
+    <AmhNumericEntryControl @bind-Value=@_numericEntryDisabledValue
+    FieldType=@FieldTypes.NumericEntryControl
+    Icon=@string.Concat(ImageConstants.I_USER_ID_SVG)
+    ResourceKey="NumericEntryControlDisabled"
+    IsControlEnabled=@false />
+
+    <AmhNumericEntryControl @bind-Value=@_counterControlValue
+    FieldType=@FieldTypes.CounterEntryControl
+    StepValue="1.5"
+    DigitsAfterDecimal=2
+    ResourceKey=@FieldTypes.CounterEntryControl.ToString() />
+
+    <AmhNumericEntryControl @bind-Value=@_counterControlDisableValue
+    FieldType=@FieldTypes.CounterEntryControl
+    ResourceKey="NumericEntryControlDisabled"
+    StepValue="1.5"
+    IsControlEnabled=@false />
+
+    <AmhNumericEntryControl @bind-Value=@_decimalEntryValue
+    FieldType=@FieldTypes.DecimalEntryControl
+    Icon=@string.Concat(ImageConstants.I_USER_ID_SVG)
+    DigitsAfterDecimal=3
+    ResourceKey=@FieldTypes.DecimalEntryControl.ToString() />
+
+    <AmhNumericEntryControl @bind-Value=@_decimalEntryDisabledValue
+    FieldType=@FieldTypes.DecimalEntryControl
+    Icon=@string.Concat(ImageConstants.I_USER_ID_SVG, Constants.PIPE_SEPERATOR, ImageConstants.I_USER_ID_SVG)
+    ResourceKey="NumericEntryControlDisabled"
+    DigitsAfterDecimal=3
+    IsControlEnabled=@false />
+
+    <AmhRichTextEditor @bind-Value=@_richTextEntryHtmlValue
+    FieldType=@FieldTypes.RichTextControl
+    ResourceKey=@FieldTypes.RichTextControl.ToString() />
+
+    <AmhRichTextEditor @bind-Value=@_richTextEntryHtmlValue
+    FieldType=@FieldTypes.RichTextControl
+    ResourceKey=@FieldTypes.RichTextControl.ToString()
+    IsControlEnabled=false />
+
+    <AmhSwitchControl @bind-Value=@_switchvalue
+    FieldType=@FieldTypes.SwitchControl
+    ResourceKey=@FieldTypes.SwitchControl.ToString()
+    ShowHeader=@false />
+
+    <AmhSwitchControl @bind-Value=@_switchdisablevalue
+    FieldType=@FieldTypes.SwitchControl
+    ResourceKey="SwitchDisableControl"
+    ShowHeader=@false
+    IsControlEnabled=@false />
+
+    <AmhMobileNumberControl @bind-Value=@_mobileNumberValue
+    Icon=@string.Concat(string.Empty,Constants.PIPE_SEPERATOR, ImageConstants.I_USER_ID_SVG)
+    FieldType=@FieldTypes.MobileNumberControl
+    CountryCodes=_authData.CountryCodes
+    ResourceKey=@FieldTypes.MobileNumberControl.ToString() />
+
+    <AmhMobileNumberControl @bind-Value=@_mobileNumberDisabledValue
+    Icon=@string.Concat(string.Empty,Constants.PIPE_SEPERATOR, ImageConstants.I_USER_ID_SVG)
+    FieldType=@FieldTypes.MobileNumberControl
+    CountryCodes=_authData.CountryCodes
+    ResourceKey="DisabledPhonecontrol"
+    IsControlEnabled=false />
+
+    <AmhDropdownControl @bind-Value=@_multiSelectValue
+    FieldType=@FieldTypes.MultiSelectDropdownControl
+    ResourceKey=@(FieldTypes.MultiSelectDropdownControl.ToString())
+    Options=@ddOptionsList />
+
+    <AmhDropdownControl @bind-Value=@_multiSelectDisabledValue
+    FieldType=@FieldTypes.MultiSelectDropdownControl
+    ResourceKey=@(FieldTypes.MultiSelectDropdownControl.ToString()+"Disabled")
+    Options=@ddOptionsList
+    IsControlEnabled=@false />
+
+    <AmhDropdownControl @bind-Value=@_multiSelectEditableValue
+    FieldType=@FieldTypes.MultiSelectEditableDropdownControl
+    ResourceKey=@FieldTypes.MultiSelectEditableDropdownControl.ToString()
+    Options=@ddOptionsList />
+
+    <AmhDropdownControl @bind-Value=@_multiSelectEditableDisabledValue
+    FieldType=@FieldTypes.MultiSelectEditableDropdownControl
+    ResourceKey=@(FieldTypes.MultiSelectEditableDropdownControl.ToString()+"Disabled")
+    Options=@ddOptionsList
+    IsControlEnabled=@false />
+
+    <AmhDropdownControl @bind-Value=@_singleSelectValue
+    FieldType=@FieldTypes.SingleSelectDropdownControl
+    ResourceKey=@FieldTypes.SingleSelectDropdownControl.ToString()
+    Options=@ddOptionsList />
+
+    <AmhDropdownControl @bind-Value=@_singleSelectDisabledValue
+    FieldType=@FieldTypes.SingleSelectDropdownControl
+    ResourceKey=@(FieldTypes.SingleSelectDropdownControl.ToString()+"Disabled")
+    Options=@ddOptionsList
+    IsControlEnabled=@false />
+
+    <AmhDropdownControl @bind-Value=@_singleSelectEditableValue
+    FieldType=@FieldTypes.SingleSelectEditableDropdownControl
+    ResourceKey=@FieldTypes.SingleSelectEditableDropdownControl.ToString()
+    Options=@ddOptionsList />
+
+    <AmhDropdownControl @bind-Value=@_singleSelectEditableDisabledValue
+    FieldType=@FieldTypes.SingleSelectEditableDropdownControl
+    ResourceKey=@(FieldTypes.SingleSelectEditableDropdownControl.ToString()+"Disabled")
+    Options=@ddOptionsList
+    IsControlEnabled=@false />
+
+
+    <AmhButtonControl @bind-Value=@_primaryButton
+    FieldType=@FieldTypes.PrimaryButtonControl
+    Icon=@ImageConstants.I_USERS_SVG
+    ResourceKey=@FieldTypes.PrimaryButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.SecondaryButtonControl
+    ResourceKey=@FieldTypes.SecondaryButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.TertiaryButtonControl
+    ResourceKey=@FieldTypes.TertiaryButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.DeleteButtonControl
+    ResourceKey=@FieldTypes.DeleteButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.PrimaryTransparentButtonControl
+    Icon=@ImageConstants.I_USER_ID_SVG
+    ResourceKey=@FieldTypes.PrimaryTransparentButtonControl.ToString() />
+
+    <AmhButtonControl FieldType=@FieldTypes.SecondaryTransparentButtonControl
+    ResourceKey=@FieldTypes.SecondaryTransparentButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.TertiaryTransparentButtonControl
+    ResourceKey=@FieldTypes.TertiaryTransparentButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.DeleteTransparentButtonControl
+    ResourceKey=@FieldTypes.DeleteTransparentButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.PrimaryBorderTransparentButtonControl
+    Icon=@ImageConstants.I_USER_ID_SVG
+    ResourceKey=@FieldTypes.PrimaryBorderTransparentButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.SecondaryBorderTransparentButtonControl
+    ResourceKey=@FieldTypes.SecondaryBorderTransparentButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.TertiaryBorderTransparentButtonControl
+    ResourceKey=@FieldTypes.TertiaryBorderTransparentButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.DeleteBorderTransparentButtonControl
+    ResourceKey=@FieldTypes.DeleteBorderTransparentButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.PrimaryExButtonControl
+    Icon=@ImageConstants.I_USER_ID_SVG
+    ResourceKey=@FieldTypes.PrimaryExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.SecondaryExButtonControl
+    ResourceKey=@FieldTypes.SecondaryExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.TertiaryExButtonControl
+    ResourceKey=@FieldTypes.TertiaryExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.DeleteExButtonControl
+    ResourceKey=@FieldTypes.DeleteExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.PrimaryTransparentExButtonControl
+    Icon=@ImageConstants.I_USER_ID_SVG
+    ResourceKey=@FieldTypes.PrimaryTransparentExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.SecondaryTransparentExButtonControl
+    ResourceKey=@FieldTypes.SecondaryTransparentExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.TertiaryTransparentExButtonControl
+    ResourceKey=@FieldTypes.TertiaryTransparentExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.DeleteTransparentExButtonControl
+    ResourceKey=@FieldTypes.DeleteTransparentExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.PrimaryBorderTransparentExButtonControl
+    Icon=@ImageConstants.I_USER_ID_SVG
+    ResourceKey=@FieldTypes.PrimaryBorderTransparentExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.SecondaryBorderTransparentExButtonControl
+    ResourceKey=@FieldTypes.SecondaryBorderTransparentExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.TertiaryBorderTransparentExButtonControl
+    ResourceKey=@FieldTypes.TertiaryBorderTransparentExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl FieldType=@FieldTypes.DeleteBorderTransparentExButtonControl
+    ResourceKey=@FieldTypes.DeleteBorderTransparentExButtonControl.ToString()
+    OnValueChanged=@OnButtonClickAsync />
+
+    <AmhButtonControl @bind-Value=@_primaryButton
+    FieldType=@FieldTypes.MenuButtonControl
+    Options=@optionsList
+    OnValueChanged=@OndropdownButtonClicked />
+
+    @switch (selectedAction.ToEnum<FieldTypes>())
+    {
+    case FieldTypes.PopupMessageControl:
+    <AmhMessageControl FieldType=@FieldTypes.PopupMessageControl Icon=@ImageConstants.I_DOC_UPLOAD_ICON ShowHidePopup=false ResourceKey=@FieldTypes.PopupMessageControl.ToString() Actions=@_messageButtonActions OnValueChanged=@OnMessageActionClicked />
+    break;
+    case FieldTypes.TopHeadingPopupMessageControl:
+    <AmhMessageControl FieldType=@FieldTypes.TopHeadingPopupMessageControl ShowHidePopup=false ResourceKey=@FieldTypes.TopHeadingPopupMessageControl.ToString() Actions=@_messageButtonActions OnValueChanged=@OnMessageActionClicked />
+    break;
+    case FieldTypes.CloseButtonPopupMessageControl:
+    <AmhMessageControl FieldType=@FieldTypes.CloseButtonPopupMessageControl ShowHidePopup=false ResourceKey=@FieldTypes.CloseButtonPopupMessageControl.ToString() Actions=@_messageButtonActions OnValueChanged=@OnMessageActionClicked />
+    break;
+    case FieldTypes.TopHeadingWithCloseButtonPopupMessageControl:
+    <AmhMessageControl FieldType=@FieldTypes.TopHeadingWithCloseButtonPopupMessageControl ShowHidePopup=false ResourceKey=@FieldTypes.TopHeadingWithCloseButtonPopupMessageControl.ToString() Actions=@_messageButtonActions OnValueChanged=@OnMessageActionClicked />
+    break;
+    }
+
+    <AmhLabelControl Value="PrimaryLargeHVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.PrimaryLargeHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryLargeHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryLargeHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.PrimaryLargeHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryLargeHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryMediumHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.PrimaryMediumHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryMediumHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryMediumHVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.PrimaryMediumHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryMediumHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimarySmallHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.PrimarySmallHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimarySmallHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimarySmallHVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.PrimarySmallHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimarySmallHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryMicroHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.PrimaryMicroHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryMicroHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryMicroHVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.PrimaryMicroHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryMicroHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondaryLargeHVCenterLabelControl"
+    FieldType=@FieldTypes.SecondaryLargeHVCenterLabelControl
+    ResourceKey=@FieldTypes.SecondaryLargeHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondaryLargeHVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.SecondaryLargeHVCenterLabelControl
+    ResourceKey=@FieldTypes.SecondaryLargeHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondaryMediumHVCenterLabelControl"
+    FieldType=@FieldTypes.SecondaryMediumHVCenterLabelControl
+    ResourceKey=@FieldTypes.SecondaryMediumHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondaryMediumHVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.SecondaryMediumHVCenterLabelControl
+    ResourceKey=@FieldTypes.SecondaryMediumHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondarySmallHVCenterLabelControl"
+    FieldType=@FieldTypes.SecondarySmallHVCenterLabelControl
+    ResourceKey=@FieldTypes.SecondarySmallHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondarySmallHVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.SecondarySmallHVCenterLabelControl
+    ResourceKey=@FieldTypes.SecondarySmallHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondaryMicroHVCenterLabelControl"
+    FieldType=@FieldTypes.SecondaryMicroHVCenterLabelControl
+    ResourceKey=@FieldTypes.SecondaryMicroHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondaryMicroHVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.SecondaryMicroHVCenterLabelControl
+    ResourceKey=@FieldTypes.SecondaryMicroHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondaryLargeHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.SecondaryLargeHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.SecondaryLargeHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="SecondaryLargeHVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.SecondaryLargeHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.SecondaryLargeHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiaryLargeHStartVCenterBoldLabelControl"
+    FieldType=@FieldTypes.TertiaryLargeHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.TertiaryLargeHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiaryLargeHStartVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.TertiaryLargeHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.TertiaryLargeHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiaryLargeHEndVCenterLabelControl"
+    FieldType=@FieldTypes.TertiaryLargeHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.TertiaryLargeHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiaryLargeHEndVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.TertiaryLargeHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.TertiaryLargeHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiaryMediumHEndVCenterLabelControl"
+    FieldType=@FieldTypes.TertiaryMediumHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.TertiaryMediumHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiaryMediumHEndVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.TertiaryMediumHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.TertiaryMediumHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiarySmallHEndVCenterLabelControl"
+    FieldType=@FieldTypes.TertiarySmallHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.TertiarySmallHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiarySmallHEndVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.TertiarySmallHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.TertiarySmallHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiaryMicroHEndVCenterLabelControl"
+    FieldType=@FieldTypes.TertiaryMicroHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.TertiaryMicroHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="TertiaryMicroHEndVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.TertiaryMicroHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.TertiaryMicroHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryAppLargeHStartVCenterBoldLabelControl"
+    FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryAppLargeHStartVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryAppLargeHStartVCenterBoldLabelControl"
+    FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryAppLargeHStartVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryAppLargeHVCenterLabelControl"
+    FieldType=@FieldTypes.PrimaryAppLargeHVCenterLabelControl
+    ResourceKey=@FieldTypes.PrimaryAppLargeHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryAppLargeHVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.PrimaryAppLargeHVCenterLabelControl
+    ResourceKey=@FieldTypes.PrimaryAppLargeHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryAppLargeHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.PrimaryAppLargeHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryAppLargeHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="PrimaryAppLargeHVCenterBoldLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.PrimaryAppLargeHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.PrimaryAppLargeHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LinkHStartVCenterLabelControl"
+    FieldType=@FieldTypes.LinkHStartVCenterLabelControl
+    ResourceKey=@FieldTypes.LinkHStartVCenterLabelControl.ToString()
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhLabelControl Value="LinkHStartVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.LinkHStartVCenterLabelControl
+    ResourceKey=@FieldTypes.LinkHStartVCenterLabelControl.ToString()
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhLabelControl Value="LinkHEndVCenterLabelControl"
+    FieldType=@FieldTypes.LinkHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.LinkHEndVCenterLabelControl.ToString()
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhLabelControl Value="LinkHEndVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.LinkHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.LinkHEndVCenterLabelControl.ToString()
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhLabelControl Value="LinkHVCenterLabelControl"
+    FieldType=@FieldTypes.LinkHVCenterLabelControl
+    ResourceKey=@FieldTypes.LinkHVCenterLabelControl.ToString()
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhLabelControl Value="LinkHVCenterLabelControl" IsControlEnabled=@false
+    FieldType=@FieldTypes.LinkHVCenterLabelControl
+    ResourceKey=@FieldTypes.LinkHVCenterLabelControl.ToString()
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhLabelControl Value="ErrorHEndVCenterLabelControl"
+    FieldType=@FieldTypes.ErrorHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.LinkHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="ErrorHVCenterLabelControl"
+    FieldType=@FieldTypes.ErrorHVCenterLabelControl
+    ResourceKey=@FieldTypes.ErrorHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl @bind-Value=@_htmlLabelControl
+    FieldType=@FieldTypes.HtmlPrimaryLabelControl
+    ResourceKey=@FieldTypes.HtmlPrimaryLabelControl.ToString()
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhLabelControl @bind-Value=@_htmlLabelControl
+    FieldType=@FieldTypes.HtmlPrimaryCenterLabelControl
+    ResourceKey=@FieldTypes.HtmlPrimaryCenterLabelControl.ToString() />
+
+    <AmhLabelControl @bind-Value=@_htmlLabelControl
+    FieldType=@FieldTypes.HtmlSecondaryLabelControl
+    ResourceKey=@FieldTypes.HtmlSecondaryLabelControl.ToString() />
+
+    <AmhLabelControl @bind-Value=@_htmlLabelControl
+    FieldType=@FieldTypes.HtmlSecondaryCenterLabelControl
+    ResourceKey=@FieldTypes.HtmlSecondaryCenterLabelControl.ToString() />
+
+    <AmhLabelControl @bind-Value=@_htmlLabelControl
+    FieldType=@FieldTypes.HtmlTertiaryLabelControl
+    ResourceKey=@FieldTypes.HtmlTertiaryLabelControl.ToString() />
+
+    <AmhLabelControl @bind-Value=@_htmlLabelControl
+    FieldType=@FieldTypes.HtmlTertiaryCenterLabelControl
+    ResourceKey=@FieldTypes.HtmlTertiaryCenterLabelControl.ToString() />
+
+    <div id="lightlabel" style="background-color:var(--primary-app-color);">
+
+    <AmhLabelControl Value="LightLargeHVCenterLabelControl"
+    FieldType=@FieldTypes.LightLargeHVCenterLabelControl
+    ResourceKey=@FieldTypes.LightLargeHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightLargeHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightLargeHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightLargeHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightLargeHStartVCenterLabelControl"
+    FieldType=@FieldTypes.LightLargeHStartVCenterLabelControl
+    ResourceKey=@FieldTypes.LightLargeHStartVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightLargeHStartVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightLargeHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightLargeHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightLargeHEndVCenterLabelControl"
+    FieldType=@FieldTypes.LightLargeHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.LightLargeHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightLargeHEndVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightLargeHEndVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightLargeHEndVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMediumHVCenterLabelControl"
+    FieldType=@FieldTypes.LightMediumHVCenterLabelControl
+    ResourceKey=@FieldTypes.LightMediumHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMediumHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightMediumHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightMediumHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMediumHStartVCenterLabelControl"
+    FieldType=@FieldTypes.LightMediumHStartVCenterLabelControl
+    ResourceKey=@FieldTypes.LightMediumHStartVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMediumHStartVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightMediumHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightMediumHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMediumHEndVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightMediumHEndVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightMediumHEndVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMediumHEndVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightMediumHEndVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightMediumHEndVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightSmallHVCenterLabelControl"
+    FieldType=@FieldTypes.LightSmallHVCenterLabelControl
+    ResourceKey=@FieldTypes.LightSmallHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightSmallHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightSmallHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightSmallHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightSmallHStartVCenterLabelControl"
+    FieldType=@FieldTypes.LightSmallHStartVCenterLabelControl
+    ResourceKey=@FieldTypes.LightSmallHStartVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightSmallHStartVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightSmallHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightSmallHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightSmallHEndVCenterLabelControl"
+    FieldType=@FieldTypes.LightSmallHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.LightSmallHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightSmallHEndVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightSmallHEndVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightSmallHEndVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMicroHVCenterLabelControl"
+    FieldType=@FieldTypes.LightMicroHVCenterLabelControl
+    ResourceKey=@FieldTypes.LightMicroHVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMicroHVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightMicroHVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightMicroHVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMicroHStartVCenterLabelControl"
+    FieldType=@FieldTypes.LightMicroHStartVCenterLabelControl
+    ResourceKey=@FieldTypes.LightMicroHStartVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMicroHStartVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightMicroHStartVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightMicroHStartVCenterBoldLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMicroHEndVCenterLabelControl"
+    FieldType=@FieldTypes.LightMicroHEndVCenterLabelControl
+    ResourceKey=@FieldTypes.LightMicroHEndVCenterLabelControl.ToString() />
+
+    <AmhLabelControl Value="LightMicroHEndVCenterBoldLabelControl"
+    FieldType=@FieldTypes.LightMicroHEndVCenterBoldLabelControl
+    ResourceKey=@FieldTypes.LightMicroHEndVCenterBoldLabelControl.ToString() />
+
+    </div>
+
+    <AmhLabelControl Value=@(nameof(imageByte))
+    FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl />
+
+    <div id="images0" style="display: flex; align-items: flex-start;flex-direction: row;flex-wrap: wrap;justify-content: space-between;align-content: flex-end;">
+
+    <AmhImageControl FieldType=@FieldTypes.CircleImageControl
+    Source=@imageByte
+    BackgroundColor=BackgroundColor.Pink
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareImageControl
+    Source=@imageByte
+    BackgroundColor=BackgroundColor.Yellow
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.CircleWithBorderImageControl
+    Source=@imageByte
+    BackgroundColor=BackgroundColor.Violet
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareWithBorderImageControl
+    Source=@imageByte
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.CircleWithBackgroundImageControl
+    Source=@imageByte
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareWithBackgroundImageControl
+    Source=@imageByte
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareWithBackgroundImageControl
+    Source=@imageByte
+    BackgroundColor=BackgroundColor.Blue
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.CircleWithBorderAndBackgroundImageControl
+    Source=@imageByte
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareWithBorderAndBackgroundImageControl
+    Source=@imageByte
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.ImageControl
+    Source=@imageByte />
+    </div>
+
+    <AmhLabelControl Value=@(nameof(imageInitial)) FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl />
+
+    <div id="images1" style="display: flex; align-items: flex-start;flex-direction: row;flex-wrap: wrap;justify-content: space-between;align-content: flex-end;">
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.CircleImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.SquareImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.CircleWithBorderImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.SquareWithBorderImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.CircleWithBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.SquareWithBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.CircleWithBorderAndBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.SquareWithBorderAndBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageInitial
+    FieldType=@FieldTypes.ImageControl />
+
+    </div>
+
+    <AmhLabelControl Value=@(nameof(imageBase64)) FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl />
+
+    <div id="images2" style="display: flex; align-items: flex-start;flex-direction: row;flex-wrap: wrap;justify-content: space-between;align-content: flex-end;">
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.CircleImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.SquareImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.CircleWithBorderImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.SquareWithBorderImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.CircleWithBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.SquareWithBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.CircleWithBorderAndBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.SquareWithBorderAndBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl Value=@imageBase64
+    FieldType=@FieldTypes.ImageControl />
+
+    </div>
+
+    <AmhLabelControl Value=@(nameof(imageIcon)) FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl />
+
+    <div id="images3" style="display: flex; align-items: flex-start;flex-direction: row;flex-wrap: wrap;justify-content: space-between;align-content: flex-end;">
+
+    <AmhImageControl FieldType=@FieldTypes.CircleImageControl
+    Icon=@imageIcon
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareImageControl
+    Icon=@imageIcon
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.CircleWithBorderImageControl
+    Icon=@imageIcon
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareWithBorderImageControl
+    Icon=@imageIcon
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.CircleWithBackgroundImageControl
+    Icon=@imageIcon
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareWithBackgroundImageControl
+    Icon=@imageIcon
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.CircleWithBorderAndBackgroundImageControl
+    Icon=@imageIcon
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.SquareWithBorderAndBackgroundImageControl
+    Icon=@imageIcon
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL />
+
+    <AmhImageControl FieldType=@FieldTypes.ImageControl
+    Icon=@imageIcon />
+
+    </div>
+
+    <AmhLabelControl Value=@(nameof(imagePath)) FieldType=@FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl />
+
+    <div id="images4" style="display: flex; align-items: flex-start;flex-direction: row;flex-wrap: wrap;justify-content: space-between;align-content: flex-end;">
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.CircleImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.SquareImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.CircleWithBorderImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.SquareWithBorderImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.CircleWithBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.SquareWithBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.CircleWithBorderAndBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.SquareWithBorderAndBackgroundImageControl
+    ImageHeight=AppImageSize.ImageSizeXXL
+    ImageWidth=AppImageSize.ImageSizeXXL
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    <AmhImageControl Value=@imagePath
+    FieldType=@FieldTypes.ImageControl
+    OnValueChanged="@OnLoginButtonClickAsync" />
+
+    </div>
+
+    <AmhBadgeCountControl @bind-Value=@_sliderValue
+    FieldType=@FieldTypes.BadgeCountControl
+    ResourceKey=@FieldTypes.BadgeCountControl.ToString() />
+
+
+    <!--if ShowPagination true, Height Parameter will not work-->
+    <!--if ShowPagination true, RowsPerPage Parameter will work, by default it is set to 5 -->
+
+    <AmhTableControl TableHeader=@string.Format(CultureInfo.InvariantCulture, "All types of Data", string.Empty)
+    DataSource=@dataset
+    DataSourceType=@PatientMedicationModel
+    TableStructure=@GenerateTableStructure()
+    ShowSearch=true
+    ShowAddButton=true
+    Height="500px"
+    RowsPerPage=10
+    OnValueChanged=@OnAddEditClick
+    ShowPagination=false />
+
+    <AmhTableControl TableHeader=@string.Format(CultureInfo.InvariantCulture, "EmptyData", string.Empty)
+    DataSource=@emptydataset
+    DataSourceType=@PatientMedicationModel
+    TableStructure=@GenerateTableStructure()
+    ShowSearch="false"
+    ShowAddButton=false />
+
+
+    <div class="d-flex justify-content-end">
+    @if (!pdfDisplayed)
+    {
+    <button class="btn btn-primary" @onclick="CreatePDF">Generate PDF</button>
+    }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(pdfBase64))
+    {
+    <object data="@pdfBase64" type=@Constants.PDF_TAG width="100%" height="950"></object>
+    }
+
+    *@
+    </BasePage>
+}

@@ -1,0 +1,30 @@
+﻿@using Radzen
+@using Radzen.Blazor
+
+@namespace AlphaMDHealth.WebClient
+
+@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <RadzenAlert AllowClose="true"
+                 AlertStyle=@(IsSuccess ? AlertStyle.Success : AlertStyle.Danger)
+                 Variant=@Variant.Flat
+                 Shade=@Shade.Lighter
+                 class="m-0">
+        @Message
+    </RadzenAlert>
+}
+
+@code {
+    /// <summary>
+    /// Set when show Success Banner is Needed
+    /// </summary>
+    [Parameter]
+    public string Message { get; set; }
+
+    /// <summary>
+    /// Flag representing message type
+    /// </summary>
+    [Parameter]
+    public bool IsSuccess { get; set; }
+
+}

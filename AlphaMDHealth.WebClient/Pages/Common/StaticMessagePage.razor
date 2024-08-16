@@ -1,0 +1,44 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/StaticMessageView"
+@page "/StaticMessageView/{key}"
+@page "/StaticMessageView/key"
+@page "/StaticMessageView/key/type/"
+@page "/StaticMessageView/key/type/targetpage/targetparameters"
+@page "/StaticMessageView/key/targetpage"
+@page "/StaticMessageView/key/targetpage/targetparameters"
+
+@if (_isDataFetched)
+{
+    @if (IsPatientMobileView)
+    {
+        <BasePage CurrentPage=@this
+                  ShowPageTitle=@(IsPatientMobileView?true: false)
+                  PageTitle=@(IsPatientMobileView?PageTitle: "")
+                  ApplyStructure=@ApplyStructure
+                  ApplyFixedFooter=true
+                  ApplyCard=@true
+                  ApplyMobileViewBeforLogin=@IsPatientMobileView
+                  PageResources=@_pageData.Resources
+                  ActionButtons=@_actionsForBasePage>
+            <AmhMessageControl ResourceKey=@Key
+                               Actions=@_actionsForConsent
+                               IsMobileView=@IsPatientMobileView
+                               OnValueChanged=@OnMessageActionClickedAsync />
+        </BasePage>
+    }
+    else
+    {
+        <BasePage CurrentPage=@this
+                  ShowPageTitle=@(IsPatientMobileView?true: false)
+                  ApplyStructure=@ApplyStructure
+                  ApplyFixedFooter=true
+                  ApplyCard=@(IsPatientMobileView?false: true)
+                  ApplyMobileViewBeforLogin=@IsPatientMobileView
+                  PageResources=@_pageData.Resources>
+            <AmhMessageControl ResourceKey=@Key
+                               Actions=@_actionsForBasePage
+                               OnValueChanged=@OnMessageActionClickedAsync />
+        </BasePage>
+    }
+}

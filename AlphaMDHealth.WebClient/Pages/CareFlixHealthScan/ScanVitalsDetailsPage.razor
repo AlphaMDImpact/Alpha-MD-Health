@@ -1,0 +1,20 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+
+<BasePage @bind-Error=@Error
+          @bind-Success=@Success
+          CurrentPage=@this
+          PageTitle="Scan Details Vitals"
+          ShowDetailPage=@ShowDetailPage>
+    <ChildContent>
+
+    </ChildContent>
+    <PageFooter>
+      @*   <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                          OnValueChanged=@OnNextlClickedAsync /> *@
+
+        <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                          OnValueChanged=@OnCancelClickedAsync />
+    </PageFooter>
+</BasePage>

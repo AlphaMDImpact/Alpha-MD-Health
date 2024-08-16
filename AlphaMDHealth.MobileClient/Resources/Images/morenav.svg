@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Icon-arrow-forward</title>
+    <g id="Patient" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="More" transform="translate(-678.000000, -211.000000)">
+            <g id="Cont" transform="translate(-2.000000, 182.000000)">
+                <g id="Icon-arrow-forward" transform="translate(680.000000, 29.000000)">
+                    <rect id="Rectangle" x="0" y="0" width="30" height="30"></rect>
+                    <polygon id="Shape" fill="#757575" points="8 4.42901786 9.6171875 3 23 14.7857143 9.6171875 26.5714286 8 25.1497768 19.7578125 14.7857143"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

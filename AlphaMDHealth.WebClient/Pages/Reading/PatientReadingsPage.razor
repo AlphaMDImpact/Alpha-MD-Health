@@ -1,0 +1,159 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientReadingsView"
+@page "/PatientReadingsView/{readingid:short}/{readingCategoryid:short}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(Parameters?.Count < 1)
+              PageResources=@_readingData.Resources
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientReadingsView.ToString())
+              ApplyCard=@(IsPatientMobileView ? false : (_readingData?.RecordCount < 1))
+              ApplyParentStructure=@(!ShowDetailPage && _readingData.ReadingID == 0)
+              SetDashboardFlag=@(_readingData.RecordCount > 0)
+              ApplyFixedFooter=@(IsPatientMobileView? !(_readingData.RecordCount > 0):false)
+              ShowPageTitle=@(!ShowDetailPage && _readingData.ReadingID == 0)>
+        <PageHeader>
+            @if (!ShowDetailPage)
+            {
+                @if (_displayCategoryFilter && GenericMethods.IsListNotEmpty(_readingData.FilterOptions) && !AppState.IsPatient)
+                {
+                    <AmhDropdownControl FieldType=@FieldTypes.SingleSelectDropdownControl
+                                        UniqueID="CategoryFilter"
+                                        @bind-Options=@_readingData.FilterOptions
+                                        OnValueChanged=@OnReadingTypeClickAsync />
+                }
+                @if (_readingData.RecordCount > 0 && !AppState.IsPatient)
+                {
+                    <AmhButtonControl FieldType=@FieldTypes.PrimaryTransparentExButtonControl
+                                      ResourceKey=@ResourceConstants.R_SHOW_MORE_KEY
+                                      OnValueChanged=@OnViewAllClickedAsync />
+                }
+                else if (CheckAddAllowed(_readingData.ChartMetaData) && _readingData.RecordCount < 1 && _readingData.ReadingID == 0)
+                {
+                    @if (AppState.IsPatient)
+                    {
+                        <AmhImageControl OnValueChanged=@ShowContextMenu Icon=@ImageConstants.I_ADD_ICON_RESPONSIVE FieldType=FieldTypes.SquareImageControl ImageHeight=AppImageSize.ImageSizeM
+                                         ImageWidth=AppImageSize.ImageSizeM />
+@*                         <button type="button" class="btn btn-primary" @onclick="ShowContextMenu">Add</button>
+ *@
+                        <div id="contextMenu" class="dropdown-menu" style="display: none; position: fixed; bottom: 10px; left: 10px; width: 100%;">
+                            <AmhLabelControl ResourceKey=@ResourceConstants.R_ADD_VITALS_KEY
+                                            OnValueChanged=@(() => OnAddEditClicked(null, false)) />
+                            <AmhLabelControl ResourceKey=@ResourceConstants.R_SCAN_VITALS_KEY
+                                        OnValueChanged=@(() => OnAddScanVitalsClicked()) />
+                            <AmhLabelControl FieldType=@FieldTypes.PrimaryAppMediumHVCenterLabelControl
+                                            ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY 
+                                            OnValueChanged="HideContextMenu" />
+                        </div>
+                    }
+                    else
+                    {
+                        <AmhButtonControl FieldType=@FieldTypes.PrimaryBorderTransparentExButtonControl
+                                            ResourceKey=@ResourceConstants.R_ADD_ACTION_KEY
+                                            OnValueChanged=@(() => OnAddEditClicked(null, false)) />
+                    }
+                }
+            }
+        </PageHeader>
+        <ChildContent>
+            @if (ShowDetailPage && !(_showScanVitalsPage))
+            {
+                @if (_shouldShowTargetAddEditPopup)
+                {
+                    <PatientReadingTargetPage ReadingID=@_readingID
+                                              ShowDetailPage=true
+                                              IsAccordion=true
+                                              OnClose=@OnDetailPageClosedAsync />
+                }
+                else
+                {
+                    <PatientReadingPage PatientReadingID=@_readingData.PatientReadingID
+                                        ShowCategory=@_readingData.IsActive
+                                        ReadingID=@_readingData.ReadingID
+                                        IsAccordion=true
+                                        ReadingCategoryID=@_readingData.ReadingCategoryID
+                                        OnClose=@OnDetailPageClosedAsync />
+                }
+            }
+            else if (ShowDetailPage && (_showScanVitalsPage))
+            {
+                if (_showScanVitalsPage)
+                {
+                    <ScanVitalsPage ShowScanVitalsPage=@_showScanVitalsPage OnClose=@OnScanVitalPageClosedAsync />
+                }
+            }
+
+            else
+            {
+                if (_readingData.ErrCode == ErrorCode.OK && (GenericMethods.IsListNotEmpty(_readingData.FilterOptions)))
+                {
+                    <div class="row">
+                        @*Readings List view*@
+                        <div class=@(_isNotSummaryView ? "col-xl-4": "col-12 ")>
+                            <div class=@AppState.ClassName($"flex-item")>
+
+                                @if ((_readingData.ErrCode == ErrorCode.OK && !AppState.IsPatient) || (_readingData.ErrCode == ErrorCode.OK && AppState.IsPatient && _readingData?.ReadingID == 0))
+                                {
+                                    @if (_displayCategoryFilter && AppState.IsPatient)
+                                    {
+                                        <div style="margin-bottom: -30px;" class=@AppState.ClassName($"d-flex justify-content-between flex-wrap")>
+                                            <ReadingTypesComponent ReadingCategories="@_readingData.FilterOptions.Where(x=>x.OptionID == 421).ToList()"
+                                                                   ClickEvent="@OnReadingTypeClickAsync" />
+                                        </div>
+                                    }
+                                    @*  <AmhListViewControl DataSourceType=@PatientReadingDTO
+                    DataSource=@_readingData.ReadingDTOs
+
+                    IsGroupedData=@false
+                    ShowSearch=@false
+                    OnValueChanged=@OnReadingRowClickedAsync /> *@
+                                    <AmhTableControl DataSource=@_readingData.ReadingDTOs
+                                                     DataSourceType=@PatientReadingDTO
+                                                     ShowSearch=@false
+                                                     SourceFieldStructure=@getViewCellModel()
+                                                     RowsPerPage=40
+                                                     IsHorizontal=@(_readingData.RecordCount > 0 && AppState.IsPatient)
+                                                     ShowViewAll=@(_readingData.RecordCount > 0 && AppState.IsPatient)
+                                                     ShowHeader=@(_readingData.RecordCount > 0 && AppState.IsPatient ? true: false)
+                                                     TableHeader=@(_readingData.RecordCount > 0? LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientReadingsView.ToString()) : string.Empty)
+                                                     OnViewClicked=OnViewAllClickedAsync
+                                                     IsPatientMobileView=@IsPatientMobileView
+                                                     SelectedId=@(ReadingID >0 && !AppState.IsPatient? Convert.ToString(ReadingID):null)
+                                                     TableStructure=@GenerateTableStructure()
+                                                     OnValueChanged=@OnReadingRowClickedAsync />
+                                }
+                            </div>
+                        </div>
+                        @if (_isNotSummaryView && !AppState.IsPatient)
+                        {
+                            <div class="col-xl-8">
+                                <div class=@AppState.ClassName($"flex-item")>
+                                    <PatientReadingDetailsPage @bind-ShowDetailPage=@ShowDetailPage
+                                                               ReadingID=@_readingID
+                                                               OnAddEditClick=@OnAddEditClicked />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@(_readingData.ErrCode == ErrorCode.OK ? ResourceConstants.R_NO_DATA_FOUND_KEY : _readingData.ErrCode.ToString()) />
+                }
+                @if (AppState.IsPatient && _readingData.ReadingID != 0)
+                {
+                    <PatientReadingDetailsPage @bind-ShowDetailPage=@ShowDetailPage
+                                               ReadingID=@_readingID
+                                               OnAddEditClick=@OnAddEditClicked
+                                               OnClose=OnDetailPageCloseAsync />
+
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

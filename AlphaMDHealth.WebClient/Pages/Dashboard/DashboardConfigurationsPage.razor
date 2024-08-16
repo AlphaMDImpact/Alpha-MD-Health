@@ -1,0 +1,58 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/DashboardConfigurationView"
+@using System.Globalization
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              ShowPageTitle=@(!ShowDetailPage)
+              CurrentPage=@this
+              ApplyStructure=(!ShowDetailPage)
+              PageResources=@_dashboardData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              RegisterComp=@RegisterControl>
+            <PageHeader>
+            @if (!ShowDetailPage)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                                  OnValueChanged=@OnCancelClickedAsync />
+            }
+            </PageHeader>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <DashboardConfigurationPage RoleID=@(Convert.ToByte(_selectedRoleID, CultureInfo.InvariantCulture))
+                                            DashboardSettingID=@_dashboardSettingID
+                                            ShowDetailPage=true
+                                            OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_dashboardData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhDropdownControl @bind-Value=@_selectedRoleID
+                                        Options=@_dashboardData.RolesOptions
+                                        ResourceKey=@ResourceConstants.R_ROLES_KEY />
+                    <div class="mb-4"></div>
+                    @if (!string.IsNullOrWhiteSpace(_selectedRoleID) && _selectedRoleID != "0")
+                    {
+                        <AmhTableControl TableHeader=@AppState.RouterData.SelectedRoute?.FeatureText
+                                         DataSource=@_dashboardData.ConfigurationRecords.FindAll(x => x.RoleID.ToString() == _selectedRoleID)
+                                         DataSourceType=@ConfigureDashboardModel
+                                         TableStructure=@GenerateTableStructure()
+                                         ShowAddButton=@LibPermissions.HasPermission(_dashboardData.FeaturePermissions, AppPermissions.DashboardConfigurationAddEdit.ToString())
+                                         OnValueChanged=@((e) => OnAddEditClick((ConfigureDashboardModel)e)) />
+                    }
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_dashboardData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

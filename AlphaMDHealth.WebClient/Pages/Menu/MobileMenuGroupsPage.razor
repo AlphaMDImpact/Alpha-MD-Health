@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/MobileMenuGroupsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error 
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_mobileMenuGroupData.ErrCode != ErrorCode.OK)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_mobileMenuGroupData.Resources >
+        @if (ShowDetailPage)
+        {
+            <MobileMenuGroupPage MenuGroupID=@_clickedMenuGroupID OnClose=@ShowDetailPageEventCallbackAsync />
+        }
+        else
+        {
+            @if (_mobileMenuGroupData.ErrCode == ErrorCode.OK)
+            {
+                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.MobileMenuGroupsView.ToString())
+                                 DataSource=@_mobileMenuGroupData.MenuGroups
+                                 DataSourceType=@MenuGroupModel
+                                 TableStructure=@GenerateTableStructure()
+                                 ShowSearch=@(_mobileMenuGroupData.RecordCount < 1)
+                                 OnValueChanged=@((e) => OnAddEditClick((MenuGroupModel)e))
+                                 ShowAddButton=@(_mobileMenuGroupData.RecordCount < 1 && LibPermissions.HasPermission(_mobileMenuGroupData.FeaturePermissions, AppPermissions.MobileMenuGroupAddEdit.ToString()))
+                                 ShowPagination=@(_mobileMenuGroupData.RecordCount < 1) />
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_mobileMenuGroupData.ErrCode.ToString() />
+            }
+        }
+    </BasePage>
+}

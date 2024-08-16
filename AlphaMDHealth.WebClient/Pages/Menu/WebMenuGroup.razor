@@ -1,0 +1,62 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/WebGroupContentAddEdit/{menuid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+    @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.WebGroupContentAddEdit.ToString())
+              OnClose=@OnClose
+              PageResources=@_menuGroupData?.Resources
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              ApplyCard=true
+              PageOperation=@GetPageOperationType(_isEditable, MenuGroupId == 0)>
+        <ChildContent>
+            <AmhEntryControl @bind-Value=@_menuGroupData.MenuGroup.GroupIdentifier
+                             ResourceKey=@ResourceConstants.R_IDENTIFIER_KEY
+                             IsControlEnabled=@_isEditable />
+
+            <AmhRadioButtonListControl ResourceKey=@ResourceConstants.R_PAGE_TYPE_KEY
+                                       Options=@_menuGroupData.PageTypes
+                                       OnValueChanged=@(e => { OnPageTypeChanged(e.ToString()); })
+                                       IsControlEnabled=@_isEditable />
+
+            <AmhLanguageTabControl @bind-LanguageTabData=@_dataFormatter
+                                   DataSource=@_menuGroupData.MenuGroupDetails
+                                   DataSourceType=@ContentDetailModel
+                                   IsControlEnabled=@_isEditable />
+
+            @if (_menuGroupData.MenuGroup.PageType == ContentType.Link || _menuGroupData.MenuGroup.PageType == ContentType.Both)
+            {
+                <AmhDropdownControl @bind-Options=@_menuGroupData.MenuNodes
+                                    ResourceKey=@ResourceConstants.R_SELECT_LINKS_KEY
+                                    IsControlEnabled=@_isEditable />
+            }
+
+        </ChildContent>
+        <PageFooter>
+            @if (_menuGroupData.MenuGroup.MenuGroupID > 0 && LibPermissions.HasPermission(_menuGroupData.FeaturePermissions, AppPermissions.WebGroupContentDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                  OnValueChanged=@OnDeleteClick />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideDeletedConfirmationPopup
+                                   Actions=@_popupActions
+                                   OnValueChanged=@OnDeleteConfirmationPopUpClickedAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                  OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCanceledClickAsync />
+        </PageFooter>
+    </BasePage>
+}

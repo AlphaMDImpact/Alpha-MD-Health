@@ -1,0 +1,257 @@
+﻿@using System.Globalization;
+@using MudBlazor;
+@inject IJSRuntime JSRuntime
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <div class="input-primary input-primary-mobile">
+            @switch (FieldType)
+            {
+                case FieldTypes.DateControl:
+                    <MudDatePicker @bind-Date=@_dateTime
+                                   Disabled=@(!IsControlEnabled)
+                                   PickerVariant="PickerVariant.Dialog"
+                                   DisableUnderLine=@true
+                                   Style="margin-top:-5px"
+                                   MinDate=@_minDate.Date
+                                   MaxDate=@_maxDate.Date
+                                   Class="px-2 set-font-size"
+                                   Clearable=true
+                                   DateFormat=@GetDateTimeFormat()
+                                   Placeholder=@_resource.PlaceHolderValue />
+                    break;
+                case FieldTypes.TimeControl:
+                    <MudTimePicker @bind-Time=@_time
+                                   Disabled=@(!IsControlEnabled)
+                                   AutoClose=true
+                                   AmPm=@(!AppState.webEssentials.GetPreferenceValue(StorageConstants.PR_IS_24_HOUR_FORMAT, false))
+                                   TimeFormat=@GetDateTimeFormat()
+                                   PickerVariant="PickerVariant.Dialog"
+                                   DisableUnderLine=true
+                                   Clearable=true
+                                   Style="margin-top:-5px"
+                                   Class="px-2 set-font-size"
+                                   Placeholder=@_resource.PlaceHolderValue />
+                    break;
+
+                case FieldTypes.DateTimeControl:
+                default:
+                    <MudDatePicker @bind-Date=@_dateTime
+                                   DateFormat=@GetDateTimeFormat()
+                                   Disabled=@(!IsControlEnabled)
+                                   PickerClosed="OpenTimer"
+                                   PickerVariant="PickerVariant.Dialog"
+                                   DisableUnderLine=@true
+                                   Style="margin-top:-5px"
+                                   Class="px-2 set-font-size"
+                                   Clearable=true
+                                   MinDate=@_minDate.Date
+                                   MaxDate=@_maxDate.Date
+                                   Placeholder=@_resource.PlaceHolderValue />
+                    <MudTimePicker @bind-Time=@_time @ref=@TimePicker
+                                   AmPm=@(!AppState.webEssentials.GetPreferenceValue(StorageConstants.PR_IS_24_HOUR_FORMAT, false))
+                                   PickerClosed=@AddTimeToDatetime
+                                   PickerVariant="PickerVariant.Dialog"
+                                   Style="display:none;" />
+                    break;
+            }
+        </div>
+    </ChildControl>
+</AmhBaseControl>
+
+@code
+{
+    private MudTimePicker? TimePicker { get; set; } = new MudTimePicker();
+    private DateTimeOffset _minDate => DateTimeOffset.Now.AddDays(_resource.MinLength).ToOffset(TimeSpan.FromMinutes(AppState.LocalOffset));
+    private DateTimeOffset _maxDate => DateTimeOffset.Now.AddDays(_resource.MaxLength).ToOffset(TimeSpan.FromMinutes(AppState.LocalOffset));
+    private string? _format;
+
+    private DateTime? _dateTime
+    {
+        get
+        {
+            return Value.HasValue ? Value?.DateTime : null;
+        }
+        set
+        {
+            if (value.HasValue)
+            {
+                var currentDT = AppState.webEssentials.ConvertToLocalTime(DateTimeOffset.UtcNow);
+                var dateTime = new DateTimeOffset(value.Value.Year, value.Value.Month, value.Value.Day, value.Value.Hour, value.Value.Minute, value.Value.Second, currentDT.Offset);
+                JSRuntime.InvokeVoidAsync("logValue", "datetimeValuebefore", dateTime);
+                Value = dateTime;
+                JSRuntime.InvokeVoidAsync("logValue", "datetimevalue", Value);
+                ValueChanged.InvokeAsync(Value);
+                OnValueChangedAction(Value);
+            }
+            else
+            {
+                Value = null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Control value represents text of Label control
+    /// </summary>
+    [Parameter]
+    public DateTimeOffset? Value { get; set; }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<DateTimeOffset?> ValueChanged { get; set; }
+
+    private TimeSpan? _time
+    {
+        get
+        {
+            return Value.HasValue ? new TimeSpan(Value.Value.Hour, Value.Value.Minute, Value.Value.Second) : null;
+        }
+        set
+        {
+            if (value.HasValue)
+            {
+                var currentDT = AppState.webEssentials.ConvertToLocalTime(DateTimeOffset.UtcNow);
+                if (!Value.HasValue)
+                {
+                    Value = currentDT;
+                }
+                var dateTime = new DateTimeOffset(Value.Value.Year, Value.Value.Month, Value.Value.Day, value.Value.Hours, value.Value.Minutes, value.Value.Seconds, currentDT.Offset);
+                JSRuntime.InvokeVoidAsync("logValue", "timeValuebefore", dateTime);
+                Value = dateTime;
+                JSRuntime.InvokeVoidAsync("logValue", "timevalue", Value);
+                ValueChanged.InvokeAsync(Value);
+                OnValueChangedAction(Value);
+            }
+            else
+            {
+                Value = null;
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //SetDateTimeFormat();
+        await base.OnInitializedAsync();
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            if (Validator.HasRequiredValidationError(_resource, Value != null))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (Value != null)
+            {
+                ValidateDateTimeRange();
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+
+    private void ValidateDateTimeRange()
+    {
+        switch (FieldType)
+        {
+            case FieldTypes.TimeControl:
+                if (_time.HasValue && (_time?.Hours < _resource.MinLength || _time?.Hours > _resource.MaxLength))
+                {
+                    DateTime date = DateTime.UtcNow.Date;
+                    var mindateTimeOffset = new DateTimeOffset(date.AddHours(_resource.MinLength));
+                    var maxdateTimeOffset = new DateTimeOffset(date.AddHours(_resource.MaxLength));
+                    ErrorMessage = string.Format("Time should be between {0} to {1}"
+                        , GenericMethods.GetDateTimeBasedOnFormatString(mindateTimeOffset, _format)
+                        , GenericMethods.GetDateTimeBasedOnFormatString(maxdateTimeOffset, _format));
+                }
+                break;
+            case FieldTypes.DateControl:
+                if (_dateTime.HasValue && (_dateTime?.Date < _minDate.Date || _dateTime?.Date > _maxDate.Date))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , GetResourceValue(ResourceConstants.R_RANGE_VALUE_VALIDATION_KEY)
+                        , GenericMethods.GetDateTimeBasedOnFormatString(_minDate.Date, _format)
+                        , GenericMethods.GetDateTimeBasedOnFormatString(_maxDate.Date, _format));
+                }
+                break;
+            case FieldTypes.DateTimeControl:
+                if (_dateTime.HasValue)
+                {
+                    // var currentDateTime = DateTime.Now;
+                    // var _minDateTime = new DateTime(_minDate.Year, _minDate.Month, _minDate.Day, currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second);
+                    // var _maxDateTime = new DateTime(_maxDate.Year, _maxDate.Month, _maxDate.Day, currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second);
+                    if (_dateTime < _minDate.DateTime || _dateTime > _maxDate.DateTime)
+                    {
+                        ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                            , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_VALUE_VALIDATION_KEY)
+                            , GenericMethods.GetDateTimeBasedOnFormatString(_minDate, _format)
+                            , GenericMethods.GetDateTimeBasedOnFormatString(_maxDate, _format));
+                    }
+                }
+                break;
+        }
+    }
+
+    private void OpenTimer()
+    {
+        TimePicker?.Open();
+    }
+
+    private void AddTimeToDatetime()
+    {
+        if (_time != null)
+        {
+            TimeSpan timeSpan = _time ?? TimeSpan.Zero;
+            _dateTime?.Add(timeSpan);
+            var currentDT = AppState.webEssentials.ConvertToLocalTime(DateTimeOffset.UtcNow);
+            JSRuntime.InvokeVoidAsync("logValue", "Valuebefore", _dateTime.Value);
+            Value = new DateTimeOffset(_dateTime.Value, currentDT.Offset);
+            JSRuntime.InvokeVoidAsync("logValue", "Value", Value);
+            ValueChanged.InvokeAsync(Value);
+            OnValueChangedAction(Value);
+        }
+    }
+
+    private string GetDateTimeFormat()
+    {
+        LibSettings.TryGetDateFormatSettings(AppState.MasterData?.Settings, out string dayFormat, out string monthFormat, out string yearFormat);
+        switch (FieldType)
+        {
+            case FieldTypes.DateControl:
+                _format = GenericMethods.GetDateTimeFormat(DateTimeType.Date, dayFormat, monthFormat, yearFormat);
+                break;
+            case FieldTypes.TimeControl:
+                _format = GenericMethods.GetDateTimeFormat(DateTimeType.Time, dayFormat, monthFormat, yearFormat);
+                if (AppState.AppDirection == Constants.RTL_DIRECTION_CONSTANT)
+                {
+                    _format = string.Concat(Enumerable.Reverse(_format));
+                }
+                break;
+            case FieldTypes.DateTimeControl:
+            default:
+                _format = GenericMethods.GetDateTimeFormat(DateTimeType.DateTime, dayFormat, monthFormat, yearFormat);
+                break;
+        }
+        return _format;
+    }
+}

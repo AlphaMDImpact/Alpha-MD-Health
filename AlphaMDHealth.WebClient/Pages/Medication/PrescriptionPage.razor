@@ -1,0 +1,41 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PrescriptionView"
+@if (_isDataFetched)
+{
+    <BasePage @bind-ShowDetailPage=@ShowDetailPage
+              @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageResources=@_prescriptionData.Resources
+              RegisterComp=@RegisterControl
+              ShowPageTitle=@(_prescriptionData.ErrCode != ErrorCode.OK)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PrescriptionView.ToString())
+              ApplyStructure=@(_prescriptionData.RecordCount < 1 && !_prescriptionData.IsMedicalHistory)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PatientMedicationPage PatientMedicationID="_clickedMedicationID" OnClose=@PopUpClosedEventCallbackAsync />
+            }
+            else
+            {
+                @if (_prescriptionData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_prescriptionData.Medications
+                                     DataSourceType=@PatientMedicationModel
+                                     ShowAddButton=@((_prescriptionData.RecordCount == 0) && LibPermissions.HasPermission(_prescriptionData.FeaturePermissions, AppPermissions.PatientMedicationAddEdit.ToString()))
+                                     ShowSearch=@(_prescriptionData.RecordCount == 0)
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowViewAll=@(_prescriptionData.RecordCount > 0)
+                                     TableHeader=@(LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PrescriptionView.ToString()))
+                                     OnValueChanged=@((e)=>OnPrescriptionAddEdit((PatientMedicationModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_prescriptionData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

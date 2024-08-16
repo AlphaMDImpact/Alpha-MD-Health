@@ -1,0 +1,26 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error 
+              @bind-Success=@Success
+              CurrentPage =@this
+              IsPopup=@true 
+              ShowPopup=@true 
+              ShowClose=@true 
+              PageResources=@ReadingData.Resources 
+              PopupPagePostion=@PopupPosition.Center
+              PageTitle=@string.Format(LibResources.GetResourceValueByKey(ReadingData.Resources, ResourceConstants.R_FOOD_SERACH_RESULT_TEXT_KEY), ReadingData.ErrorDescription)
+              ShowPopupChanged=@OnCloseIconClicked>
+
+          <AmhTableControl ShowSearch=@true                          
+                           ShowAddButton=@false
+                           DataSourceType=@OptionModel
+                           ShowPagination=@false
+                           DataSource=@ReadingData.SummaryDataOptions
+                           TableHeader=@ReadingData.ErrorDescription
+                           TableStructure=@GenerateTableStructure()
+                           OnValueChanged=@(e => OnOptionSelectedAsync((OptionModel)e)) />
+    </BasePage>
+}

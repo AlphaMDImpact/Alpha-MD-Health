@@ -1,0 +1,36 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/BranchesView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyCard=true
+              ShowPageTitle=@(_branchData.ErrCode != ErrorCode.OK)
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_branchData.Resources>
+        @if (ShowDetailPage)
+        {
+            <BranchPage BranchId=@_branchID ShowDetailPage=true IsAccordion=true OnClose=@OnAddEditClosed />
+        }
+        else
+        {
+            @if (_branchData.ErrCode == ErrorCode.OK)
+            {
+                <AmhTableControl TableHeader=@AppState.RouterData.SelectedRoute?.FeatureText
+                                 DataSource=@_branchData.Branches
+                                 DataSourceType=@BranchModel
+                                 TableStructure=@GenerateTableStructure()
+                                 ShowAddButton=@LibPermissions.HasPermission(_branchData.FeaturePermissions, AppPermissions.BranchAddEdit.ToString())
+                                 OnValueChanged=@(e=>OnAddEditClick((BranchModel)e)) />
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_branchData.ErrCode.ToString() />
+            }
+        }
+    </BasePage>
+}

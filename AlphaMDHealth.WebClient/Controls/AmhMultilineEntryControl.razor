@@ -1,0 +1,108 @@
+﻿@using System.Globalization;
+@using MudBlazor;
+@using Microsoft.Fast.Components.FluentUI;
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <MudTextField @bind-Value=@Value
+                      Immediate="true"
+                      Margin=@Margin.Dense
+                      MaxLength=@((int)_resource?.MaxLength)
+                      Class=@AppState.ClassName($"input-primary input-primary-mobile-rich {Class} set-font-size")
+                      InputType=@InputType.Text
+                      Variant=@Variant.Outlined
+                      Placeholder=@_resource?.PlaceHolderValue
+                      Lines=@(MaxLine < 2 ? 2 : MaxLine)
+                      Disabled=@(!IsControlEnabled)>
+        </MudTextField>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private string _value;
+    /// <summary>
+    /// Control value represents text
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(_value);
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Max Line
+    /// </summary>
+    [Parameter]
+    public int MaxLine { get; set; }
+
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        OnControlValidate();
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+
+    private void OnControlValidate()
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            if (Validator.HasRequiredValidationError(_resource, !string.IsNullOrWhiteSpace(_value)))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (!string.IsNullOrWhiteSpace(_value))
+            {
+                if (Validator.HasMinLengthValidationError(_resource, _value.Length))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_MINIMUM_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength);
+                }
+                else if (Validator.HasRangeValidationError(_resource, _value.Length))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength, _resource.MaxLength);
+                }
+            }
+        }
+    }
+}

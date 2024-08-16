@@ -1,0 +1,51 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/OrganisationContactsView";
+@page "/BranchContactsView";
+@page "/UserContactsView";
+@page "/PatientContactsView";
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyCard=true
+              ApplyStructure=@(Parameters?.Count < 1)
+              PageResources=@_contactData.Resources
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_contactData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <ContactPage ContactID=@_contactID
+                             OnClose=@OnAddEditClosedAsync
+                             ShowDetailPage=true
+                             IsAccordion=true
+                             ContactType=@_contactData.ContactType
+                             UserID=@(_contactData.ContactType == ContactType.Patient || _contactData.ContactType == ContactType.User ? AppState.UserDetails.User.UserID : 0) />
+            }
+            else
+            {
+                @if (_contactData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, GetTableHeader())
+                                     DataSource=@_contactData.Contacts
+                                     DataSourceType=@ContactModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowViewAll=@(_contactData.RecordCount > 0)
+                                     ShowSearch=@(_contactData.RecordCount < 1)
+                                     ShowPagination=@(_contactData.RecordCount < 1)
+                                     ShowAddButton=@(_contactData.RecordCount < 1 && LibPermissions.HasPermission(_contactData.FeaturePermissions, CheckAddEditPermission()))
+                                     OnValueChanged=@(e => OnAddEditClick((ContactModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_contactData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

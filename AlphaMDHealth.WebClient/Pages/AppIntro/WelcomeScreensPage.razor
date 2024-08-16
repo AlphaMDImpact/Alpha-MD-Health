@@ -1,0 +1,44 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/WelcomeScreensView"
+@page "/WelcomeScreensView/{appintroid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_appIntroData.ErrCode != ErrorCode.OK)
+              ApplyStructure=@(_appIntroData.RecordCount == 0)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_appIntroData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <WelcomeScreenPage AppIntroID=@_appIntroID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_appIntroData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@AppState.RouterData.SelectedRoute.FeatureText
+                                     DataSource=@_appIntroData.AppIntros
+                                     DataSourceType=@AppIntroModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowViewAll=@(_appIntroData.RecordCount > 0)
+                                     OnViewClicked=@OnViewAllClickedAsync
+                                     ShowSearch=@(_appIntroData.RecordCount < 1)
+                                     OnValueChanged=@((e) => OnAddEditClick((AppIntroModel)e))
+                                     ShowAddButton=@( (_appIntroData.RecordCount < 1) && LibPermissions.HasPermission(_appIntroData.FeaturePermissions, AppPermissions.WelcomeScreenAddEdit.ToString()))
+                                     ShowPagination=@(_appIntroData.RecordCount < 1) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_appIntroData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

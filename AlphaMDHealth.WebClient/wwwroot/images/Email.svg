@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="12px" viewBox="0 0 16 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>Shape</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Welcome" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Sign-in" transform="translate(-746.000000, -419.000000)" fill="#212121" fill-rule="nonzero">
+            <g transform="translate(191.000000, 168.000000)" id="Content">
+                <g transform="translate(360.000000, 0.000000)">
+                    <g transform="translate(180.000000, 149.000000)">
+                        <g id="Input-/-Field-/-Large-/-With-Label" transform="translate(0.000000, 64.000000)">
+                            <g id="Input-/-Field-/-Medium-/-Right-Icon" transform="translate(0.000000, 24.000000)">
+                                <path d="M16.2307692,14 C16.0674113,14 15.9116082,14.0324513 15.7692308,14.0897436 L22.5705128,20.3782215 C22.8623426,20.6480267 23.1241662,20.6482113 23.4166667,20.3782215 L30.2307692,14.0897436 C30.0883918,14.0324513 29.9325887,14 29.7692308,14 L16.2307692,14 Z M15.0128205,15.0641026 C15.0056226,15.1181538 15,15.1746872 15,15.2307692 L15,23.84616 C15,24.5280062 15.5489313,25.0769292 16.2307692,25.0769292 L29.7692308,25.0769292 C30.4510687,25.0769292 31,24.5280062 31,23.84616 L31,15.2307692 C31,15.1746872 30.9943795,15.1181538 30.9871795,15.0641026 L24.2564103,21.2820574 C23.5505723,21.9336062 22.4365395,21.9346318 21.7307692,21.2820574 L15.0128205,15.0641026 Z" id="Shape"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

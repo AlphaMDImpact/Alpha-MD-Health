@@ -1,0 +1,57 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ContentPreviewPage/{pageid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@_pageTitle
+              PageResources=@_contentPage.Resources
+              ApplyFixedFooter=@(IsPatientMobileView?false: true)
+              OnClose=@OnClose
+              ActionButtons=@_actionButtons>
+        <ChildContent>
+            <div class=@(IsPatientMobileView?"card p-4":"")>
+                @if (_contentPage.Page.IsLink || _contentPage.Page.IsPdf)
+                {
+                    <div class="embed-responsive embed-responsive-16by9">
+                        @if (_contentPage.Page.IsLink)
+                        {
+                            <embed class="embed-responsive-item"
+                                   style="height:80vh; width: 100%;"
+                                   src="@_content.Value"
+                                   allowfullscreen>
+                        }
+                        else
+                        {
+                            <embed class="embed-responsive-item"
+                                   style="height:80vh; width: 100%;"
+                                   src="@_contentPage.Page.PDFName"
+                                   allowfullscreen>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p>@_content</p>
+                }
+            </div>
+        </ChildContent>
+        <PageFooter>
+            @if (!string.IsNullOrWhiteSpace(PatientEducationIDs)
+           && AppState.RouterData.SelectedRoute.Page == AppPermissions.MyEducationsView.ToString()
+           && EducationStatus != PatientEducationStatus.Completed.ToString())
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_READ_BUTTON_TEXT_KEY
+                                  OnValueChanged=@OnReadActionClicked />
+            }
+            @if (!IsPatientMobileView)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_OK_ACTION_KEY
+                                  OnValueChanged=@OnOkayClicked />
+            }
+        </PageFooter>
+    </BasePage>
+}

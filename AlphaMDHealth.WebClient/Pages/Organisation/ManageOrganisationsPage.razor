@@ -1,0 +1,31 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ManageOrganisationsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_organizationData.Resources
+              ApplyStructure=@(!ShowDetailPage)
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_organizationData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (_organizationData.ErrCode == ErrorCode.OK)
+            {
+                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ManageOrganisationsView.ToString())
+                                 DataSource=@_organizationData.Organisations
+                                 DataSourceType=@OrganisationModel
+                                 TableStructure=@GenerateTableStructure()
+                                 OnValueChanged=@((e) => OnAddEditClickAsync((OrganisationModel)e))
+                                 ShowAddButton=@LibPermissions.HasPermission(_organizationData.FeaturePermissions, AppPermissions.OrganisationAddEdit.ToString()) />
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_organizationData.ErrCode.ToString() />
+            }
+        </ChildContent>
+    </BasePage>
+}

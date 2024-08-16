@@ -1,0 +1,35 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@inject IJSRuntime JSRuntime
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              OnClose=@OnClose
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.MedicalHistoryShare.ToString())
+              PageOperation=@PageOperationType.Add
+              PageResources=@_medicationData?.Resources
+              ApplyCard=true
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhEntryControl @bind-Value=@_doctorName ResourceKey=@ResourceConstants.R_NAME_KEY
+                             RegexExpression=@LibSettings.GetSettingValueByKey(_medicationData.Settings, SettingsConstants.S_ALPHA_REGEX_KEY) />
+
+            <AmhMobileNumberControl @bind-Value=@_mobileNumber CountryCodes=@_medicationData.CountryCodes ResourceKey=@ResourceConstants.R_PHONE_NUMBER_KEY />
+
+            <AmhEntryControl @bind-Value=@_emailAddress Icon=@string.Concat(string.Empty,Constants.PIPE_SEPERATOR,
+                         ImageConstants.I_EMAIL_ICON_SVG) ResourceKey=@ResourceConstants.R_EMAIL_KEY />
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_MENU_ACTION_SHARE_KEY
+                              OnValueChanged=@OnSendButtonClickedAsync />
+
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=OnCanceledClickAsync />
+        </PageFooter>
+    </BasePage>
+}

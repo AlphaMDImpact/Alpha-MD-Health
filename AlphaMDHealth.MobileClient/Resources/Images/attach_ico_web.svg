@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40px" height="40px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Attach-icon-web</title>
+    <g id="Welcome" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Provider-Chats" transform="translate(-707.000000, -1478.000000)">
+            <g id="Chat-box" transform="translate(320.000000, 228.000000)">
+                <g id="Type" transform="translate(372.000000, 1240.000000)">
+                    <g id="Attach-icon-web" transform="translate(15.000000, 10.000000)">
+                        <rect id="Rectangle" fill="#FAFAFA" x="0" y="0" width="40" height="40" rx="4"></rect>
+                        <g id="Icons" transform="translate(12.666667, 12.666667)" fill="#1A051D" fill-rule="nonzero">
+                            <path d="M7.33333333,0.666666667 C8.02368927,0.666666667 8.58333333,1.17701566 8.58333333,1.80656304 L8.58266667,6.08266667 L12.8601036,6.08333333 C13.489651,6.08333333 14,6.6429774 14,7.33333333 C14,8.02368927 13.489651,8.58333333 12.8601036,8.58333333 L8.58266667,8.58266667 L8.58333333,12.8601036 C8.58333333,13.489651 8.02368927,14 7.33333333,14 C6.6429774,14 6.08333333,13.489651 6.08333333,12.8601036 L6.08266667,8.58266667 L1.80656304,8.58333333 C1.17701566,8.58333333 0.666666667,8.02368927 0.666666667,7.33333333 C0.666666667,6.6429774 1.17701566,6.08333333 1.80656304,6.08333333 L6.08266667,6.08266667 L6.08333333,1.80656304 C6.08333333,1.17701566 6.6429774,0.666666667 7.33333333,0.666666667 Z" id="Combined-Shape"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

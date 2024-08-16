@@ -1,0 +1,42 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@inherits AmhBaseControl
+
+<AmhBaseControl ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                ErrorMessage=@ErrorMessage
+                IsValid=@IsValid>
+    <ChildControl>
+        <RadzenAccordion>
+
+            <Items>
+                @foreach(var timelines in Options){
+                <RadzenAccordionItem Text=@timelines.GroupName>
+                        <AmhTimelineControl FieldType=@FieldTypes.VerticalTimelineControl Options=@GetTimelineList()></AmhTimelineControl>
+                </RadzenAccordionItem>
+                }
+                
+            </Items>
+
+        </RadzenAccordion>
+
+    </ChildControl>
+</AmhBaseControl>
+@code {
+    AmhTimelineControl timeline;
+
+    public List<OptionModel> GetTimelineList()
+    {
+        return new List<OptionModel>
+     {
+         new OptionModel { OptionID = 1,GroupName="NOV 2022" ,OptionText="Celebrating the official release of Radzen Blazor Studio." ,  ParentOptionText =ImageConstants.I_USER_ID_SVG},
+         new OptionModel { OptionID = 1,GroupName="SEP 2022" ,OptionText="Celebrating the official release of Radzen Blazor Studio." },
+         new OptionModel { OptionID = 1,GroupName="OCT 2022" ,OptionText="Celebrating the official release of Radzen Blazor Studio." ,  ParentOptionText =ImageConstants.I_USER_ID_SVG},
+     };
+    }
+}

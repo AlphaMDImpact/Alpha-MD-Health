@@ -1,0 +1,140 @@
+﻿@using Radzen
+@using Radzen.Blazor
+
+@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <RadzenRow id=@string.Concat(ResourceKey, FieldType, "chart")
+                   class=@AppState.ClassName("amh-chart")
+                   Gap="0rem"
+                   AlignItems=@AlignItems.Center>
+            <RadzenColumn Size="1">
+                <AmhImageControl FieldType=@FieldTypes.CircleImageControl
+                                 ImageHeight=@AppImageSize.ImageNoSize
+                                 ImageWidth=@AppImageSize.ImageNoSize
+                                 Icon=@ImageConstants.I_PREVIOUS_ARROW_PNG
+                                 IsControlEnabled=@IsPrevEnabled()
+                                 OnValueChanged=@OnPrevClick />
+            </RadzenColumn>
+            <RadzenColumn>
+                @if (Value.StartDate.HasValue && Value.EndDate.HasValue)
+                {
+                    <AmhLabelControl Value=@GetDateTimeLabelText() />
+                }
+                @if (Value.ShowGraph)
+                {
+                    <RadzenChart @bind-Value=@_value>
+                        @if (Value.Lines?.Count > 0)
+                        {
+                            @switch (FieldType)
+                            {
+                                case FieldTypes.BarGraphControl:
+                                    foreach (var graphLineModel in Value.Lines)
+                                    {
+                                        <RadzenColumnSeries Data=@graphLineModel.ChartData
+                                                            Title=@graphLineModel.LineName
+                                                            CategoryProperty=@(nameof(DataPointModel.DateTime))
+                                                            ValueProperty=@(nameof(DataPointModel.Value))
+                                                            RenderingOrder="100">
+                                            <TooltipTemplate Context="data">
+                                                <div>
+                                                    <span>@graphLineModel.LineName : @data.Value</span>
+                                                </div>
+                                                <div>
+                                                    <span>@GenericMethods.GetDateTimeBasedOnFormatString(GenericMethods.GetDateTimeAccordingEssentials(data.DateTime), _datetimeFormat)</span>
+                                                </div>
+                                            </TooltipTemplate>
+                                        </RadzenColumnSeries>
+                                    }
+                                    break;
+                                case FieldTypes.LineGraphControl:
+                                    foreach (var graphLineModel in Value.Lines)
+                                    {
+                                        <RadzenLineSeries Smooth=@true
+                                                          Data=@graphLineModel.ChartData
+                                                          Title=@graphLineModel.LineName
+                                                          CategoryProperty=@(nameof(DataPointModel.DateTime))
+                                                          ValueProperty=@(nameof(DataPointModel.Value))
+                                                          Stroke=@graphLineModel.LineColor
+                                                          RenderingOrder="100">
+                                            <ChildContent>
+                                                <RadzenMarkers MarkerType="MarkerType.Circle" />
+                                            </ChildContent>
+                                            <TooltipTemplate Context="data">
+                                                <div>
+                                                    <span>@graphLineModel.LineName : @data.Value</span>
+                                                </div>
+                                                <div>
+                                                    <span>@GenericMethods.GetDateTimeBasedOnFormatString(GenericMethods.GetDateTimeAccordingEssentials(data.DateTime), _datetimeFormat)</span>
+                                                </div>
+                                            </TooltipTemplate>
+                                        </RadzenLineSeries>
+                                    }
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            <AmhMessageControl FieldType=@FieldTypes.MessageControl ResourceKey=@ResourceConstants.R_GRAPH_DATA_NOT_FOUND_KEY />
+                        }
+                        @if (bands?.Count > 0)
+                        {
+                            @foreach (var band in bands)
+                            {
+                                <RadzenAreaSeries Data=@band.Ranges
+                                                  Title=" "
+                                                  CategoryProperty=@(nameof(BandModel.BandDate))
+                                                  ValueProperty=@(nameof(BandModel.Value))
+                                                  Fill=@band.Color
+                                                  Stroke=@band.Color
+                                                  RenderingOrder="1">
+                                    <ChildContent>
+                                        <RadzenSeriesMedianLine Stroke=@band.Color
+                                                                LineType=@LineType.Solid
+                                                                TooltipTemplate=@((data) => builder => {ApplyTooltip(builder, band);}) />
+                                        <RadzenSeriesModeLine Stroke=@band.Color
+                                                              LineType=@LineType.Solid
+                                                              TooltipTemplate=@((data) => builder => {ApplyTooltip(builder, band);}) />
+                                    </ChildContent>
+                                </RadzenAreaSeries>
+                            }
+                        }
+                        <RadzenCategoryAxis Padding="10"
+                                            Max=@Value.EndDate
+                                            Min=@Value.StartDate
+                                            Formatter="FormatCategoryAxis">
+                            <ChildContent>
+                                <RadzenAxisTitle Text="" />
+                                <RadzenGridLines Visible="true" />
+                            </ChildContent>
+                        </RadzenCategoryAxis>
+
+                        <RadzenValueAxis>
+                            <RadzenGridLines Visible="true" />
+                            <RadzenAxisTitle Text="" />
+                        </RadzenValueAxis>
+                        <RadzenLegend Position=@LegendPosition.Bottom Visible=@false />
+                    </RadzenChart>
+                }
+            </RadzenColumn>
+            <RadzenColumn Size="1">
+                <AmhImageControl FieldType=@FieldTypes.CircleImageControl
+                                 ImageHeight=@AppImageSize.ImageNoSize
+                                 ImageWidth=@AppImageSize.ImageNoSize
+                                 Icon=@ImageConstants.I_NEXT_ARROW_PNG
+                                 IsControlEnabled=@IsNextEnabled()
+                                 OnValueChanged=@OnNextClick />
+            </RadzenColumn>
+        </RadzenRow>
+    </ChildControl>
+</AmhBaseControl>

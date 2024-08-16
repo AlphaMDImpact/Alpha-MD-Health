@@ -1,0 +1,145 @@
+﻿@using MudBlazor;
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <MudRadioGroup @bind-SelectedOption=@_selectedOptions Class="ms-1">
+            @switch (FieldType)
+            {
+                case FieldTypes.HorizontalRadioButtonControl:
+                    foreach (var item in Options)
+                    {
+                        <MudRadio Option=@item.OptionText
+                                  ChildContent=@((builder) => builder.AddContent(0, item.OptionText))
+                                  Disabled=@(item.IsDisabled || (!IsControlEnabled)) />
+                    }
+                    break;
+                case FieldTypes.VerticalRadioButtonControl:
+                default:
+                    <ul>
+                        @foreach (var item in Options)
+                        {
+                            <li>
+                                <MudRadio Option=@item.OptionText
+                                          ChildContent=@((builder) => builder.AddContent(0, item.OptionText))
+                                          Disabled=@(item.IsDisabled || (!IsControlEnabled)) />
+                            </li>
+                        }
+                    </ul>
+                    break;
+            }
+        </MudRadioGroup>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private string _value;
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(value);
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private string _selectedOptions
+    {
+        get
+        {
+            var value = string.Empty;
+            if (_value != null)
+            {
+                value = Options?.FirstOrDefault(x => x.OptionID.ToString() == _value)?.OptionText ?? string.Empty;
+            }
+            // if (string.IsNullOrWhiteSpace(value))
+            // {
+            //     value = Options?.FirstOrDefault(x => x.IsSelected)?.OptionText ?? string.Empty;
+            // }
+            return value;
+        }
+        set
+        {
+            var val = string.Empty;
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                foreach (var option in Options)
+                {
+                    option.IsSelected = option.OptionText == value;
+                    if (option.IsSelected)
+                    {
+                        val = option.OptionID.ToString();
+                    }
+                }
+            }
+            Value = val;
+        }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        SetControlValue();
+        return base.OnInitializedAsync();
+    }
+
+    private void SetControlValue()
+    {
+        long selectedID = 0;
+        if (Options?.Count > 0)
+        {
+            selectedID = FetchOptionIDsFromValue(Value)?.FirstOrDefault() ?? 0;
+            if (selectedID > 0)
+            {
+                return;
+            }
+            else
+            {
+                selectedID = Options.FirstOrDefault(item => item.IsSelected)?.OptionID ?? 0;
+            }
+        }
+        Value = selectedID > 0 ? selectedID.ToString() : string.Empty;
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    ///</summary>
+    ///<param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null
+        && Validator.HasRequiredValidationError(_resource, !string.IsNullOrWhiteSpace(_selectedOptions)))
+        {
+            ErrorMessage = GetRequiredResourceValue();
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+}

@@ -1,0 +1,69 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/LoginView"
+
+@if (_isDataFetched && _showPage)
+{
+    <BasePage @bind-Error=@Error @bind-Success=@Success
+              CurrentPage=@this
+              PageResources=@_authData.Resources
+              RegisterComp=@RegisterControl>
+
+        <AmhEntryControl @bind-Value=@_authData.AuthenticationData.UserName
+                         Icon=@ImageConstants.I_USER_ID_SVG
+                         ResourceKey=@ResourceConstants.R_USER_NAME_KEY />
+
+        <AmhEntryControl @bind-Value=@_authData.AuthenticationData.AccountPassword
+                         Icon=@ImageConstants.I_PASSWORD_LOCK_ICON
+                         ResourceKey=@ResourceConstants.R_PASSWORD_KEY />
+
+        <AmhCheckBoxListControl ShowHeader=@false
+                                ResourceKey=@ResourceConstants.R_REMEMBER_ME_KEY
+                                Options=@GetRememberMeOption()
+                                Value=@(_authData.AuthenticationData.RememberMe? "1": "")
+                                ValueChanged=@OnRememberMeClicked />
+
+        <AmhButtonControl ResourceKey=@ResourceConstants.R_LOGIN_ACTION_KEY
+                          OnValueChanged=@OnLoginButtonClickAsync />
+
+        <AmhButtonControl ResourceKey=@ResourceConstants.R_FORGOT_PASSWORD_ACTION_KEY
+                          Class="my-2"
+                          OnValueChanged=@OnForgotPasswordLinkClickAsync />
+
+        <AmhHorizontalRuleControl />
+
+        <AmhButtonControl ResourceKey=@ResourceConstants.R_REGISTER_ACTION_KEY
+                          Class="my-2 mb-8"
+                          OnValueChanged=@OnRegisterButtonClickAsync />
+                                      
+        @if (_showLockPopup)
+        {
+            <BasePage CurrentPage=@this
+                      PageResources=@_authData.Resources
+                      IsPopup="@_showLockPopup"
+                      ShowPopup="@_showLockPopup"
+                      ShowClose="@false"
+                      ShowPageTitle="@false">
+
+                <AmhImageControl Class="justify-content-center w-available text-center"
+                                 FieldType=@FieldTypes.ImageControl
+                                 ImageHeight=@AppImageSize.ImageSizeXXXL
+                                 ImageWidth=@AppImageSize.ImageSizeXXXL
+                                 Icon=@LibResources.GetResourceKeyDescByKey(_authData.Resources, ErrorCode.AccountLockout.ToString(), AppState.SelectedLanguageID) />
+
+                <AmhLabelControl FieldType=@FieldTypes.PrimaryLargeHVCenterBoldLabelControl
+                                 ResourceKey=@ErrorCode.AccountLockout.ToString() />
+
+                @if (_popupContent?.Length > 0)
+                {
+                    <AmhLabelControl FieldType=@FieldTypes.HtmlPrimaryCenterLabelControl
+                                     Value=@_popupContent[0] />
+                    <AmhLabelControl FieldType=@FieldTypes.HtmlPrimaryCenterLabelControl
+                                     Value=@_timerString />
+                    <AmhLabelControl FieldType=@FieldTypes.HtmlPrimaryCenterLabelControl
+                                     Value=@_popupContent[1] />
+                }
+            </BasePage>
+        }
+    </BasePage>
+}

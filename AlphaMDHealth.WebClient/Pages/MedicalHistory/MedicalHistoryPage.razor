@@ -1,0 +1,161 @@
+﻿@namespace AlphaMDHealth.WebClient
+@using Radzen
+@using Radzen.Blazor
+@using System.Globalization
+@inherits BasePage
+@inject IJSRuntime JSRuntime
+@page "/MedicalHistoryView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_medicalHistoryData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                @* // Render Add-Edit page's*@
+                @if (_selectedFeature != default)
+                {
+                    switch (_selectedFeature)
+                    {
+                        case AppPermissions.PatientReadingAddEdit:
+                            <PatientReadingPage ShowCategory=@true PatientReadingID=@Guid.Empty OnClose=@AddEditClosedReadingEventCallback />
+                            break;
+                        case AppPermissions.PatientProviderNoteAddEdit:
+                            <PatientProviderNotePage IsAccordion=true ProviderNoteID=@Guid.Empty OnClose=@AddEditClosedWithIsDataUpdatedEventCallback />
+                            break;
+                        case AppPermissions.PatientAssignTaskView:
+                            <AssignTaskPage IsAccordion=true OnClose=@AddEditClosedWithIsDataUpdatedEventCallback />
+                            break;
+                        case AppPermissions.PatientFileAddEdit:
+                            <PatientFilePage IsAccordion=true FileID=@Guid.Empty OnClose=@AddEditClosedWithIsDataUpdatedEventCallback />
+                            break;
+                        case AppPermissions.PatientMedicationAddEdit:
+                            <PatientMedicationPage ApplyFixedFooter=true IsAccordion=true PatientMedicationID=@Guid.Empty OnClose=@AddEditClosedWithIsDataUpdatedEventCallback />
+                            break;
+                        case AppPermissions.PatientEducationAddEdit:
+                            <AssignEducationPage IsAccordion=true OnClose=@AddEditClosedWithIsDataUpdatedEventCallback />
+                            break;
+                        case AppPermissions.PatientTrackerAddEdit:
+                            <PatientTrackerPage IsAccordion=true PatientTrackerID=@Guid.Empty OnClose=@AddEditClosedWithIsDataUpdatedEventCallback />
+                            break;
+                        case AppPermissions.MedicalHistoryShare:
+                            // Render Share Medical history
+                            <ShareMedicalHistory IsAccordion=true MedicalHistoryData=@_shareMedicalHistoryData OnClose=@ShareAddEditClosedEventCallback />
+                            break;
+                    }
+                }
+            }
+            else
+            {
+        <div class="mt-2">
+            @if (_medicalHistoryData.ErrCode == ErrorCode.OK && GenericMethods.IsListNotEmpty(_accordianOptions))
+            {
+
+                <AmhAccordianControl @bind-Value=@_selectedOption Options=@_accordianOptions OnValueChanged=@OnAccordianContentChanged>
+                    <AccordionContent>
+                        @if (selectedView != null)
+                        {
+                            @if (!string.IsNullOrWhiteSpace(selectedView?.ParentOptionText))
+                            {
+                                var historyData = _medicalHistoryData?.MedicalHistory?.FirstOrDefault(x => x.HistoryFromDate == selectedView?.ParentOptionText);
+                                if (historyData != null)
+                                {
+                                    @if (GenericMethods.IsListNotEmpty(historyData?.MedicalHistoryViews) && historyData.MedicalHistoryViews.Any(x => !x.ShowAllData && x.HasData))
+                                    {
+                                        <AmhHeaderControl>
+                                            <ActionSection>
+                                                @if (_isPrintAllowed)
+                                                {
+                                                    <AmhButtonControl ResourceKey=@ResourceConstants.R_PRINT_KEY OnValueChanged=@(e => OnPrintClicked(historyData)) />
+                                                }
+                                                @if (_isShareAllowed)
+                                                {
+                                                    <AmhButtonControl ResourceKey=@ResourceConstants.R_MENU_ACTION_SHARE_KEY OnValueChanged=@(e => OnShareClicked(historyData)) />
+                                                }
+                                            </ActionSection>
+                                        </AmhHeaderControl>
+
+                                        <RadzenTimeline LinePosition=@LinePosition.Start Orientation=@Orientation.Vertical AlignItems=@AlignItems.Start>
+                                            <Items>
+                                                @foreach (var options in GetHistoryOptions(historyData))
+                                                {
+                                                    if (historyData.MedicalHistoryViews[(int)options.OptionID].HasData)
+                                                    {
+                                                        @if (!string.IsNullOrWhiteSpace(options.OptionText))
+                                                        {
+                                                            <RadzenTimelineItem PointStyle=PointStyle.Primary
+                                                                                PointShadow="3"
+                                                                                PointVariant=Variant.Filled
+                                                                                PointSize=PointSize.Medium>
+                                                                <ChildContent>
+                                                                    <ViewMapper FeatureCode=@options.GroupName
+                                                                                FeatureText=@options.OptionText
+                                                                                Parameters=@GetViewParameters(historyData.MedicalHistoryViews[(int)options.OptionID], historyData)
+                                                                                PageData=@historyData.MedicalHistoryViews[(int)options.OptionID].PageData
+                                                                                IsDashboardPage=@false />
+
+                                                                </ChildContent>
+                                                            </RadzenTimelineItem>
+                                                        }
+                                                    }
+                                                }
+                                            </Items>
+                                        </RadzenTimeline>
+                                    }
+                                }
+                            }
+                            else @if (!string.IsNullOrWhiteSpace(selectedView?.GroupName))
+                       {
+                           //Render Medical history views for all date range(MedicalHistoryFixedFeatures)
+                           var view = _medicalHistoryData?.AllMedicalHistoryViews?[Convert.ToInt32(selectedView?.OptionID, CultureInfo.InvariantCulture)];
+                           @if(view != null){
+                                            <div class="card app-background-color">
+                                                <ViewMapper FeatureCode=@view.FeatureCode.ToString()
+                                                            FeatureText=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, view.FeatureCode.ToString())
+                                                            Parameters=@GetViewParameters(view, null)
+                                                            PageData=@view.PageData
+                                                            IsDashboardPage=@false />
+                                            </div>
+                           }
+                       
+                    }
+                        }
+                    </AccordionContent>
+                </AmhAccordianControl>
+            }
+            else
+            {
+                <AmhMessageControl FieldType=FieldTypes.MessageControl
+                                   ResourceKey=@(_medicalHistoryData.ErrCode == ErrorCode.OK ? ResourceConstants.R_NO_DATA_FOUND_KEY : _medicalHistoryData.ErrCode.ToString()) />
+            }
+        </div>
+                    }
+                </ChildContent>
+        <PageHeader>
+            @if (!ShowDetailPage)
+            {
+                @if (_isPrintAllowed)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_PRINT_KEY
+                                      OnValueChanged=@(e =>OnPrintClicked(new MedicalHistoryModel())) />
+                }
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_REFRESH_ACTION_KEY
+                                  OnValueChanged=@OnRefreshClicked />
+                @if (_isShareAllowed)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_MENU_ACTION_SHARE_KEY
+                                      OnValueChanged=@(e =>OnShareClicked(new MedicalHistoryModel())) />
+                }
+                <AmhButtonControl FieldType=@FieldTypes.MenuButtonControl
+                                  ResourceKey=@ResourceConstants.R_MENU_ACTION_ADD_KEY
+                                  Options=@_medicalHistoryData.AddHistoryFor
+                                  OnValueChanged=@OnAddFeatureSelectionChanged />
+            }
+        </PageHeader>
+    </BasePage>
+}

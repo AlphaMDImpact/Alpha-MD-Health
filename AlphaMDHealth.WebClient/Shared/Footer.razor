@@ -1,0 +1,82 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits LayoutComponentBase
+@using AlphaMDHealth.Utility
+@inject IJSRuntime JSRuntime
+
+<div class="bottom-row px-4 d-flex justify-content-between align-items-start padding-vertical-sm padding-horizontal-md">
+    <div class="d-flex justify-content-lg-start align-items-start row w-available margin-clearfix">
+        @if (AppState.MasterData?.Menus != null)
+        {
+            @foreach (var menuItem in AppState.MasterData?.Menus?.Where(x => x.MenuLocation == MenuLocation.Footer).ToList())
+            {
+                <div class="col-xl-4 col-lg-3 col-md-2 col-sm-1 padding-top-sm padding-bottom-xs">
+                    @if (menuItem.PageTypeID == MenuType.Group)
+                    {
+                        if (!string.IsNullOrWhiteSpace(menuItem.PageHeading))
+                        {
+                            <AmhMenuItem Location=@MenuLocation.Footer
+                                            IsTitle="true"
+                                            MenuTitle=@menuItem.PageHeading
+                                            IsSelected=@menuItem.IsActive />
+                        }
+                        var menuGroups = AppState.MasterData?.MenuGroups?.Where(x => x.MenuGroupID == menuItem.TargetID && x.MenuLocation == MenuLocation.Footer)?.ToList();
+                        @if (menuGroups != null)
+                        {
+                            @if (menuGroups.Any(x => x.GroupType == ContentType.Both))
+                            {
+                                @if (!string.IsNullOrWhiteSpace(menuGroups[0].Content))
+                                {
+                                    MarkupString contentData = (MarkupString)menuGroups[0].Content;
+                                    <div>
+                                        @contentData
+                                    </div>
+                                }
+                                @foreach (var menuGroup in menuGroups)
+                                {
+                                    @if (!string.IsNullOrWhiteSpace(menuGroup.PageHeading))
+                                    {
+                                        <AmhMenuItem Location=@MenuLocation.Footer
+                                                        MenuTitle=@menuGroup.PageHeading
+                                                        MenuItem=@menuGroup
+                                                        OnMenuItemSelected=@OnFeatureMenuClickAsync
+                                                        IsSelected=@menuGroup.IsActive />
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                @foreach (var menuGroup in menuGroups)
+                                {
+                                    @if (menuGroup.GroupType == ContentType.Content && !string.IsNullOrWhiteSpace(menuGroup.Content))
+                                    {
+                                        MarkupString contentData = (MarkupString)menuGroup.Content;
+                                        <div>
+                                            @contentData
+                                        </div>
+                                    }
+                                    else if (menuGroup.GroupType == ContentType.Link && !string.IsNullOrWhiteSpace(menuGroup.PageHeading))
+                                    {
+                                        <AmhMenuItem Location=@MenuLocation.Footer
+                                                        MenuTitle=@menuGroup.PageHeading
+                                                        MenuItem=@menuGroup
+                                                        OnMenuItemSelected=@OnFeatureMenuClickAsync
+                                                        IsSelected=@menuGroup.IsActive />
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        <AmhMenuItem Location=@MenuLocation.Footer
+                                        MenuTitle=@menuItem.PageHeading
+                                        MenuItem=@menuItem
+                                        OnMenuItemSelected=@OnFeatureMenuClickAsync
+                                        IsSelected=@menuItem.IsActive />
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>

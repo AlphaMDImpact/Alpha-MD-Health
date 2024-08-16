@@ -1,0 +1,212 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+@inject IJSRuntime JSRuntime
+@typeparam DataSourceType
+@using Microsoft.JSInterop;
+@using MudBlazor
+
+
+@if (IsPatientMobileView)
+{
+    <AmhListViewControl DataSourceType="DataSourceType"
+                        DataSource=@_filteredDataSource
+                        SourceFields=@SourceFieldStructure
+                        IsGroupedData=@IsGroupedData
+                        ShowSearch=@ShowSearch
+                        IsHorizontal=@IsHorizontal
+                        TableHeader=@TableHeader
+                        ShowHeader=@ShowHeader
+                        ShowViewAll=@(NoShowViewAllText ? true:ShowViewAll)
+                        CssClass=@CssClass
+                        IsPatientMobileView=@IsPatientMobileView
+                        ActionButtons=@ActionButtons
+                        ShowMoreGroupedData=@ShowMoreGroupedData
+                        ShouldShowNoRecordFound=@ShouldShowNoRecordFound
+                        OnShowAllClicked=@((e) => OnGroupShowAllClicked((DataSourceType)(e)))
+                        OnValueChanged=@((e) => AddEditButtonClicked((DataSourceType)(e)))
+                        OnDeleteActionClicked=@(e => { LabelClickEvent(e ,""); }) />
+}
+else
+{
+    <AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                    ApplyStructure=@false
+                    ShowHeader=@ShowHeader
+                    ResourceKey=@ResourceKey
+                    FieldType=@FieldType
+                    Icon=@Icon
+                    Source=@Source
+                    IsControlEnabled=@IsControlEnabled
+                    Options=@Options
+                    IsValid=@IsValid>
+        <ChildControl>
+            <AmhHeaderControl Title=@(ShowHeader && !string.IsNullOrWhiteSpace(TableHeader) ? $"{TableHeader} ({(_filteredDataSource == null ? "0" : GetFilteredElements().Count().ToString())})" : string.Empty)
+                              IsPatientMobileView=@false>
+                <ActionSection>
+                    @if (ShowSearch)
+                    {
+                        <AmhEntryControl @bind-Value=@_searchString
+                                         FieldType=@FieldTypes.TextEntryControl
+                                         Icon=@ImageConstants.I_SEARCH_ICON_SVG
+                                         ResourceKey=@ResourceConstants.R_SEARCH_TEXT_KEY
+                                         Style="height:35px;"
+                                         ShowHeader=false />
+                    }
+                    @if (ActionButtons?.Count > 0)
+                    {
+                        @foreach (var action in ActionButtons)
+                        {
+                                <AmhButtonControl FieldType=@FieldType
+                                                  ResourceKey=@action.ButtonResourceKey
+                                                  OnValueChanged=@action.ButtonAction
+                                                  Style=@action.Style
+                                                  Class=@action.ButtonClass />
+                        }
+                    }
+                </ActionSection>
+            </AmhHeaderControl>
+
+            <div class=@AppState.ClassName("col-12 ps-2 mx-1 pe-3")>
+                @if (_filteredDataSource?.Count > 0 && GetFilteredElements().Count() > 0)
+                {
+
+                    <MudDataGrid T="DataSourceType"
+                                 Items=@_filteredDataSource
+                                 RowClick=@RowClicked
+                                 RowStyleFunc=@_rowStyleFunc
+                                 RowClassFunc=@_rowClassFunc
+                                 QuickFilter=@_quickFilter
+                                 Style="padding-left:0px;padding-right:0px;box-shadow: unset;margin-left: -10px;margin-right: -10px;"
+                                 Virtualize=@(ShowPagination ? false : true)
+                                 Height=@(!ShowPagination ? Height : "")
+                                 RowsPerPage=@(ShowPagination ? RowsPerPage :_filteredDataSource.Count() )>
+                        <Columns>
+                            @foreach (var cellItem in TableStructure)
+                            {
+                                @if (!string.IsNullOrWhiteSpace(cellItem.BorderColorDataField))
+                                {
+                                    <TemplateColumn Title=""
+                                                    CellStyleFunc=@(x => "padding:3px;background-color: " + GetDataItemPropertyValueFromContext(x, cellItem.BorderColorDataField))
+                                                    Sortable="false"
+                                                    ShowColumnOptions="false"
+                                                    ShowFilterIcon="false"
+                                                    Resizable="false"
+                                                    Filterable="false"
+                                                    HeaderStyle="padding:3px;">
+                                    </TemplateColumn>
+                                }
+                                else if (!cellItem.IsHidden)
+                                {
+                                    <TemplateColumn Title=@getTitle(cellItem.DataHeader,cellItem.DataHeaderValue)
+                                                    Sortable=@getSortableFlag(cellItem)
+                                                    CellStyle=@getCheckMaxHeaderWidthSize(cellItem.MaxColumnWidthSize,cellItem.ShowRowColumnHeader)
+                                                    HeaderStyle=@getCheckMaxHeaderWidthSize(cellItem.MaxColumnWidthSize,cellItem.ShowRowColumnHeader)
+                                                    SortBy=@(x => GetSortDataItemPropertyValueFromContext(x, cellItem.DataField))
+                                                    Resizable="true" HeaderClass=@("mud-data-cell-header" +" "+ (cellItem.ShowRowColumnHeader ? "" :"hide-column-header" ))>
+                                        <CellTemplate>
+                                            @if (cellItem.IsBadge)
+                                            {
+                                                var fieldType = GetDataItemPropertyValueFromContext(context.Item, cellItem.BadgeFieldType);
+                                                <AmhBadgeControl Value=@GetDataItemPropertyValueFromContext(context.Item, cellItem.DataField)
+                                                                 FieldType=@GetBadgeFieldType(fieldType) />
+                                            }
+                                            else if (cellItem.IsLink || !string.IsNullOrWhiteSpace(cellItem.IsLinkField))
+                                            {
+                                                bool isLink = cellItem.IsLink;
+                                                if (!isLink)
+                                                {
+                                                    var isLinkField = GetDataItemPropertyValueFromContext(context.Item, cellItem.IsLinkField);
+                                                    isLink = string.IsNullOrWhiteSpace(isLinkField) ? false : Convert.ToBoolean(isLinkField);
+                                                }
+                                                @if (isLink)
+                                                {
+                                                    <AmhLabelControl Value=@cellItem.LinkText
+                                                                     FieldType=@(string.IsNullOrEmpty(cellItem.LinkFieldType.ToString()) ?FieldTypes.LinkHStartVCenterLabelControl:(FieldTypes)cellItem.LinkFieldType)
+                                                                     OnValueChanged=@(e => { LabelClickEvent(context.Item ,cellItem.LinkText); }) />
+                                                }
+                                            }
+                                            else if (cellItem.IsEditable)
+                                            {
+                                                <AmhEntryControl Value=@GetDataItemPropertyValueFromContext(context.Item, cellItem.DataField)
+                                                                 FieldType=@FieldTypes.TextEntryControl
+                                                                 ResourceKey=@cellItem.DataHeader
+                                                                 ShowHeader=false
+                                                                 OnValueChanged=@(e=> {OnSetValueChanged(e, cellItem.DataField, GetDataItemPropertyValueFromContext(context.Item, TableStructure.Where(x => x.IsKey).FirstOrDefault()?.DataField));}) />
+                                            }
+                                            else if (cellItem.HasImage)
+                                            {
+                                                <AmhImageControl FieldType=@cellItem.ImageFieldType
+                                                                 ImageHeight=@cellItem.ImageHeight
+                                                                 Icon=@getImageValue(cellItem.ImageIcon, context.Item, _leftIcon)
+                                                                 ImageWidth=@cellItem.ImageWidth
+                                                                 ShowHeader="false"
+                                                                 BackgroundColor=@(string.IsNullOrEmpty(cellItem.ImageBackgroundColor)?null:GetDataItemPropertyValueFromContext(context.Item, cellItem.ImageBackgroundColor))
+                                                                 Value=@getImageValue(cellItem.ImageSrc, context.Item, "") />
+                                            }
+                                            else if (cellItem.IsCheckBox)
+                                            {
+                                                <AmhCheckBoxListControl FieldType=@FieldTypes.CheckBoxControl
+                                                                        ShowHeader=@false
+                                                                        Options=@GetOptions()
+                                                                        Value=@(Convert.ToBoolean( GetDataItemPropertyValueFromContext(context.Item, cellItem.DataField)) ?"1":"")
+                                                                        ValueChanged=@(e=> {
+                                                    var ischecked= !string.IsNullOrWhiteSpace(e) && Convert.ToInt32(e) == 1;
+                                                    OnSetCheckBoxChanged(ischecked, cellItem.DataField, GetDataItemPropertyValueFromContext(context.Item, TableStructure.Where(x=>
+                                                    x.IsKey).FirstOrDefault()?.DataField));}) />
+                                            }
+                                            else
+                                            {
+                                                @if (cellItem.IsHtmlTag)
+                                                {
+                                                    var htmlData = GetDataItemPropertyValueFromContext(context.Item, cellItem.DataField);
+                                                    @(new MarkupString(htmlData))
+                                                }
+                                                else
+                                                {
+                                                    if (cellItem.ImageFields != null && cellItem.ImageFields.Count > 0)
+                                                    {
+                                                        <span class="d-flex">
+                                                            @GetDataItemPropertyValueFromContext(context.Item, cellItem.DataField)
+                                                            @foreach (var imageItem in cellItem.ImageFields)
+                                                            {
+                                                                string imga = GetDataItemPropertyValueFromContext(context.Item, imageItem);
+                                                                <AmhImageControl FieldType=@cellItem.ImageFieldType ImageHeight=@cellItem.ImageHeight Icon=@imga
+                                                                                 class="mx-2"
+                                                                                 BackgroundColor=@(string.IsNullOrEmpty(cellItem.ImageBackgroundColor)?null:GetDataItemPropertyValueFromContext(context.Item, cellItem.ImageBackgroundColor))
+                                                                                 ImageWidth=@cellItem.ImageWidth ShowHeader="false" />
+                                                            }
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @GetDataItemPropertyValueFromContext(context.Item, cellItem.DataField)
+                                                    }
+                                                }
+                                            }
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                }
+                            }
+                        </Columns>
+                        <PagerContent>
+                            @if (ShowPagination && GetFilteredElements().Count() > RowsPerPage)
+                            {
+                                <MudDataGridPager T="DataSourceType"
+                                                  PageSizeOptions=@pageSizeOptions
+                                                  RowsPerPageString="Page Size" />
+                            }
+                        </PagerContent>
+                    </MudDataGrid>
+                }
+                else
+                {
+                    if (ShouldShowNoRecordFound)
+                    {
+                        <div class="mt-5"></div>
+                        <AmhMessageControl Class="mt-2" FieldType=@FieldTypes.MessageControl ResourceKey=@ResourceConstants.R_NO_DATA_FOUND_KEY Icon=@ImageConstants.I_RESTART_APP_SVG />
+                    }
+                }
+
+            </div>
+        </ChildControl>
+    </AmhBaseControl>
+}

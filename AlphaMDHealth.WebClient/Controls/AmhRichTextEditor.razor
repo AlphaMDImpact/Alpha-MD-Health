@@ -1,0 +1,109 @@
+﻿@using System.Globalization;
+@using System.Text.RegularExpressions;
+@using TinyMCE.Blazor
+
+@inherits AmhBaseControl
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <Editor @bind-Value=@Value Disable=@(!IsControlEnabled)
+                Conf=@(new Dictionary<string, object> {
+                    {Constants.TOOL_BAR1_TEXT, Constants.TOOL_BAR1_VALUE},
+                    {Constants.TOOL_BAR2_TEXT,Constants.TOOL_BAR2_VALUE},
+                    {Constants.PLUGINS_TEXT, Constants.PLUGINS_VALUE} ,
+                    {Constants.MENU_BAR_TEXT, false},
+                    {Constants.BRANDING_TEXT, false},
+                    {Constants.PLACEHOLDER_TEXT,_resource?.PlaceHolderValue}
+                }) />
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private string _value;
+
+    /// <summary>
+    /// Control value represents text of control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(_value);
+                OnValueChangedAction(_value);
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick">flag to validate</param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            var formatText = Regex.Replace(_value, Constants.REGEX_REMOVE_HTML_BLANK_SPACE_BETWEEN_TAGS, match =>
+            {
+                if (match.Value.EndsWith("<"))
+                    return "<";
+                else
+                    return ">";
+            });
+            formatText = Regex.Replace(formatText, Constants.REGEX_REMOVE_HTML_BLANK_SPACE, string.Empty);
+            var textOnly = Regex.Replace(formatText, Constants.FormattedStringRegex, string.Empty);
+
+            if (Validator.HasRequiredValidationError(_resource, !string.IsNullOrWhiteSpace(textOnly)))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (!string.IsNullOrWhiteSpace(textOnly))
+            {
+                if (Validator.HasMinLengthValidationError(_resource, textOnly.Length))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_MINIMUM_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength);
+                }
+                else if (Validator.HasRangeValidationError(_resource, textOnly.Length))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength, _resource.MaxLength);
+                }
+                // else if (!Regex.IsMatch(textOnly, Constants.ImageMatchingRegex))
+                // {
+                //     ErrorMessage = GetRequiredResourceValue();
+                // }
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+}

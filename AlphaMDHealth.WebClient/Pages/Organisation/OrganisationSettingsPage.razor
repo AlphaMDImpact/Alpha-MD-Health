@@ -1,0 +1,66 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/OrganisationThemeSettingsView"
+@page "/OrganisationSettingsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageOperation=@PageOperationType.Edit
+              PageTitle=@GetPageTile()
+              ApplyFixedFooter=true
+              ApplyCard=true
+              IsAccordion=true
+              PageResources=@_settingData.Resources
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            @if (_settingData.ErrCode == ErrorCode.OK)
+            {
+                @foreach (var setting in _settingData.Settings.Where(x => x.GroupName == _settingData.LastModifiedBy && x.SettingType != null))
+                {
+                    @switch (setting.SettingType?.ToEnum<SettingType>())
+                    {
+                        case SettingType.String:
+                            <AmhEntryControl @bind-Value=@setting.SettingValue
+                                             ResourceKey=@setting.SettingKey
+                                             RegexExpression=@LibSettings.GetSettingValueByKey(_settingData.Settings, SettingsConstants.S_GENERIC_TEXT_REGEX_KEY) />
+                            break;
+                        case SettingType.Numeric:
+                            double? numericValue = string.IsNullOrWhiteSpace(setting.SettingValue) ? null : Convert.ToDouble(setting.SettingValue);
+                            <AmhNumericEntryControl @bind-Value=@numericValue
+                                                    ResourceKey=@setting.SettingKey
+                                                    OnValueChanged=@(e => OnValueChanges(e, setting)) />
+                            break;
+                        case SettingType.Color:
+                            <AmhColorPickerControl @bind-Value=@setting.SettingValue
+                                                   ResourceKey=@setting.SettingKey />
+                            break;
+                        case SettingType.Bool:
+                            <AmhCheckBoxListControl ResourceKey=@setting.SettingKey
+                                                    ShowHeader=@false
+                                                    Options=@GetCheckBoxOptions(setting)
+                                                    OnValueChanged=@(e => OnValueChanges (e, setting)) />
+                            break;
+                        case SettingType.Image:
+                            <AmhUploadControl @bind-Value=@setting.SettingValue
+                                              ResourceKey=@setting.SettingKey />
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_settingData.ErrCode.ToString() />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (LibPermissions.HasPermission(_settingData.FeaturePermissions, GetFeaturePermission()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                  OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+        </PageFooter>
+    </BasePage>
+}

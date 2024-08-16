@@ -1,0 +1,154 @@
+﻿@using Microsoft.Fast.Components.FluentUI
+@using Radzen.Blazor;
+
+@inherits AmhBaseControl
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=false
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        @if (FieldType == FieldTypes.MenuButtonControl && Options?.Count > 0)
+        {
+            <RadzenSplitButton id=@string.Concat(ResourceKey, FieldType, "button")
+                               AlwaysOpenPopup=@true
+                               Text=@Value Click=@OnButtonClicked>
+                <ChildContent>
+                    @foreach (var option in Options)
+                    {
+                        <RadzenSplitButtonItem Text=@option.OptionText Value=@option.OptionID.ToString() />
+                    }
+                </ChildContent>
+            </RadzenSplitButton>
+        }
+        else
+        {
+            <button @onclick=@OnButtonClicked
+                    id=@string.Concat(ResourceKey, FieldType, "button")
+                    style=@Style
+                    class=@AppState.ClassName($"btn-base {GetButtonStyleBasedOnControlType()} {Class} px-1")>
+                <AmhFieldIcon LeftIcon=@_leftIcon />
+                @Value
+            </button>
+        }
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    public Dictionary<string, string> _optionsDictionary;
+    private string _value;
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value == null || string.IsNullOrWhiteSpace(_value)
+                ? _resource?.ResourceValue ?? string.Empty
+                : _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(_value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    private void OnButtonClicked(object sender)
+    {
+        if (sender != null && sender is RadzenSplitButtonItem)
+        {
+            OnValueChangedAction((sender as RadzenSplitButtonItem).Value);
+        }
+        else
+        {
+            OnValueChangedAction(sender);
+        }
+    }
+
+    private string GetButtonStyleBasedOnControlType()
+    {
+        switch (FieldType)
+        {
+            // Regular Buttons
+            case FieldTypes.PrimaryButtonControl:
+                return "primary-btn1";
+            case FieldTypes.SecondaryButtonControl:
+                return "secondary-btn1";
+            case FieldTypes.TertiaryButtonControl:
+                return "tertiary-btn1";
+            case FieldTypes.DeleteButtonControl:
+                return "delete-btn1";
+            // Transparent buttons
+            case FieldTypes.PrimaryTransparentButtonControl:
+                return "primary-transparent-btn1";
+            case FieldTypes.SecondaryTransparentButtonControl:
+                return "secondary-transparent-btn1";
+            case FieldTypes.TertiaryTransparentButtonControl:
+                return "tertiary-transparent-btn1";
+            case FieldTypes.DeleteTransparentButtonControl:
+                return "delete-transparent-btn1";
+            // Border Transparent buttons
+            case FieldTypes.PrimaryBorderTransparentButtonControl:
+                return "primary-border-transparent-btn1";
+            case FieldTypes.SecondaryBorderTransparentButtonControl:
+                return "secondary-border-transparent-btn1";
+            case FieldTypes.TertiaryBorderTransparentButtonControl:
+                return "tertiary-border-transparent-btn1";
+            case FieldTypes.DeleteBorderTransparentButtonControl:
+                return "delete-border-transparent-btn1";
+            // Expandable Buttons
+            case FieldTypes.PrimaryExButtonControl:
+                return "primary-btn1 Ex-btn-width";
+            case FieldTypes.SecondaryExButtonControl:
+                return "secondary-btn1 Ex-btn-width";
+            case FieldTypes.TertiaryExButtonControl:
+                return "tertiary-btn1 Ex-btn-width";
+            case FieldTypes.DeleteExButtonControl:
+                return "delete-btn1 Ex-btn-width";
+            // Transparent buttons
+            case FieldTypes.PrimaryTransparentExButtonControl:
+                return "primary-transparent-btn1 Ex-btn-width";
+            case FieldTypes.SecondaryTransparentExButtonControl:
+                return "secondary-transparent-btn1 Ex-btn-width";
+            case FieldTypes.TertiaryTransparentExButtonControl:
+                return "tertiary-transparent-btn1 Ex-btn-width";
+            case FieldTypes.DeleteTransparentExButtonControl:
+                return "delete-transparent-btn1 Ex-btn-width";
+            // Border Transparent buttons
+            case FieldTypes.PrimaryBorderTransparentExButtonControl:
+                return "primary-border-transparent-btn1 Ex-btn-width";
+            case FieldTypes.SecondaryBorderTransparentExButtonControl:
+                return "secondary-border-transparent-btn1 Ex-btn-width";
+            case FieldTypes.TertiaryBorderTransparentExButtonControl:
+                return "tertiary-border-transparent-btn1 Ex-btn-width";
+            case FieldTypes.DeleteBorderTransparentExButtonControl:
+                return "delete-border-transparent-btn1 Ex-btn-width";
+            case FieldTypes.MenuButtonControl:
+                return "primary-btn1 Ex-btn-width";
+            default:
+                return "primary-btn1";
+        }
+    }
+}

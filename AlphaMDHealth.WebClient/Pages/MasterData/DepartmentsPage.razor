@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/DepartmentsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error 
+              @bind-Success=@Success 
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_departmentData.ErrCode != ErrorCode.OK)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_departmentData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <DepartmentPage DepartmentId=@_departmentID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_departmentData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSourceType=@DepartmentModel
+                                     DataSource=@_departmentData.Departments
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.DepartmentsView.ToString())
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_departmentData.FeaturePermissions, AppPermissions.DepartmentAddEdit.ToString())
+                                     OnValueChanged=@(e => OnAddEditClick((DepartmentModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_departmentData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

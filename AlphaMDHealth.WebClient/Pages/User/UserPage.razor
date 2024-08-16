@@ -1,0 +1,206 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ProfileView"
+@page "/ProfileView/{userid:long}"
+@page "/PatientView"
+@page "/PatientView/{userid:long}"
+@page "/UserView"
+@page "/UserView/{organizationid:long}"
+@page "/UserView/{userid:long}"
+@page "/UserView/{userid:long}/{organizationid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              OnClose=@OnClose
+              PageResources=@_userData.Resources
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              PageTitle=@GetPageTitle()
+              ApplyCard=@true
+              ApplyMobileViewBeforLogin=@(IsPatientMobileView)
+              PageOperation=@GetPageOperationType(_isEditable, _userData?.User?.UserID == 0)
+              ActionButtons=@(IsPatientMobileView ?_actionButtons:null)>
+        <PageHeader>
+            @if (AppState.MasterData.IsProfileCompleted && CurrentView == AppPermissions.ProfileView)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CHANGE_PASSWORD_KEY
+                                  OnValueChanged=@OnChangePasswordLinkClickAsync />
+            }
+        </PageHeader>
+        <ChildContent>
+            @if (_userData.ErrCode == ErrorCode.OK)
+            {
+                @if (!AppState.MasterData.IsProfileCompleted && CurrentView == AppPermissions.ProfileView)
+                {
+                    <AmhLabelControl Value=@LibResources.GetResourcePlaceHolderByKey(_userData.Resources, ResourceConstants.R_ADDITIONAL_PROFILE_DATA_KEY) 
+                                     FieldType=@FieldTypes.TertiarySmallHStartVCenterLabelControl/>
+
+                    <AmhDateTimeControl @bind-Value=@_userData.User.Dob
+                                        ResourceKey=@ResourceConstants.R_DATE_OF_BIRTH_KEY
+                                        IsControlEnabled=@_isEditable
+                                        OnValueChanged=@(e=>OnDobAgeChanged((DateTimeOffset)e)) />
+
+                    <AmhNumericEntryControl Value=@_userData.User.UserAge
+                                            ResourceKey=@ResourceConstants.R_AGE_KEY
+                                            IsControlEnabled=@_isEditable
+                                            OnValueChanged=@(e=>OnDobAgeChanged(Convert.ToByte(e))) />
+
+                    <AmhDropdownControl @bind-Options=_userData.Genders
+                                        ResourceKey=@ResourceConstants.R_GENDER_KEY
+                                        IsControlEnabled=@_isEditable />
+
+                    <AmhDropdownControl @bind-Options=@_userData.BloodGroups
+                                        ResourceKey=@ResourceConstants.R_BLOOD_GROUP_KEY
+                                        IsControlEnabled=@_isEditable />
+                }
+                else
+                {
+                    <AmhUploadControl @bind-Value=@_userData.User.ImageName
+                                      ResourceKey=@ResourceConstants.R_PROFILE_IMAGE_KEY
+                                      IsControlEnabled=@_isEditable />
+
+                    <AmhEntryControl @bind-Value=@_userData.User.FirstName
+                                     ResourceKey=@ResourceConstants.R_FIRST_NAME_KEY
+                                     RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_ALPHA_REGEX_KEY)
+                                     IsControlEnabled=@_isEditable />
+
+                    <AmhEntryControl @bind-Value=@_userData.User.MiddleName
+                                     ResourceKey=@ResourceConstants.R_MIDDLE_NAME_KEY
+                                     IsControlEnabled=@_isEditable />
+
+                    <AmhEntryControl @bind-Value=@_userData.User.LastName
+                                     ResourceKey=@ResourceConstants.R_LAST_NAME_KEY
+                                     RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_ALPHA_REGEX_KEY)
+                                     IsControlEnabled=@_isEditable />
+
+                    <AmhDropdownControl @bind-Options=_userData.Genders
+                                        ResourceKey=@ResourceConstants.R_GENDER_KEY
+                                        IsControlEnabled=@_isEditable />
+
+                    <AmhDateTimeControl @bind-Value=@_userData.User.Dob
+                                        ResourceKey=@ResourceConstants.R_DATE_OF_BIRTH_KEY
+                                        IsControlEnabled=@_isEditable
+                                        OnValueChanged=@(e=>OnDobAgeChanged((DateTimeOffset)e)) />
+
+                    <AmhNumericEntryControl Value=@_userData.User.UserAge
+                                            ResourceKey=@ResourceConstants.R_AGE_KEY
+                                            IsControlEnabled=@_isEditable
+                                            OnValueChanged=@(e=>OnDobAgeChanged(Convert.ToByte(e))) />
+
+                    <AmhDropdownControl @bind-Options=@_userData.OrganisationTags @ref=@_multiSelectValue
+                                        IsControlEnabled=@_isEditable
+                                        ResourceKey=@ResourceConstants.R_ORGANISATION_TAGS_KEY />
+
+                    @if (IsUserAddEdit())
+                    {
+                        <AmhDateTimeControl @bind-Value=@_userData.User.Doj
+                                            ResourceKey=@ResourceConstants.R_DATE_OF_JOINING_KEY
+                                            IsControlEnabled=@(_isEditable && CurrentView != AppPermissions.ProfileView) />
+
+                        <AmhDropdownControl @bind-Options=_userData.Organisations
+                                            ResourceKey=@ResourceConstants.R_ORGANISATION_KEY
+                                            IsControlEnabled=@(_isEditable && CurrentView != AppPermissions.ProfileView) />
+
+                        <AmhDropdownControl @bind-Options=@_userData.Branches
+                                            ResourceKey=@ResourceConstants.R_BRANCH_KEY
+                                            IsControlEnabled=@(_isEditable && CurrentView != AppPermissions.ProfileView)
+                                            OnValueChanged=@(e => OnSelectedValueChanged(e)) />
+
+                        <AmhDropdownControl @bind-Options=@_departmentList
+                                            ResourceKey=@ResourceConstants.R_DEPARTMENT_KEY
+                                            IsControlEnabled=@(_isEditable && CurrentView != AppPermissions.ProfileView) />
+
+                        <AmhDropdownControl @bind-Options=@_userData.Roles
+                                            ResourceKey=@ResourceConstants.R_ROLES_KEY
+                                            IsControlEnabled=@(_isEditable && CurrentView != AppPermissions.ProfileView) />
+
+                        <AmhDropdownControl @bind-Options=@_userData.Professions
+                                            ResourceKey=@ResourceConstants.R_PROFESSION_KEY
+                                            IsControlEnabled=@(_isEditable && CurrentView != AppPermissions.ProfileView) />
+
+                        <AmhDropdownControl @bind-Value=@_userData.User.UserDegrees
+                                            @bind-Options=@_userData.UserDegrees
+                                            IsControlEnabled=@(_isEditable && (CurrentView != AppPermissions.ProfileView && !AppState.IsProvider))
+                                            ResourceKey=@ResourceConstants.R_DEGREE_KEY />
+
+                        <AmhEntryControl @bind-Value=@_userData.User.MedicalLicenseNumber
+                                         ResourceKey=@ResourceConstants.R_MEDICAL_LICENSE_NUMBER_KEY
+                                         RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_ALPHA_NUMERIC_REGEX_KEY)
+                                         IsControlEnabled=@_isEditable />
+                    }
+                    else
+                    {
+                        <AmhDropdownControl @bind-Options=@_userData.BloodGroups
+                                            ResourceKey=@ResourceConstants.R_BLOOD_GROUP_KEY
+                                            IsControlEnabled=@_isEditable />
+
+                        if (CurrentView != AppPermissions.LinkedUsersView)
+                        {
+                            <AmhDropdownControl @bind-Options=@_userData.Languages
+                                                ResourceKey=@ResourceConstants.R_PREFERRED_LANGUAGE_KEY
+                                                IsControlEnabled=@_isEditable />
+
+                            <AmhEntryControl @bind-Value=@_userData.User.SocialSecurityNo
+                                             ResourceKey=@ResourceConstants.R_SOCIAL_SECURITY_NUMBER_KEY
+                                             IsControlEnabled=@_isEditable />
+
+                            <AmhEntryControl @bind-Value=@_userData.User.HospitalIdenfier
+                                             ResourceKey=@ResourceConstants.R_INTERNAL_CODE_KEY
+                                             IsControlEnabled=@_isEditable />
+
+                            <AmhEntryControl @bind-Value=@_userData.User.GeneralMedicalIdenfier
+                                             ResourceKey=@ResourceConstants.R_EXTERNAL_CODE_KEY
+                                             IsControlEnabled=@_isEditable />
+                        }
+                    }
+                    if (CurrentView != AppPermissions.LinkedUsersView)
+                    {
+                        <AmhMobileNumberControl @bind-Value=@_userData.User.PhoneNo
+                                                ResourceKey=@ResourceConstants.R_MOBILE_NUMBER_KEY
+                                                CountryCodes=@_userData.CountryCodes
+                                                IsControlEnabled=@(_isEditable && _userData.User.UserID == 0) />
+
+                        <AmhEntryControl @bind-Value=@_userData.User.EmailId
+                                         ResourceKey=@ResourceConstants.R_EMAIL_ADDRESS_KEY
+                                         IsControlEnabled=@(_isEditable && _userData.User.UserID == 0)
+                                         RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_EMAIL_REGEX_KEY) />
+                    }
+                }
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_userData.ErrCode.ToString() />
+            }
+        </ChildContent>
+        <PageFooter>
+
+            @if (CurrentView == AppPermissions.LinkedUsersView && UserID > 0 && LibPermissions.HasPermission(_userData.FeaturePermissions, AppPermissions.LinkedUserDelete.ToString()) || (OrganizationID > 0 && _userData.User.UserID > 0))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                  OnValueChanged=@OnRemoveClick />
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideConfirmationPopup
+                                   Actions=@_deleteActionData
+                                   OnValueChanged=@PopUpCallbackAsync ContentClass="top-center" />
+            }
+            @if (!IsPatientMobileView)
+            {
+                @if (_isEditable)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                      OnValueChanged=@(async () => { await OnSaveButtonClickedAsync(true); }) />
+                }
+                @if (CurrentView == AppPermissions.LinkedUsersView || AppState?.Tabs?.Count < 1 || OrganizationID > 0)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                                      OnValueChanged=@OnCancelClickedAsync />
+                }
+            }
+        </PageFooter>
+    </BasePage>
+}

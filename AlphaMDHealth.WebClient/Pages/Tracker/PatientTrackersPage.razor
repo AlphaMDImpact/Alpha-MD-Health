@@ -1,0 +1,46 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientTrackersView/{patienttrackerid:guid}"
+@page "/PatientTrackersView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_patientTrackerData.ErrCode != ErrorCode.OK)
+              ApplyStructure=@(Parameters?.Count < 1)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_patientTrackerData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PatientTrackerPage PatientTrackerID=@_patientTrackerID
+                                    IsAccordion=true
+                                    OnClose=@CloseEventCallbackAsync />
+            }
+            else
+            {
+                @if (_patientTrackerData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_patientTrackerData.PatientTrackers
+                                     DataSourceType=@PatientTrackersModel
+                                     TableHeader=@(LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientTrackersView.ToString()))
+                                     ShowAddButton=@(!_isDashboardView && LibPermissions.HasPermission(_patientTrackerData.FeaturePermissions, AppPermissions.PatientTrackerAddEdit.ToString()))
+                                     ShowSearch=@(!_isDashboardView)
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowPagination=@(!_isDashboardView)
+                                     ShowViewAll=@_isDashboardView
+                                     OnViewClicked=@OnViewAllClickedAsync
+                                     OnValueChanged=@((e) => OnAddEditClick((PatientTrackersModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_patientTrackerData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

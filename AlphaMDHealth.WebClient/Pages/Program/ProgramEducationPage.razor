@@ -1,0 +1,59 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              OnClose=@OnClose
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ProgramEducationAddEdit.ToString())
+              PageOperation=@GetPageOperationType(_isEditable, _programData.ProgramEducation.ProgramEducationID == 0)
+              PageResources=@_programData.Resources
+              IsAccordion=@IsAccordion
+              ApplyFixedFooter=true
+              ApplyCard=true
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=@_programData.TaskTypes
+                                ResourceKey=@ResourceConstants.R_CATEGORY_KEY
+                                IsControlEnabled=@_isEditable
+                                OnValueChanged=@OnCategoryChange />
+
+            <AmhDropdownControl @bind-Options=@_educations
+                                ResourceKey=@ResourceConstants.R_SELECT_EDUCATION_LABEL_KEY
+                                IsControlEnabled=@_isEditable
+                                OnValueChanged=@OnEducationChange />
+
+            <AmhNumericEntryControl @bind-Value=@_assignAfterDays
+                                    ResourceKey=@ResourceConstants.R_ASSIGN_AFTER_DAYS_KEY
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhNumericEntryControl @bind-Value=@_assignForDays
+                                    ResourceKey=@ResourceConstants.R_SHOW_FOR_DAYS_KEY
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                               ShowHidePopup=@_hideConfirmationPopup
+                               Actions=@_actionData
+                               OnValueChanged=@DeletePopUpCallbackAsync />
+
+            <AmhCheckBoxListControl ShowHeader=@false
+                                    ResourceKey=@ResourceConstants.R_FOR_PROVIDERS_KEY
+                                    Options=@GetOptions()
+                                    ValueChanged=@(e => { _programData.ProgramEducation.ForProviders = !string.IsNullOrWhiteSpace(e) && Convert.ToInt32(e) == 1; })
+                                    IsControlEnabled=@(!(SelectedProgramEducationID > 0) || _isEditable) />
+        </ChildContent>
+        <PageFooter>
+            @if (_programData.ProgramEducation.ProgramEducationID != 0 && LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.ProgramEducationDelete.ToString()) && _isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClick />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClick />
+        </PageFooter>
+    </BasePage>
+}

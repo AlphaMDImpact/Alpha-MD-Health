@@ -1,0 +1,144 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/QuestionnaireTaskView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@_questionnaireData?.Questionnaire?.CaptionText
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=true
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              PageResources=@_questionnaireData?.Resources>
+        <ChildContent>
+            @if (_questionnaireData.ErrCode == ErrorCode.OK)
+            {
+                @switch (_questionnaireData.Questionnaire.QuestionnaireAction)
+                {
+                    case QuestionnaireAction.StartQuestionnaire:
+                        <AmhMessageControl ResourceKey=@ResourceConstants.R_QUESTIONNAIRE_DYNAMIC_START_KEY Class="d-flex flex-column justify-content-center align-items-center" />
+                        break;
+                    case QuestionnaireAction.Finish:
+                        <AmhMessageControl ResourceKey=@ResourceConstants.R_TASK_COMPLETED_MESSAGE_KEY />
+                        break;
+                    default:
+                        var key = ResourceConstants.R_QUESTIONNAIRE_DYNAMIC_RESOURCE_KEY;
+                        @switch (_questionnaireData.Question.QuestionTypeID)
+                        {
+                            case QuestionType.TextQuestionKey:
+                                <AmhEntryControl @bind-Value=@_questionnaireData.QuestionnaireQuestionAnswer.AnswerValue
+                                                 ResourceKey=@key />
+                                break;
+                            case QuestionType.MultilineTextQuestionKey:
+                                <AmhMultilineEntryControl @bind-Value=@_questionnaireData.QuestionnaireQuestionAnswer.AnswerValue
+                                                          ResourceKey=@key />
+                                break;
+                            case QuestionType.RichTextQuestionKey:
+                                @((MarkupString)_questionnaireData.Question?.CaptionText)
+                                <br/>
+                                @((MarkupString)_questionnaireData.Question?.InstructionsText)
+                                <br />
+                                break;
+                            case QuestionType.NumericQuestionKey:
+                                <AmhNumericEntryControl @bind-Value=@_numericValue
+                                                        ResourceKey=@key
+                                                        ErrorMessage=@_numericEntryErrorLabel />
+                                break;
+                            case QuestionType.HorizontalSliderQuestionKey:
+                                <AmhSliderControl Value=@(_numericValue ?? _questionnaireData.Question.MinValue)
+                                                  Step=@_questionnaireData.Question.SliderSteps
+                                                  ResourceKey=@key
+                                                  OnValueChanged=@(e => { _numericValue = Convert.ToDouble(e); }) />
+                                break;
+                            case QuestionType.VerticalSliderQuestionKey:
+                                <AmhSliderControl Value=@(_numericValue ?? _questionnaireData.Question.MinValue)
+                                                  Step=@_questionnaireData.Question.SliderSteps
+                                                  ResourceKey=@key
+                                                  OnValueChanged=@(e => { _numericValue = Convert.ToDouble(e); }) />
+                                break;
+                            case QuestionType.DropDownQuestionKey:
+                                <AmhDropdownControl @bind-Value=@_questionnaireData.QuestionnaireQuestionAnswer.AnswerValue
+                                                    ResourceKey=@key
+                                                    Options=@_questionnaireData.DropDownOptions />
+                                break;
+                            case QuestionType.SingleSelectQuestionKey:
+                                <AmhRadioButtonListControl @bind-Value=@_questionnaireData.QuestionnaireQuestionAnswer.AnswerValue
+                                                           ResourceKey=@key
+                                                           Options=@_questionnaireData.DropDownOptions />
+                                break;
+                            case QuestionType.MultiSelectQuestionKey:
+                                <AmhCheckBoxListControl @bind-Value=@_questionnaireData.QuestionnaireQuestionAnswer.AnswerValue
+                                                        ResourceKey=@key
+                                                        Options=@_questionnaireData.DropDownOptions />
+                                break;
+                            case QuestionType.DateTimeQuestionKey:
+                                <AmhDateTimeControl @bind-Value=@_dateTime
+                                                    ResourceKey=@key />
+                                break;
+                            case QuestionType.DateQuestionKey:
+                                <AmhDateTimeControl @bind-Value=@_dateTime
+                                                    ResourceKey=@key />
+                                break;
+                            case QuestionType.TimeQuestionKey:
+                                <AmhDateTimeControl @bind-Value=@_dateTime
+                                                    ResourceKey=@key />
+                                break;
+                            case QuestionType.FilesAndDocumentQuestionKey:
+                                <AmhUploadControl Files=@_file
+                                                  ResourceKey=@key
+                                                  DescriptionResourceKey=@ResourceConstants.R_DOCUMENT_CAPTION_KEY
+                                                  OnValueChanged=@(e => OnImageChnaged((AttachmentModel)e)) />
+                                break;
+                            case QuestionType.MeasurementQuestionKey:
+                                <PatientReadingPage ShowCategory=@false
+                                                    ReadingCategoryID=@_questionnaireData.ReadingCategoryID
+                                                    IsComingFromQuestionnaireTaskPage=@true
+                                                    PatientReadingID=@_patientReadingID
+                                                    ReadingID=@((short)_questionnaireData.Question.CategoryID)
+                                                    IsRequiredQuestion=@_questionnaireData.Question.IsRequired
+                                                    @ref=@_patientReadingPageRef />
+                                break;
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_questionnaireData.ErrCode.ToString() />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_questionnaireData.ErrCode == ErrorCode.OK)
+            {
+                @switch (_questionnaireData.Questionnaire.QuestionnaireAction)
+                {
+                    case QuestionnaireAction.StartQuestionnaire:
+                        <AmhButtonControl ResourceKey=@ResourceConstants.R_START_ACTION_KEY
+                                            Class="me-3"
+                                          OnValueChanged=@OnStartQuestionnaireClick />
+                        break;
+                    case QuestionnaireAction.Finish:
+                        <AmhButtonControl ResourceKey=@ResourceConstants.R_DONE_TEXT_KEY
+                                                  Class="me-3"
+                                          OnValueChanged=@OnDoneQuestionnaireClick />
+                        break;
+                    default:
+                        <AmhButtonControl ResourceKey=@ResourceConstants.R_PREVIOUS_ACTION_KEY
+                                                  Class="me-3"
+                                          OnValueChanged=@OnPreviousButtonClick />
+
+                        <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_AND_NEXT_ACTION_KEY
+                                                  Class="me-3"
+                                          OnValueChanged=@OnSaveAndNextButtonClick />
+                        break;
+                }
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCloseClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

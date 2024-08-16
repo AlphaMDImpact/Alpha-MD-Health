@@ -1,0 +1,75 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/UserConsentsView"
+
+@if (_isDataFetched)
+{
+    @if (ShowDetailPage && IsPatientMobileView)
+    {
+        <StaticMessagePage Key=@_consentData.Consent.PageID.ToString()
+                           Type=@AlphaMDHealth.Utility.PageType.ConsentPage.ToString()
+                           TargetParameters=@(new string[] { _consentData.Consent.IsAccepted ? Constants.NUMBER_TWO : Constants.NUMBER_ONE } )
+                           OnActionClicked=@OnConsentActionClicked
+                           PageTitle=@_consentData?.Consent?.Description
+                           ApplyStructure=@false />
+    }
+    else
+    {
+        <BasePage @bind-Error=@Error
+                  @bind-Success=@Success
+                  @bind-ShowDetailPage=@ShowDetailPage
+                  CurrentPage=@this
+                  ApplyFixedFooter=@(IsPatientMobileView?true: !ShowDetailPage)
+                  ApplyCard=@(IsPatientMobileView?false: !ShowDetailPage)
+                  PageResources=@_consentData.Resources
+                  ApplyMobileViewBeforLogin=IsPatientMobileView
+                  ActionButtons=@(IsPatientMobileView ?_actionButtons:null)>
+            <ChildContent>
+                @if (ShowDetailPage && !IsPatientMobileView)
+                {
+                    <StaticMessagePage Key=@_consentData.Consent.PageID.ToString()
+                                       Type=@AlphaMDHealth.Utility.PageType.ConsentPage.ToString()
+                                       TargetParameters=@(new string[] { _consentData.Consent.IsAccepted ? Constants.NUMBER_TWO : Constants.NUMBER_ONE } )
+                                       OnActionClicked=@OnConsentActionClicked
+                                       ApplyStructure=@false />
+                }
+                else
+                {
+                    @if (_consentData.ErrCode == ErrorCode.OK)
+                    {
+                        <div class="@(IsPatientMobileView ?"col-12 ps-3 mx-1 ltr consent-pad":"")">
+                            <AmhLabelControl ResourceKey=@ResourceConstants.R_INFORMED_CONSENT_INSTRUCTIONS_LABEL_KEY />
+                        </div>
+
+                        <AmhTableControl DataSource=@_consentData.Consents
+                                         DataSourceType=@ConsentModel
+                                         ShowSearch=@false
+                                         TableStructure=@GenerateTableStructure()
+                                         SourceFieldStructure=@getViewCellModel()
+                                         ShowAddButton=@false
+                                         IsPatientMobileView=@IsPatientMobileView
+                                         ShowHeader=@false
+                                         OnValueChanged=@((e) => OnListItemClicked((ConsentModel)e)) />
+
+                    }
+                    else
+                    {
+                        <AmhMessageControl ResourceKey=@_consentData.ErrCode.ToString() />
+                    }
+                    <AmhMessageControl ResourceKey=@ResourceConstants.R_ACCEPT_REQUIRED_CONSENT_ERROR_MSG_KEY
+                                       ShowHidePopup=@_hideConfirmation
+                                       Actions=@_actionData
+                                       OnValueChanged=@OnPopupOkClickAsync />
+                }
+            </ChildContent>
+            <PageFooter>
+                @if (!ShowDetailPage && _isEditable)
+                {
+                    <AmhButtonControl Class="mt-3" ResourceKey=@(AppState.MasterData.IsConsentAccepted ? ResourceConstants.R_SAVE_ACTION_KEY : ResourceConstants.R_NEXT_ACTION_KEY)
+                                      OnValueChanged=@OnSendClickAsync />
+
+                }
+            </PageFooter>
+        </BasePage>
+    }
+}

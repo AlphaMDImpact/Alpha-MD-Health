@@ -1,0 +1,108 @@
+﻿@namespace AlphaMDHealth.WebClient
+@using Radzen
+@using Radzen.Blazor
+@inherits AmhBaseControl
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=false
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <div id=@string.Concat(ResourceKey, FieldType, "message-field") class=@(IsPopupMessage?(_modalStyle + " " + Class): Class)>
+            <div class=@(IsPopupMessage?("modal-content padding-lg" + " "+ ContentClass):("" + ContentClass ))>
+                @if (_resource != null)
+                {
+                    @if (FieldType.ToString().Contains("CloseButton"))
+                    {
+                        <AmhHeaderControl Title=@(FieldType.ToString().Contains("TopHeading") ?_resource.ResourceValue : "")>
+                            <ActionSection>
+                                <AmhImageControl FieldType=@FieldTypes.CircleImageControl
+                                                 Icon=@ImageConstants.I_CLOSE_BTN_SVG
+                                                 OnValueChanged=@(e => { OnCloseActionButtonClicked(new OptionModel { SequenceNo = 0 }); })
+                                                 ImageHeight=AppImageSize.ImageSizeS
+                                                 ImageWidth=AppImageSize.ImageSizeS />
+                            </ActionSection>
+                        </AmhHeaderControl>
+                    }
+                    else if (FieldType.ToString().Contains("TopHeading"))
+                    {
+                        <AmhLabelComponent FieldType=FieldTypes.PrimaryMediumHVCenterBoldLabelControl value=@_resource.ResourceValue />
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(_resource.KeyDescription) || !string.IsNullOrWhiteSpace(Icon))
+                    {
+                        if (string.IsNullOrWhiteSpace(Icon))
+                        {
+                            Icon = _resource.KeyDescription;
+                        }
+                        <AmhImageComponent IconValue=@_leftIcon />
+                    }
+
+                    @if (!FieldType.ToString().Contains("TopHeading"))
+                    {
+                        <AmhLabelComponent FieldType=FieldTypes.PrimaryMediumHVCenterBoldLabelControl value=@_resource.ResourceValue />
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(_resource.PlaceHolderValue))
+                    {
+                        string[] msgSplit = _resource.PlaceHolderValue?.Split(Constants.SYMBOL_PIPE_SEPERATOR);
+                        if (msgSplit?.Length > 0)
+                        {
+                            @if (!string.IsNullOrWhiteSpace(msgSplit[0]))
+                            {
+                                <AmhLabelComponent FieldType=FieldTypes.HtmlSecondaryCenterLabelControl value=@msgSplit[0] />
+                            }
+                            @if (msgSplit.Length > 1 && !string.IsNullOrWhiteSpace(msgSplit[1]))
+                            {
+                                <AmhLabelComponent FieldType=FieldTypes.HtmlSecondaryCenterLabelControl value=@msgSplit[1] />
+                            }
+                        }
+                    }
+                   <div class="mb-3"></div>      
+                    @if (!string.IsNullOrWhiteSpace(_resource.InfoValue))
+                    {
+                        <div class="centered-container ">
+                            @if (IsYouTubeLink(_resource.InfoValue))
+                            {
+                                <iframe style="height:60vh;" src=@_resource.InfoValue allowfullscreen></iframe>
+                            }
+                            else if (IsWebPageLink(_resource.InfoValue))
+                            {
+                                <iframe style="height:60vh;" src=@_resource.InfoValue></iframe>
+                            }
+                            else if (IsPdfLink(_resource.InfoValue))
+                            {
+                                <embed src="@_resource.InfoValue" type=application/pdf />
+                            }
+                            else
+                            {
+                                @((MarkupString)_resource.InfoValue)
+                            }
+                        </div>
+                    }
+                }
+                <div class="mt-3"></div>
+                @if (Actions?.Count > 0)
+                {
+                    <div class=@(IsMobileView ? "" : IsPopupMessage?"align-right":"align-center")>
+                        <div class=@(IsMobileView ? "" : AppState.ClassName("d-flex justify-content-space-between")) style="gap:10px;">
+                            @foreach (var action in Actions)
+                            {
+                                <AmhButtonControl Icon=@action.Icon
+                                                  Class=@(action.ButtonClass)
+                                                  FieldType=@action.FieldType
+                                                  ResourceKey=@action.ButtonResourceKey
+                                                  OnValueChanged=@(e => { OnValueChangedAction(action.ButtonID); }) />
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </ChildControl>
+</AmhBaseControl>

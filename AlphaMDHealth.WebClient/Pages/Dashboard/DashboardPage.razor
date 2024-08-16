@@ -1,0 +1,47 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/DashboardView"
+@page "/PatientDetailView/"
+@page "/PatientDetailView/{key}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageResources=@_pageData.Resources
+              ShowPageTitle=@_isDashboardPage
+              ApplyFixedFooter=@(IsPatientMobileView?true:false)>
+        <PageHeader>
+            @if (_isDashboardPage && LibPermissions.HasPermission(_pageData.FeaturePermissions, AppPermissions.DashboardConfigurationView.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CONFIGURE_ACTION_KEY
+                                  Icon=@ImageConstants.I_CONFIGURE_WHITE_SVG
+                                  OnValueChanged=@OnAddButtonClickedAsync />
+            }
+        </PageHeader>
+        <ChildContent>
+            @if (_pageData.ErrCode == ErrorCode.OK && _pageData.ConfigurationRecords?.Count > 0)
+            {
+                <div class="row">
+                    @foreach (var view in _pageData.ConfigurationRecords.OrderBy(x => x.SequenceNo).ToList())
+                    {
+                        var parameters = _pageData.ConfigurationRecordParameters?.Where(x => x.DashboardSettingID == view.DashboardSettingID).ToList();
+                        <div class=@($"col-xl-{view.WidgetSizeInWebPage} col-sm-12")>
+                            <div class=@(IsPatientMobileView?"":"card my-2 px-2") style=@(IsPatientMobileView?"":"height: 400px; overflow:auto")>
+                                <ViewMapper FeatureCode=@view.FeatureCode
+                                            FeatureText=@view.FeatureText
+                                            Parameters=@parameters
+                                            IsDashboardPage=@_isDashboardPage />
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@(_pageData.ErrCode == ErrorCode.OK ? ResourceConstants.R_NO_DATA_FOUND_KEY : _pageData.ErrCode.ToString()) />
+            }
+        </ChildContent>
+    </BasePage>
+}

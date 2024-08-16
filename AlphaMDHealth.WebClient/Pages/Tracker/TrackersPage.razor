@@ -1,0 +1,41 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/TrackersView"
+@page "/TrackersView/{trackerid:short}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage 
+              CurrentPage=@this
+              ShowPageTitle=@(_trackerData.ErrCode != ErrorCode.OK)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_trackerData.Resources>
+        @if (ShowDetailPage)
+        {
+            <TrackersAddEdit TrackerID=@_trackerID OnClose=@OnAddEditClosedAsync />
+        }
+        else
+        {
+            @if (_trackerData.ErrCode == ErrorCode.OK)
+            {
+                <AmhTableControl DataSource=@_trackerData.Trackers
+                                 DataSourceType=@TrackersModel
+                                 TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.TrackersView.ToString())
+                                 TableStructure=@GenerateTableStructure()
+                                 ShowViewAll=@_isDashboardView
+                                 ShowSearch=@(!_isDashboardView)
+                                 ShowPagination=@(!_isDashboardView)
+                                 ShowAddButton=@(!_isDashboardView && LibPermissions.HasPermission(_trackerData.FeaturePermissions, AppPermissions.TrackersAddEdit.ToString()))
+                                 OnViewClicked=@OnViewAllClickedAsync
+                                 OnValueChanged=@((e) => OnAddEditClick((TrackersModel)e)) />
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_trackerData.ErrCode.ToString() />
+            }
+        }
+    </BasePage>
+}

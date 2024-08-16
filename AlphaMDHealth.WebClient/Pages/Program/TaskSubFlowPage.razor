@@ -1,0 +1,64 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              OnClose=@OnClose
+              RegisterComp=@RegisterControl
+              PageResources=@_programData.Resources
+              IsAccordion=true
+              ApplyFixedFooter=true
+              PageOperation=@GetPageOperationType(_isEditable, _programData.SubFlow.SubFlowID == 0)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.SubflowAddEdit.ToString())>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=@_programData.ProgramSubFlows
+                                ResourceKey=@ResourceConstants.R_SELECT_SUBFLOW_KEY
+                                OnValueChanged=@SelectedSubFlowChanged
+                                IsControlEnabled=@_isEditable />
+
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_TASK_TYPE_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimaryMediumHStartVCenterBoldLabelControl
+                             Value=@(string.IsNullOrWhiteSpace(_programData.SubFlow.TaskType) ? Constants.SYMBOL_DOUBLE_HYPHEN : _programData.SubFlow.TaskType) />
+
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_ITEM_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimaryMediumHStartVCenterBoldLabelControl
+                             Value=@(string.IsNullOrWhiteSpace(_programData.SubFlow.Item) ? Constants.SYMBOL_DOUBLE_HYPHEN : _programData.SubFlow.Item) />
+
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_OPERATION_TYPE_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimaryMediumHStartVCenterBoldLabelControl
+                             Value=@_operationTypeValue />
+
+            <AmhNumericEntryControl @bind-Value=@_assignAfterDays
+                                    ResourceKey=@ResourceConstants.R_ASSIGN_AFTER_DAYS_KEY
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhNumericEntryControl @bind-Value=@_assignForDays
+                                    ResourceKey=@ResourceConstants.R_SHOW_FOR_DAYS_KEY
+                                    IsControlEnabled=@_isEditable />
+
+        </ChildContent>
+        <PageFooter>
+            @if (TaskSubflowID > 0 && LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.SubflowDelete.ToString()) && _isEditable)
+            {
+                <AmhButtonControl Class="mt-1" ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnDeleteClicked />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideDeletedConfirmationPopup
+                                   Actions=@_popupActions
+                                   ContentClass="top-center"
+                                   OnValueChanged=@OnDeleteConfirmationActionClickedAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl Class="mt-1" ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl Class="mt-1" ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=OnCancelActionClicked />
+        </PageFooter>
+    </BasePage>
+}

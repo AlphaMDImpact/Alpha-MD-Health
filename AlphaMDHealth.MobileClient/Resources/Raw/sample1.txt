@@ -1,0 +1,20 @@
+Project Description
+
+Our .NET MAUI project aims to create a versatile file viewer application that allows users to seamlessly view different types of files within a single app. The app is designed to be user-friendly and capable of displaying a wide range of file formats, making it a one-stop solution for various document and media needs.
+
+Key Features:
+
+File Type Support: Our app supports various file types, including text documents, PDFs, Word documents, images (JPEG, PNG), HTML content, Excel spreadsheets, videos (local files), and even YouTube videos.
+
+User Interface: The user interface is intuitive and easy to navigate. Users can choose from a selection of buttons representing different file types, making it straightforward to view specific content.
+
+WebView Integration: We utilize the power of the WebView control to render and display file content seamlessly. The WebView is versatile and can handle HTML, PDFs, videos, and more.
+
+WebView Integration: We utilize the power of the WebView control to render and display file content seamlessly. The WebView is versatile and can handle HTML, PDFs, videos, and more.
+
+
+rtkhyrtrt
+yyyyyyyyyyyyyyrl
+
+
+r'tylrtjhi

@@ -1,0 +1,57 @@
+﻿@using AlphaMDHealth.WebClient.Controls
+@using System.Globalization;
+@using Microsoft.Fast.Components.FluentUI
+@using AlphaMDHealth.Utility
+
+@inherits AmhBaseControl
+
+@if (Value != null)
+{
+    <AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                    ShowHeader=@ShowHeader
+                    ResourceKey=@ResourceKey
+                    FieldType=@FieldType
+                    Icon=@Icon
+                    Source=@Source
+                    IsControlEnabled=@IsControlEnabled
+                    Options=@Options
+                    IsValid=@IsValid>
+        <ChildControl>
+            <FluentBadge @bind-Value=@Value
+                         Circular=true
+                         Fill="badgeCount">
+                <div class="fluent-badge-count-value">
+                    @Value
+                </div>
+            </FluentBadge>
+        </ChildControl>
+    </AmhBaseControl>
+}
+
+@code {
+    private double? _value;
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public double? Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(_value);
+            }
+        }
+    }
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<double?> ValueChanged { get; set; }
+}

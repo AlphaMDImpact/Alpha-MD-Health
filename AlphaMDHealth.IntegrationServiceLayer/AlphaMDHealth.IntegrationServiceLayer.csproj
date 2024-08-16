@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
+	<PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
+	
+	<ItemGroup>
+		<PackageReference Include="Azure.Identity" Version="1.11.4" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AlphaMDHealth.IntegrationServiceBusinessLayer\AlphaMDHealth.IntegrationServiceBusinessLayer.csproj" />
+		<ProjectReference Include="..\AlphaMDHealth.Model\AlphaMDHealth.Model.csproj" />
+		<ProjectReference Include="..\AlphaMDHealth.Utility\AlphaMDHealth.Utility.csproj" />
+	</ItemGroup>
+
+</Project>

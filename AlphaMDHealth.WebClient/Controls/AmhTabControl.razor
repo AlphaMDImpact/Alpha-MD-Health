@@ -1,0 +1,153 @@
+﻿@using MudBlazor;
+@inherits AmhBaseControl
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <MudTabs @bind-ActivePanelIndex=@_tabIndex
+                 Rounded=true
+                 DisableSliderAnimation=true
+                 DisableRipple=true
+                 HideSlider=true
+                 MinimumTabWidth="0"
+                 Color=Color.Transparent
+                 Class=@AppState.ClassName(ShowIcon?"mb-0 ": $"lbl-primary-text lbl-small {Class} mb-0 ")>
+
+            @foreach (var (item, index) in Options.Select((value, i) => (value, i)))
+            {
+                @if (item.IsActive)
+                {
+                    @if (@ShowIcon)
+                    {
+                        var imagePath = GetSvgContent(string.Concat(item.ParentOptionText, ".svg"));
+                        <MudTabPanel Icon="@(imagePath)"
+                                     Class="mobile-icon"
+                                     Disabled=@(!IsControlEnabled || item.IsDisabled)
+                                     OnClick=@OnTabClicked ChildContent=@ChildContent />
+                    }
+                    else
+                    {
+                        <MudTabPanel Text=@item.OptionText
+                                     Disabled=@(!IsControlEnabled || item.IsDisabled)
+                                     OnClick=@OnTabClicked
+                                     ChildContent=@ChildContent />
+                    }
+                }
+            }
+
+
+        </MudTabs>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private long _value;
+    [Parameter]
+    public bool ShowIcon { get; set; }
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public long Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<long> ValueChanged { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private int _tabIndex
+    {
+        get
+        {
+            if (Options != null)
+            {
+                var item = Options.FirstOrDefault(x => x.OptionID == Value);
+                if (item == null)
+                {
+                    item = Options.FirstOrDefault(x => x.IsSelected);
+                }
+                item = item ?? Options.FirstOrDefault();
+                if (item != null)
+                {
+                    if (!item.IsActive)
+                    {
+                        item = Options.LastOrDefault(x => x.IsActive);
+                    }
+                    return Options.IndexOf(item);
+                }
+            }
+            return default;
+        }
+        set
+        {
+            if (Options.Count > 0 && Options.Count > value && (Options[value]?.IsActive ?? false))
+            {
+                var val = value != -1 ? Options[value]?.OptionID : 0;
+                if (val == null)
+                {
+                    val = Options.FirstOrDefault()?.OptionID;
+                }
+
+                Value = val ?? 0;
+            }
+        }
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    private void OnTabClicked(object sender)
+    {
+        OnValueChangedAction(_value);
+    }
+
+    private void OnMoreTabClicked(object sender)
+    {
+        OnValueChangedAction(sender);
+    }
+
+    private string hideScrollbtn()
+    {
+        if (ShowIcon)
+        {
+            return " hide-scroll-buttons";
+        }
+        return string.Empty;
+    }
+    private string GetSvgContent(string svgFileName)
+    {
+        var imagePath = Path.Combine("wwwroot/images", svgFileName);
+        if (File.Exists(imagePath))
+        {
+            return File.ReadAllText(imagePath);
+        }
+        return "";
+    }
+}

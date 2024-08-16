@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ProfessionsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error 
+              @bind-Success=@Success 
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_professionData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_professionData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <ProfessionPage ProfessionID=@_professionID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_professionData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSourceType=@ProfessionModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ProfessionsView.ToString())
+                                     DataSource=@_professionData.Professions
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_professionData.FeaturePermissions, AppPermissions.ProfessionAddEdit.ToString())
+                                     OnValueChanged=@(e => OnAddEditClick((ProfessionModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_professionData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

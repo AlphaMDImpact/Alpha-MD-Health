@@ -1,0 +1,118 @@
+﻿@namespace AlphaMDHealth.WebClient
+
+@switch (FeatureCode.ToEnum<AppPermissions>())
+{
+    case AppPermissions.PatientAppointmentsView:
+        <AppointmentsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.AppointmentsView:
+        <AppointmentsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.UsersView:
+    case AppPermissions.PatientsView:
+    case AppPermissions.LinkedUsersView:
+        <UsersPage Parameters=@Parameters CurrentView=@(FeatureCode.ToEnum<AppPermissions>()) />
+        break;
+    case AppPermissions.ChatsView:
+        <ChatsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.PatientEducationsView:
+        <PatientEducationsPage Parameters=@Parameters PageData=@PageData />
+        break;
+    case AppPermissions.EducationsView:
+    case AppPermissions.MyEducationsView:
+        if (!IsDashboardPage)
+        {
+            <PatientEducationsPage Parameters=@Parameters PageData=@PageData />
+        }
+        else
+        {
+            <ContentsPage Parameters=@Parameters IsEducationPage="true" IsProviderEducations=AppState.IsProvider />
+        }
+        break;
+    case AppPermissions.PatientFilesView:
+        <PatientFilesPage Parameters=@Parameters PageData=@PageData />
+        break;
+    case AppPermissions.CaregiversView:
+        <CaregiversPage Parameters=@Parameters />
+        break;
+    case AppPermissions.OrganisationView:
+        <OrganisationProfilePage Parameters=@Parameters />
+        break;
+    case AppPermissions.BranchesView:
+        <BranchesPage Parameters=@Parameters />
+        break;
+    case AppPermissions.DepartmentsView:
+        <DepartmentsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.ReasonsView:
+        <ReasonsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.QuestionnairesView:
+        <QuestionnairesPage Parameters=@Parameters />
+        break;
+    case AppPermissions.StaticContentsView:
+        <ContentsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.WebMenusView:
+        <WebMenusPage Parameters=@Parameters />
+        break;
+    case AppPermissions.WebGroupContentsView:
+        <WebMenuGroup Parameters=@Parameters />
+        break;
+    case AppPermissions.ProfessionsView:
+        <ProfessionsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.SubflowsView:
+        <SubFlowsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.TasksView:
+        <TasksPage Parameters=@Parameters />
+        break;
+    case AppPermissions.ProgramsView:
+        <ProgramsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.PatientProgramsView:
+        <PatientProgramsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.PatientTasksView:
+        <PatientTasksPage Parameters=@Parameters PageData=@PageData />
+        break;
+    case AppPermissions.EducationCategoriesView:
+        <EducationCategoryPage Parameters=@Parameters />
+        break;
+    case AppPermissions.PatientReadingsView:
+        <PatientReadingsPage Parameters=@Parameters PageData=@PageData />
+        break;
+    case AppPermissions.PatientMedicationsView:
+        <PatientMedicationsPage Parameters=@Parameters PageData=@PageData />
+        break;
+    case AppPermissions.PrescriptionView:
+        <PrescriptionPage Parameters=@Parameters PageData=@PageData />
+        break;
+    case AppPermissions.TrackersView:
+        <TrackersPage Parameters=@Parameters />
+        break;
+    case AppPermissions.PatientTrackersView:
+        <PatientTrackersPage Parameters=@Parameters PageData=@PageData />
+        break;
+    case AppPermissions.PatientBillsView:
+        <PatientBillsPage Parameters=@Parameters />
+        break;
+    case AppPermissions.PatientProviderNotesView:
+        <PatientProviderNotesPage Parameters=@Parameters PageData=@PageData />
+        break;
+    case AppPermissions.PatientMobileMenuView:
+        <PatientMobileMenuPage Parameters=@Parameters  />
+        break;
+    @*  case Permissions.CarepathsView:
+        <CarepathsPage Parameters=@parameters />
+        break; *@
+    default:
+        <div style=" height: 100%; vertical-align:middle">
+            <StaticMessagePage PageTitle=@FeatureText
+                               Key=@ErrorCode.NotImplemented.ToString()
+                               ApplyStructure=@false />
+        </div>
+        break;
+}

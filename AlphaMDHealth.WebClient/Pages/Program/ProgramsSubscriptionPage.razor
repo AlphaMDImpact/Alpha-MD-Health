@@ -1,0 +1,40 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ProgramSubscribeView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ProgramSubscribeView.ToString())
+              PageOperation=@PageOperationType.Add
+              OnClose=@OnClose
+              PageResources=@_programData?.Resources
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=@_programData.Items
+                                ResourceKey=@ResourceConstants.R_SELECT_PROGRAM_KEY
+                                OnValueChanged=@((e) =>OnProgramSelectionChange(e)) />
+            @if (_programData.Items.Any(x => x.OptionID != 0 && x.IsSelected))
+            {
+                <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                 ResourceKey=@ResourceConstants.R_PROGRAM_DESCRIPTION_KEY />
+                @if (!string.IsNullOrWhiteSpace(_programDescription))
+                {
+                    <AmhLabelControl FieldType=@FieldTypes.SecondarySmallHStartVCenterLabelControl
+                                     Value=@_programDescription />
+                }
+            }
+           
+            <AmhMessageControl ResourceKey=@ResourceConstants.R_PROGRAM_SUBSCRIPTION_CONFIRM_KEY
+                               ShowHidePopup=@_hideConfirmationPopup
+                               Actions=@_confirmationActions
+                               OnValueChanged=@OnSubscribeActionClickAsync />
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_SUBSCRIBE_ACTION_KEY OnValueChanged=@OnSubscribeClick />
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=OnCanceledClickAsync />
+        </PageFooter>
+    </BasePage>
+}

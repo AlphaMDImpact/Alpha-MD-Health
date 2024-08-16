@@ -1,0 +1,99 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientTaskView"
+@page "/PatientTaskView/{patienttaskid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientTaskView.ToString())
+              RegisterComp=@RegisterControl
+              PageResources=@_patientTaskData.Resources
+              ApplyFixedFooter=true
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              OnClose=@OnClose>
+        <ChildContent>
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_TASK_TYPE_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                             ResourceKey=@_patientTaskData.Task.TaskType />
+            <span class="mt-2"></span>
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_PROGRAM_NAME_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                             Value=@_patientTaskData.Task.SelectedItemName />
+            <span class="mt-2"></span>
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_PROGRAM_TITLE_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                             Value=@_patientTaskData.Task.Name />
+            <span class="mt-2"></span>
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_START_END_DATE_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                             Value=@_patientTaskData.Task.FromDateString />
+            <span class="mt-2"></span>
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_STATUS_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                             Value=@_patientTaskData.Task.StatusValue />
+            <span class="mt-2"></span>
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_LAST_ACTION_BY_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                             Value=@_patientTaskData.Task.LastActionBy />
+            <span class="mt-2"></span>
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             ResourceKey=@ResourceConstants.R_COMPLETION_DATE_KEY />
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                             Value=@_patientTaskData.Task.CompletionDateString />
+
+            @if (_patientTaskData.Task.Status == ResourceConstants.R_COMPLETED_STATUS_KEY)
+            {
+                @if ((_patientTaskData.Task.TaskType == ResourceConstants.R_MEASUREMENT_KEY || _patientTaskData.Task.TaskType == ResourceConstants.R_QUESTIONNAIRE_KEY))
+                {
+                    <span class="mt-2"></span>
+                    <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                                     ResourceKey=@(_patientTaskData.Task.TaskType == ResourceConstants.R_QUESTIONNAIRE_KEY ? ResourceConstants.R_SCORE_KEY : ResourceConstants.R_VALUE_KEY) />
+                    <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                     Value=@(string.IsNullOrEmpty(_patientTaskData.Task.ResultValue) ? Constants.SYMBOL_DOUBLE_HYPHEN : GetResultValue(_patientTaskData.Task.ResultValue)) />
+                }
+                @if (_patientTaskData.Task.TaskType == ResourceConstants.R_QUESTIONNAIRE_KEY)
+                {
+                    <span class="mt-2"></span>
+                    <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                                     ResourceKey=@ResourceConstants.R_RECOMMENDATION_TEXT_KEY />
+                    <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                     Value=@(string.IsNullOrWhiteSpace(_patientTaskData.Task.Recommendation) ? Constants.SYMBOL_DOUBLE_HYPHEN : _patientTaskData.Task.Recommendation) />
+
+                    if (_patientTaskData.ErrCode == ErrorCode.OK && GenericMethods.IsListNotEmpty(_patientTaskData.Items))
+                    {
+                        foreach (var x in _patientTaskData.Items)
+                        {
+                            MarkupString markUpString = new MarkupString(x.OptionText);
+                            @markUpString
+                        }
+                    }
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_patientTaskData.Task.Status == ResourceConstants.R_NEW_STATUS_KEY && _patientTaskData.Task.ProgramID == 0 && LibPermissions.HasPermission(_patientTaskData.FeaturePermissions, AppPermissions.PatientTaskDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                  OnValueChanged=@OnRemoveClick />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideConfirmationPopup
+                                   Actions=@_actionData
+                                   OnValueChanged=@OnDeleteConfirmationPopUpClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_OK_ACTION_KEY
+                              OnValueChanged=@OnCloseIconClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

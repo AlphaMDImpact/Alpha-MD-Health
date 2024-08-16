@@ -1,0 +1,27 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/SMSAuthenticationView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              ShowPopup=@ShowPopup
+              IsPopup=@IsPopup
+              ShowClose=@ShowClose
+              PageTitle=@PageTitle
+              CurrentPage=@this
+              PageResources=@_authData.Resources
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <OtpComponent @bind-Value=@Value
+                          PageData=@_authData
+                          OnResendClicked=@OnResendLabelClickAsync />
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_VERIFY_ACTION_KEY
+                              Class="mt-3 mb-8"
+                              OnValueChanged=@OnVerifyButtonClickAsync />
+        </PageFooter>
+    </BasePage>
+}

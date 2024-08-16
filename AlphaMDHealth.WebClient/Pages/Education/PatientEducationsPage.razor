@@ -1,0 +1,70 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientEducationsView"
+@page "/PatientEducationsView/{pageid:long}"
+@page "/PatientEducationsView/{patienteducationid:long}"
+@page "/PatientEducationsView/{pageid:long}/{patienteducationid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_patientEducationData.ErrCode != ErrorCode.OK)
+              PageResources=@_patientEducationData.Resources
+              ApplyCard=@(IsPatientMobileView ? false : !_isDashboardView)
+              ApplyParentStructure=@(!ShowDetailPage)
+              ApplyFixedFooter=@(IsPatientMobileView ? !_isDashboardView : false)
+              ApplyStructure=@(_patientEducationData.RecordCount < 1 && !_patientEducationData.IsMedicalHistory)
+              ActionButtons=@(IsPatientMobileView ?_actionButtons:null) >
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                @if (_showPreview)
+                {
+                    <ContentPreviewPage PageId=@_selectedEducationID
+                                        IsEducationPreview=@true
+                                        PatientEducationIDs=@_selectedEducationID.ToString()
+                                        IsAccordion=true
+                                        OnClose=@OnPreviewClosedAsync />
+                }
+                else
+                {
+                    <AssignEducationPage PageID=@_selectedEducationID
+                                         ShowDetailPage=true
+                                         IsAccordion=true
+                                         ProgramEducationID=@_programEducationID
+                                         PatientEducationID=@_patientEducationID
+                                         OnClose=@OnAddEditClosedAsync />
+                }
+            }
+            else
+            {
+                @if (_patientEducationData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@(AppState.IsPatient ? _categorywiseEducations : _patientEducationData.PatientEducations)
+                                     DataSourceType=@PatientEducationModel
+                                     ShowAddButton=@(!_isDashboardView && LibPermissions.HasPermission(_patientEducationData.FeaturePermissions, AppPermissions.PatientEducationAddEdit.ToString()))
+                                     ShowSearch=@(!_isDashboardView)
+                                     TableStructure=@GenerateTableStructure()
+                                     SourceFieldStructure=@getViewCellModel()
+                                     ShowPagination=@(!_isDashboardView)
+                                     ShowViewAll=@(_isDashboardView)
+                                     IsPatientMobileView=@IsPatientMobileView
+                                     IsGroupedData=@_isGoupedData
+                                     ShowMoreGroupedData=@_isGoupedData
+                                     ActionButtons=@(!_isGoupedData ? _actionButtons : null)
+                                     OnViewClicked=@((e) => OnViewAllClickedAsync((PatientEducationModel)e))
+                                     TableHeader=@(IsPatientMobileView ? (_isDashboardView || _isGoupedData ? LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientEducationsView.ToString())
+                                                     : _categorywiseEducations?[0].CategoryName) : LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientEducationsView.ToString()))
+                                     OnValueChanged=@((e) => OnAddEditClick((PatientEducationModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_patientEducationData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

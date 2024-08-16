@@ -1,0 +1,45 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientBillsView"
+@page "/PatientBillsView/{patientbillid:guid}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error 
+              @bind-Success=@Success 
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(Parameters?.Count < 1)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientBillsView.ToString())
+              ShowPageTitle=@(_billData.ErrCode != ErrorCode.OK)
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              PageResources=@_billData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PatientBillPage  IsAccordion=true PatientBillID=@_patientBillID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_billData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientBillsView.ToString())
+                                     DataSource=@_billData.PatientBills
+                                     DataSourceType=@PatientBillModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowSearch=@(_billData.RecordCount < 1)
+                                     ShowViewAll=@(_billData.RecordCount > 0)
+                                     ShowPagination=@(_billData.RecordCount < 1)
+                                     ShowAddButton=@(_billData.RecordCount < 1 && LibPermissions.HasPermission(_billData.FeaturePermissions, AppPermissions.PatientBillAddEdit.ToString()))
+                                     OnValueChanged=@(e => OnAddEditClick((PatientBillModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_billData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

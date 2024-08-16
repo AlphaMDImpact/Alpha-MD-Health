@@ -1,0 +1,70 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inject TooltipService tooltipService
+@using Radzen
+@using Radzen.Blazor
+
+<div id=@string.Concat(ResourceKey, FieldType) class=@BaseClass>
+    @if (ShowHeader && (!string.IsNullOrWhiteSpace(Title) || !string.IsNullOrWhiteSpace(_resource?.ResourceValue)))
+    {
+        <AmhLabelControl UniqueID=@string.Concat(ResourceKey, FieldType, "headerLabel")
+                         For=@For
+                         Class="control-label"
+                         FieldType=@(IsControlEnabled?FieldTypes.PrimarySmallHStartVCenterBoldLabelControl:FieldTypes.TertiarySmallHStartVCenterBoldLabelControl)>
+            <ValueControl>
+                @((MarkupString)(string.IsNullOrWhiteSpace(Title) ? _resource?.ResourceValue : Title))
+                @if (_resource != null && IsControlEnabled)
+                {
+                    @if (_resource.IsRequired)
+                    {
+                        <AmhLabelControl ResourceKey=@string.Concat(ResourceKey, FieldType, "errorLabel")
+                                         FieldType=@FieldTypes.ErrorHStartVCenterBoldLabelControl
+                                         Value="*" />
+                    }
+                    @if (!string.IsNullOrWhiteSpace(_resource.InfoValue))
+                    {
+                        
+                        <RadzenButton @ref="radzenButton"
+                                      ButtonStyle="@ButtonStyle.Light"
+                                      Style="font-weight: var(--font-weight-bold); margin-left:-4px; margin-right:-4px; background-color: transparent;box-shadow: unset; min-height: 1.5rem; padding:0px;"
+                                      MouseEnter="@(args => ShowTooltip(radzenButton.Element, new TooltipOptions(){ Style = "background-color: var(--accent-color); color: var(--generic-background-color); max-width:350px; text-wrap:pretty; margin-top:-25px", Position= TooltipPosition.Bottom, Duration=null }))"
+                                      MouseLeave="@(args=>HideTooltip(radzenButton.Element, new TooltipOptions()))"
+                                      Click="@(args => ShowTooltip(radzenButton.Element, new TooltipOptions(){ Style = "background-color: var(--accent-color); color: var(--generic-background-color); max-width:350px; text-wrap:pretty; margin-top:-25px", Position= TooltipPosition.Bottom, Duration=null }))" >
+                            <AmhFieldIcon LeftIcon="@($"{ImageConstants.WEB_IMAGE_PATH}{ImageConstants.I_INFO_ICON}")" ></AmhFieldIcon>
+                        </RadzenButton>
+                    }
+                }
+            </ValueControl>
+        </AmhLabelControl>
+    }
+    @ChildControl
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <AmhLabelControl ResourceKey=@string.Concat(ResourceKey, FieldType, "errorLabel")
+                         FieldType=@FieldTypes.ErrorHStartVCenterLabelControl
+                         Style="font-size:13px; margin-top:-2px;"
+                         Value=@ErrorMessage />
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Content to be wrapped in BasePage
+    /// </summary>
+    [Parameter]
+    public RenderFragment ChildControl { get; set; }
+
+    /// <summary>
+    /// Provide label for Field to associate with
+    /// </summary>
+    [Parameter]
+    public string For { get; set; }
+
+    private RadzenButton radzenButton;
+
+    [Parameter]
+    public string Style { get; set; }
+
+    private void ShowTooltip(ElementReference elementReference, TooltipOptions options = null) => tooltipService.OpenOnTheBottom(elementReference, _resource.InfoValue, options);
+
+    private void HideTooltip(ElementReference elementReference, TooltipOptions options = null) => tooltipService.Close();
+}

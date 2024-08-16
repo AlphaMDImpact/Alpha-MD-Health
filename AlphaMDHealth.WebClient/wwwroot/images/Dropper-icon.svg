@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="6px" height="4px" viewBox="0 0 6 4" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>Dropper-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Welcome" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Add-Questionnaire" transform="translate(-1385.000000, -177.000000)">
+            <g id="Model-Pop" transform="translate(920.000000, 0.000000)">
+                <g id="Input-/-Field-/-Large-/-With-Label" transform="translate(30.000000, 135.000000)">
+                    <g id="Input-/-Field-/-Medium-/-Right-Icon" transform="translate(0.000000, 24.000000)">
+                        <g id="Group" transform="translate(433.000000, 15.000000)">
+                            <g id="Dropper-icon">
+                                <rect id="Rectangle" fill-opacity="0" fill="#D8D8D8" x="0" y="0" width="10" height="10"></rect>
+                                <path d="M2.66496403,4.77579137 L4.2407434,6.61420063 C4.60016555,7.03352647 5.23146553,7.08208801 5.65079137,6.72266586 C5.68967018,6.68934117 5.72593191,6.65307944 5.7592566,6.61420063 L7.33503597,4.77579137 C7.69445812,4.35646553 7.64589658,3.72516555 7.22657074,3.3657434 C7.04532763,3.21039216 6.81449064,3.125 6.57577936,3.125 L3.42422064,3.125 C2.87193589,3.125 2.42422064,3.57271525 2.42422064,4.125 C2.42422064,4.36371127 2.5096128,4.59454826 2.66496403,4.77579137 Z" id="Path" fill="#212121" fill-rule="nonzero"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

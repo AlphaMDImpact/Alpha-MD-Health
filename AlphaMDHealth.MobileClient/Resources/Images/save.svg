@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="70px" height="70px" viewBox="0 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Save-tick-square</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Save-tick-square" fill-rule="nonzero">
+            <rect id="Rectangle" fill="#FFFFFF" opacity="0" x="0" y="0" width="70" height="70" rx="8"></rect>
+            <path d="M64.5683946,11.9318351 C65.811026,10.6893118 67.8256419,10.6893995 69.068165,11.9320309 C70.2452923,13.1092607 70.3071675,14.9793519 69.2538482,16.2294224 L69.0679691,16.4318013 L28.4163207,57.0799093 C27.2391272,58.2570002 25.3691058,58.318913 24.1190291,57.2656763 L23.9166483,57.0798113 L0.93193287,34.095096 C-0.31064429,32.8525187 -0.31064429,30.8379028 0.93193287,29.5953255 C2.10911142,28.4181471 3.97919992,28.3561903 5.22931624,29.4094553 L5.43170342,29.5953255 L26.1656818,50.3304546 L64.5683946,11.9318351 Z" id="Stroke-1" fill="#0078D3"></path>
+        </g>
+    </g>
+</svg>

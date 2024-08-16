@@ -1,0 +1,43 @@
+﻿@namespace AlphaMDHealth.WebClient
+@page "/SubscaleScoresView"
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              ShowDetailPage=@true
+              CurrentPage=@this
+              PageResources=@_questionnaireData.Resources
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.SubscalesScoreView.ToString())
+              ShowPageTitle=@ShowPageTitle
+              IsAccordion=@IsAccordion>
+        <ChildContent>
+            @if (_showAddEditPage)
+            {
+                <SubscalesScorePage SubscaleRangeID=@_subscaleRange
+                                    QuestionnaireID=@QuestionnaireID
+                                    QuestionnaireData=@_questionnaireData
+                                    IsAccordion=@IsAccordion
+                                    QuestionnaireSubscaleRanges=@_questionnaireData.QuestionnaireSubscaleRanges
+                                    OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_questionnaireData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.SubscalesScoreView.ToString())
+                                     DataSource=@_questionnaireData.QuestionnaireSubscaleRanges.Where(x => x.IsActive == true).ToList()
+                                     DataSourceType=@QuestionnaireSubscaleRangesModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.SubscaleAddEdit.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((QuestionnaireSubscaleRangesModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_questionnaireData.ErrCode.ToString() Class="mt-2" />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

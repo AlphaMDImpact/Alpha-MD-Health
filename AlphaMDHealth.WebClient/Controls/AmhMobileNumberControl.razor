@@ -1,0 +1,222 @@
+﻿@using System.Globalization;
+@using MudBlazor;
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <div class=@AppState.ClassName("input-primary input-primary-mobile i pt-1" + Class) style="display:flex">
+            <div style="col-2">
+                <MudSelect T="string" @bind-Value=@_countryCode
+                           SelectedValuesChanged=@OnSelectionChanged
+                           DisableUnderLine=true
+                           Immediate=true
+                           Disabled=@(!IsControlEnabled)
+                           Class="pl-3"
+                           Style="height:inherit !important;">
+                    @if (CountryCodes?.Count > 0)
+                    {
+                        @foreach (var code in CountryCodes)
+                        {
+                            <MudSelectItem Value=@(code.CountryCode)
+                                           Disabled=@(!IsControlEnabled)
+                                           Class=@AppState.ClassName("mud-typography" + Class) />
+                        }
+                    }
+                </MudSelect>
+            </div>
+            <div style="col-8; width:100%" >
+                <MudNumericField @bind-Value=@PhoneNumber
+                                 Placeholder=@_resource?.PlaceHolderValue
+                                 MaxLength=@_maxLength
+                                 HideSpinButtons=true
+                                 DisableUnderLine=true
+                                 Immediate=true
+                                 Disabled=@(!IsControlEnabled)
+                                 Pattern=@Constants.PhoneRegexReplaceString
+                                 Style="margin-top:-4px !important;" />
+            </div>
+        </div>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private int _maxLength;
+    private int _minLength;
+    private string? _countryCode;
+
+    private string _value;
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                SetValues();
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(_value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private string? _phoneNumber;
+    private string? PhoneNumber
+    {
+        get
+        {
+            return _phoneNumber;
+        }
+        set
+        {
+            if (value != _phoneNumber)
+            {
+                if (value != _phoneNumber)
+                {
+                    _phoneNumber = value;
+                }
+                ValidateControl(IsButtonClick);
+            }
+        }
+    }
+
+    /// <summary>
+    /// List of Country Codes
+    /// </summary>
+    [Parameter]
+    public List<CountryModel> CountryCodes { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        SetDefaultCountryCode();
+        return base.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _minLength = _minLength == 0 ? Convert.ToInt32(_resource?.MinLength ?? 0) : _minLength;
+        _maxLength = _maxLength == 0 ? Convert.ToInt32(_resource?.MaxLength ?? 0) : _maxLength;
+        base.OnParametersSet();
+    }
+
+    private void SetDefaultCountryCode()
+    {
+        if (string.IsNullOrWhiteSpace(_countryCode))
+        {
+            if (!string.IsNullOrWhiteSpace(AppState.CountryCode))
+            {
+                _countryCode = CountryCodes?.FirstOrDefault(x => x.CountryCulture == AppState.CountryCode)?.CountryCode;
+            }
+            if (string.IsNullOrWhiteSpace(_countryCode))
+            {
+                _countryCode = CountryCodes?.FirstOrDefault()?.CountryCode;
+            }
+            UpdateMinMaxLength();
+        }
+    }
+
+    private void SetValues()
+    {
+        if (!string.IsNullOrWhiteSpace(_value))
+        {
+            var mobileNumberParts = _value?.Split('-');
+            if (mobileNumberParts?.Length == 2)
+            {
+                if (!string.IsNullOrWhiteSpace(mobileNumberParts[0]))
+                {
+                    _countryCode = mobileNumberParts[0];
+                }
+                if (!string.IsNullOrWhiteSpace(mobileNumberParts[1]))
+                {
+                    _phoneNumber = mobileNumberParts[1];
+                }
+                UpdateMinMaxLength();
+            }
+        }
+    }
+
+    private void OnSelectionChanged(IEnumerable<string> newValues)
+    {
+        var selectedValues = newValues;
+        if (selectedValues?.Count() > 0)
+        {
+            UpdateMinMaxLength();
+        }
+        PhoneNumber = string.Empty;
+        ErrorMessage = string.Empty;
+    }
+
+    private void UpdateMinMaxLength()
+    {
+        var selectedOption = CountryCodes?.FirstOrDefault(item => item.CountryCode == _countryCode);
+        if (selectedOption != null)
+        {
+            _minLength = (int)selectedOption.MobileNumberLength;
+            _maxLength = (int)selectedOption.MobileNumberLengthMax;
+        }
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {   
+        Value = _countryCode + Constants.SYMBOL_DASH + _phoneNumber;
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            bool isEmpty = string.IsNullOrWhiteSpace(_countryCode) || string.IsNullOrWhiteSpace(_phoneNumber);
+            if (Validator.HasRequiredValidationError(_resource, !isEmpty))
+            {
+                if (string.IsNullOrWhiteSpace(_countryCode))
+                {
+                    ErrorMessage = "Country Code must be selected";
+                }
+                else if (string.IsNullOrWhiteSpace(_phoneNumber))
+                {
+
+                    ErrorMessage = GetRequiredResourceValue();
+                }
+            }
+            else if (!isEmpty)
+            {
+                var phoneNumberLength = PhoneNumber?.Length;
+                if (_minLength != 0 && phoneNumberLength < _minLength)
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_LENGTH_VALIDATION_KEY)
+                        , _minLength, _maxLength);
+                }
+                else if(phoneNumberLength == _minLength)
+                {
+                    ErrorMessage = string.Empty;
+                }
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }               
+}

@@ -1,0 +1,100 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ProgramReadingAddEdit.ToString())
+              OnClose=@OnClose
+              IsAccordion=@IsAccordion
+              ApplyFixedFooter=true
+              PageResources=@_readingMasterData.Resources
+              RegisterComp=@RegisterControl
+              ApplyCard=true
+              PageOperation=@GetPageOperationType(true, ProgramReadingID == 0)>
+        <ChildContent>
+            <AmhEntryControl ResourceKey=@ResourceConstants.R_READING_TYPE_KEY
+                             Value=@_readingMasterData.ReadingMetadata.Reading
+                             IsControlEnabled=@false />
+
+            <AmhEntryControl ResourceKey=@ResourceConstants.R_READING_CODE_KEY
+                             Value=@_readingMasterData.ReadingMetadata.ReadingCode
+                             IsControlEnabled=@false />
+
+            <AmhNumericEntryControl ResourceKey=@ResourceConstants.R_SEQUENCE_NO_KEY
+                                    Value=@_readingMasterData?.ReadingMetadata?.SequenceNo
+                                    IsControlEnabled=@false />
+
+            <AmhDropdownControl @bind-Options=@_readingMasterData.FrequencyType
+                                ResourceKey=@ResourceConstants.R_READING_FREQUENCY_KEY />
+
+            <AmhRadioButtonListControl @bind-Options=@_readingMasterData.ValueAddedByType
+                                       ResourceKey=@ResourceConstants.R_VALUE_CAN_BE_ADDED_BY_KEY />
+
+            <AmhRadioButtonListControl Options=@_readingMasterData.ManualReadingType
+                                       Value=@(_readingMasterData.ReadingMetadata.AllowManualAdd? "1": "0")
+                                       ResourceKey=@ResourceConstants.R_ALLOW_MANUAL_READING_KEY
+                                       ValueChanged=@(e => SetBooleanValue(e,x =>_readingMasterData.ReadingMetadata.AllowManualAdd = x)) />
+
+            <AmhRadioButtonListControl Options=@_readingMasterData.HealthKitDataType
+                                       Value=@(_readingMasterData.ReadingMetadata.AllowHealthKitData? "1": "0")
+                                       ResourceKey=@ResourceConstants.R_ALLOW_HEALTH_KIT_DATA_KEY
+                                       ValueChanged=@(e => SetBooleanValue(e,x =>_readingMasterData.ReadingMetadata.AllowHealthKitData = x)) />
+
+            @if (_readingMasterData.ReadingMetadata.AllowHealthKitData)
+            {
+                <AmhNumericEntryControl ResourceKey=@ResourceConstants.R_READ_HISTORY_DATA_KEY
+                                        Value=@_readingMasterData?.ReadingMetadata?.DaysOfPastRecordsToSync
+                                        OnValueChanged=@(e => { OnReadHistoryDataValueChanged(Convert.ToByte(e)); }) />
+            }
+            <AmhRadioButtonListControl Options=@_readingMasterData.DeviceDataType
+                                       Value=@(_readingMasterData.ReadingMetadata.AllowDeviceData? "1": "0")
+                                       ResourceKey=@ResourceConstants.R_ALLOW_DEVICE_DATA_KEY
+                                       ValueChanged=@(e => SetBooleanValue(e,x =>_readingMasterData.ReadingMetadata.AllowDeviceData = x)) />
+
+            <AmhRadioButtonListControl Options=@_readingMasterData.ShowInGraphType
+                                       Value=@(_readingMasterData.ReadingMetadata.ShowInGraph? "1": "0")
+                                       ResourceKey=@ResourceConstants.R_SHOW_IN_GRAPH_KEY
+                                       ValueChanged=@(e => SetBooleanValue(e,x =>_readingMasterData.ReadingMetadata.ShowInGraph = x)) />
+
+            <AmhRadioButtonListControl Options=@_readingMasterData.ShowInDataType
+                                       Value=@(_readingMasterData.ReadingMetadata.ShowInData? "1": "0")
+                                       ResourceKey=@ResourceConstants.R_SHOW_IN_DATA_KEY
+                                       ValueChanged=@(e => SetBooleanValue(e,x =>_readingMasterData.ReadingMetadata.ShowInData = x)) />
+
+            <AmhRadioButtonListControl Options=@_readingMasterData.ShowInDifferentLinesType
+                                       Value=@(_readingMasterData.ReadingMetadata.ShowInDifferentLines? "1": "0")
+                                       ResourceKey=@ResourceConstants.R_SHOW_IN_DIFFERENT_LINES_KEY
+                                       ValueChanged=@(e => SetBooleanValue(e,x =>_readingMasterData.ReadingMetadata.ShowInDifferentLines = x)) />
+
+            <AmhNumericEntryControl ResourceKey=@ResourceConstants.R_SUMMARY_RECORD_KEY
+                                    Value=@_readingMasterData?.ReadingMetadata?.SummaryRecordCount
+                                    OnValueChanged=@(e => { OnSummaryRecordValueChanged(Convert.ToByte(e)); }) />
+
+            <AmhDropdownControl @bind-Options=@_readingMasterData.ChartType
+                                ResourceKey=@ResourceConstants.R_CHART_TYPE_KEY />
+
+            <AmhCheckBoxListControl @bind-Value=@_readingMasterData.ReadingMetadata.ReadingFilters
+                                    Options=@_readingMasterData.FilterType
+                                    ResourceKey=@ResourceConstants.R_DURATION_KEY />
+
+            <AmhRadioButtonListControl Options=@_readingMasterData.CanBeDeletedType
+                                       Value=@(_readingMasterData.ReadingMetadata.AllowDelete? "1": "0")
+                                       ResourceKey=@ResourceConstants.R_CAN_BE_DELETED_KEY
+                                       ValueChanged=@(e => SetBooleanValue(e,x =>_readingMasterData.ReadingMetadata.AllowDelete = x)) />
+                                        
+            <AmhNumericEntryControl ResourceKey=@ResourceConstants.R_DIGITS_AFTER_DECIMAL_POINT
+                                    Value=@_readingMasterData?.ReadingMetadata?.DigitsAfterDecimalPoint
+                                    OnValueChanged=@(e => { OnDigitsAfterDecimalPointValueChanged(Convert.ToByte(e)); }) />
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                              OnValueChanged=@OnSaveButtonClickedAsync />
+
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

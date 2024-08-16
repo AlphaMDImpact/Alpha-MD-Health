@@ -1,0 +1,356 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@using BlazorBootstrap
+@using Radzen
+@using Radzen.Blazor
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              OnClose=@OnClose
+              ApplyStructure=@(!IsShowAddEditPage)
+              ApplyFixedFooter=@(!IsShowAddEditPage)
+              PageOperation=@GetPageOperationType(_isEditable, ProgramID == 0)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ProgramAddEdit.ToString())
+              ApplyCard=false
+              Content2Class="col-12"
+              PageResources=@_programData?.Resources
+              ApplyParentStructure=@(!IsShowAddEditPage)
+              RegisterComp=@RegisterControl>
+
+        <ChildContent>
+            @if (IsShowAddEditPage)
+            {
+                @switch (_selectedTab)
+                {
+                    case AppPermissions.ProgramTasksView:
+                        <ProgramTaskPage SelectedTaskID=@_selectedID
+                                         ProgramID=@ProgramID
+                                         ProgramDuration=@_programData.Program.ProgramDuration
+                                         OnClose=@OnAddEditPageClosed
+                                         IsAccordion=true
+                                         IsSynced=@_programData.Program.IsSynced />
+                        break;
+                    case AppPermissions.SubflowsView:
+                        <ProgramSubFlowPage ProgramID=@ProgramID
+                                            SubflowID=@_selectedID
+                                            ProgramDuration=@_programData.Program.ProgramDuration
+                                            OnClose=@OnAddEditPageClosed
+                                            IsAccordion=true
+                                            IsSynced=@_programData.Program.IsSynced />
+                        break;
+                    case AppPermissions.ProgramCaregiversView:
+                        <ProgramCareGiverPage SelectedProgramCareGiverID=@_selectedID
+                                              ProgramID=@_programData.Program.ProgramID
+                                              IsAccordion=true
+                                              ProgramDuration=@_programData.Program.ProgramDuration
+                                              OnClose=@OnAddEditPageClosed />
+                        break;
+                    case AppPermissions.ProgramReadingsView:
+                        @if (_shouldShowConfigureRange)
+                        {
+                            <ProgramReadingRangesPage ProgramReadingID=@_selectedID
+                                                      IsAccordion=true
+                                                      ShowDetailPage=true
+                                                      OnClose=@(e=>{ _shouldShowConfigureRange = false; OnAddEditPageClosed(e);}) />
+                        }
+                        else if (_shouldShowConfigureReading)
+                        {
+                            <ProgramReadingMetadataPage ProgramReadingID=@_selectedID
+                                                        IsAccordion=true
+                                                        OnClose=@(e=>{ _shouldShowConfigureReading = false; OnAddEditPageClosed(e);}) />
+                        }
+                        else
+                        {
+                            <ProgramReadingPage ProgramReadingID=@_selectedID
+                                                ProgramID=@ProgramID
+                                                IsAccordion=true
+                                                OnClose=@OnAddEditPageClosed
+                                                IsSynced=@_programData.Program.IsSynced />
+                        }
+                        break;
+                    case AppPermissions.ProgramEducationsView:
+                        <ProgramEducationPage SelectedProgramEducationID=@_selectedID
+                                              ProgramID=@ProgramID
+                                              IsAccordion=true
+                                              ProgramDuration=@_programData.Program.ProgramDuration
+                                              OnClose=@OnAddEditPageClosed
+                                              IsSynced=@_programData.Program.IsSynced />
+                        break;
+                    case AppPermissions.ProgramMedicationsView:
+                        <PatientMedicationPage ProgramID=@ProgramID
+                                               ProgramMedicationID=@_selectedID
+                                               IsAccordion=true
+                                               ProgramDuration=@_programData.Program.ProgramDuration
+                                               ApplyFixedFooter=true
+                                               OnClose=@OnAddEditPageClosed
+                                               IsSynced=@_programData.Program.IsSynced />
+                        break;
+                    case AppPermissions.ProgramTrackersView:
+                        <ProgramTrackerPage ProgramID=@ProgramID
+                                            ProgramTrackerID=@_selectedID
+                                            IsAccordion=true
+                                            ProgramDuration=@_programData.Program.ProgramDuration
+                                            OnClose=@ProgramTrackerClosedEventCallback
+                                            IsSynced=@_programData.Program.IsSynced />
+                        break;
+                    case AppPermissions.PatientProviderNoteTypesView:
+                        <ProgramNoteTypePage ProgramID=@ProgramID
+                                             ProgramNoteID=@_selectedID
+                                             IsAccordion=true
+                                             IsSynced=_programData.Program.IsSynced
+                                             OnClose=@ProgramNoteTypeClosedEventCallback />
+                        break;
+                    case AppPermissions.ProgramBillingItemsView:
+                        <ProgramBillingItemPage ProgramID=@ProgramID
+                                                IsAccordion=true
+                                                ProgramBillingItemID=@_selectedID
+                                                OnClose=@ProgramBillingItemPageClosedEventCallback />
+                        break;
+                    case AppPermissions.ProgramReasonsView:
+                        <ProgramReasonPage ProgramID=@ProgramID
+                                           ProgramReasonID=@_selectedID
+                                           IsAccordion=true
+                                           OnClose=@OnAddEditPageClosed
+                                           IsSynced=@_programData.Program.IsSynced />
+                        break;
+
+                    case AppPermissions.ProgramServicesView:
+                        <ProgramServicePage ProgramID=@ProgramID
+                                            ProgramExternalServiceID=@_selectedID
+                                            IsAccordion=true
+                                            OnClose=@OnAddEditPageClosed
+                                            IsSynced=@_programData.Program.IsSynced />
+                        break;
+                }
+            }
+            else
+            {
+                <Card Class="p-4 mt-3 mb-3">
+                    <AmhLanguageTabControl LanguageTabData=@_dataFormatter
+                                           DataSource=@_programData.LanguageDetails
+                                           DataSourceType=@ProgramDetails
+                                           IsControlEnabled=@_isEditable />
+
+                    <AmhDropdownControl @bind-Options=@_programData.ProgramTypes
+                                        ResourceKey=@ResourceConstants.R_PROGRAM_DURATION_TYPE_KEY
+                                        OnValueChanged=@(e => { OnProgramTypeSelectionChange(e); })
+                                        IsControlEnabled=@_isEditable />
+
+                    @if (_programData.Program.ProgramTypeID == LibResources.GetResourceKeyIDByKey(_programData.Resources, ResourceConstants.R_TIME_BOUNDED_PROGRAM_KEY))
+                    {
+                        <AmhNumericEntryControl @bind-Value=@_programDuration
+                                                ResourceKey=@ResourceConstants.R_PROGRAM_DURATION_KEY
+                                                IsControlEnabled=@_isEditable />
+                    }
+                    <AmhColorPickerControl @bind-Value=@_programData.Program.ProgramGroupIdentifier
+                                           ResourceKey=@ResourceConstants.R_DEFAULT_PROGRAM_INDENTIFIER_COLOR_KEY
+                                           IsControlEnabled=@_hasPermission />
+
+                    <AmhDropdownControl @ref=@_inputRef
+                                        @bind-Options=@_programData.SupportedCodes
+                                        ResourceKey=@ResourceConstants.R_SUPPORTED_CODE_SYSTEM_KEY
+                                        OnValueChanged=@(e => { OnSelectionChange(e); })
+                                        IsControlEnabled=@_hasPermission />
+
+                    <AmhCheckBoxListControl ShowHeader=@false
+                                            ResourceKey=@ResourceConstants.R_ALLOW_SELF_REGISTRATION_KEY
+                                            Options=@GetSelfRegistrationOption()
+                                            OnValueChanged=@(e => { GetSelfRegistrationClicked(e.ToString()); })
+                                            IsControlEnabled=@_hasPermission />
+
+                    <AmhCheckBoxListControl ShowHeader=@false
+                                            ResourceKey=@ResourceConstants.R_ALLOW_PROVIDER_TO_SCAN_KEY
+                                            Options=@GetProviderToScanOption()
+                                            OnValueChanged=@(e => { GetProviderToScanClicked(e.ToString()); })
+                                            IsControlEnabled=@_hasPermission />
+
+                    <AmhCheckBoxListControl ShowHeader=@false
+                                            ResourceKey=@ResourceConstants.R_ALLOW_PATIENT_TO_SCAN_KEY
+                                            Options=@GetPatientToScanOption()
+                                            OnValueChanged=@(e => { GetPatientToScanClicked(e.ToString()); })
+                                            IsControlEnabled=@_hasPermission />
+
+                    <AmhCheckBoxListControl ShowHeader=@false
+                                            ResourceKey=@ResourceConstants.R_ALLOW_PATIENTS_TO_BUY_CREDITS_DIRECTLY_KEY
+                                            Options=@GetPatientToBuyCreditsOption()
+                                            OnValueChanged=@(e => { GetPatientToBuyCreditsClicked(e.ToString()); })
+                                            IsControlEnabled=@_hasPermission />
+
+                    <AmhCheckBoxListControl ShowHeader=@false
+                                            ResourceKey=@ResourceConstants.R_ALLOW_PROGRAM_TO_BUY_CREDICTS_DIRECTLY_KEY
+                                            Options=@GetProgramToBuyCreditsOption()
+                                            OnValueChanged=@(e => { GetProgramToBuyCreditsClicked(e.ToString()); })
+                                            IsControlEnabled=@_hasPermission />
+                </Card>
+
+                
+            }
+        </ChildContent>
+        <ChildContent2>
+            @if (!IsShowAddEditPage) {
+                <Card Class="p-4 mt-3">
+                    @if (_programData.Program.ProgramID > 0 && _tabsData?.Count > 0)
+                    {
+                        <AmhTabControl Options=@_tabsData
+                                       FieldType=@FieldTypes.TabControl
+                                       OnValueChanged=@(e => { OnProgramTabSelectionValueChanged(e) ;}) />
+
+                        @switch (_selectedTab)
+                        {
+                            case AppPermissions.ProgramTasksView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.Tasks.Where(x => x.IsActive).ToList()
+                                                 DataSourceType=@TaskModel
+                                                 TableStructure=@GenerateTableStructure(nameof(TaskModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramTaskAddEditClick((TaskModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.ProgramTaskAddEdit.ToString()) && _programData.Program.IsSynced)
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.SubflowsView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.SubFlows.Where(x => x.IsActive).ToList()
+                                                 DataSourceType=@SubFlowModel
+                                                 TableStructure=@GenerateTableStructure(nameof(SubFlowModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramSubFlowAddEditClick((SubFlowModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.SubflowAddEdit.ToString()) && _programData.Program.IsSynced)
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.ProgramCaregiversView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramCareGivers.Where(x => x.IsActive).ToList()
+                                                 DataSourceType=@CaregiverModel
+                                                 TableStructure=@GenerateTableStructure(nameof(CaregiverModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramCareGiverAddEditClick((CaregiverModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.ProgramCaregiverAddEdit.ToString()))
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.ProgramReadingsView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramReadings.Where(x => x.IsActive).ToList()
+                                                 DataSourceType=@ReadingModel
+                                                 TableStructure=@GenerateTableStructure(nameof(ReadingModel))
+                                                 ShowSearch=@true
+                                                 ShowPagination=@(_programData.RecordCount < 1)
+                                                 OnValueChanged=@((e) => OnProgramReadingAddEditClick((ReadingModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.ProgramReadingAddEdit.ToString()) && _programData.Program.IsSynced)
+                                                 OnActionClicked=@OnConfigureLinkClicked />
+                                break;
+                            case AppPermissions.ProgramEducationsView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramEducations.Where(x => x.IsActive).ToList()
+                                                 DataSourceType=@PatientEducationModel
+                                                 TableStructure=@GenerateTableStructure(nameof(PatientEducationModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramEducationAddEditClick((PatientEducationModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.ProgramEducationAddEdit.ToString()) && _programData.Program.IsSynced)
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.ProgramMedicationsView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramMedications.ToList()
+                                                 DataSourceType=@PatientMedicationModel
+                                                 TableStructure=@GenerateTableStructure(nameof(PatientMedicationModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramMedicationAddEditClick((PatientMedicationModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.ProgramMedicationAddEdit.ToString()) && _programData.Program.IsSynced)
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.ProgramTrackersView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramTrackers.Where(x => x.IsActive).ToList()
+                                                 DataSourceType=@ProgramTrackerModel
+                                                 TableStructure=@GenerateTableStructure(nameof(ProgramTrackerModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramTrackerAddEditClick((ProgramTrackerModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.ProgramTrackerAddEdit.ToString()) && _programData.Program.IsSynced)
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.PatientProviderNoteTypesView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramNotes
+                                                 DataSourceType=@ProgramNoteModel
+                                                 TableStructure=@GenerateTableStructure(nameof(ProgramNoteModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramNoteAddEditClick((ProgramNoteModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.PatientProviderNoteTypeAddEdit.ToString()))
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.ProgramBillingItemsView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramBillingItems.Where(x => x.IsActive).ToList()
+                                                 DataSourceType=@PatientBillModel
+                                                 TableStructure=@GenerateTableStructure(nameof(PatientBillModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramBillingItemAddEditClick((PatientBillModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions,AppPermissions.BillingItemAddEdit.ToString()))
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.ProgramConfigurationView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramConfigurations
+                                                 DataSourceType=@ProgramConfigurationModel
+                                                 TableStructure=@GenerateTableStructure(nameof(ProgramConfigurationModel))
+                                                 ShowSearch=@true
+                                                 ShowSaveButton=@true
+                                                 OnSaveClicked=@OnSaveProgramReasonConfigClickedAsync
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.ProgramReasonsView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.Reasons
+                                                 DataSourceType=@ReasonModel
+                                                 TableStructure=@GenerateTableStructure(nameof(ReasonModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramReasonAddEditClick((ReasonModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.ProgramReasonAddEdit.ToString()) && _programData.Program.IsSynced)
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                            case AppPermissions.ProgramServicesView:
+                                <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, _selectedTab.ToString())
+                                                 DataSource=@_programData.ProgramServices.Where(x => x.IsActive).ToList()
+                                                 DataSourceType=@ProgramServiceModel
+                                                 TableStructure=@GenerateTableStructure(nameof(ProgramServiceModel))
+                                                 ShowSearch=@true
+                                                 OnValueChanged=@((e) => OnProgramServiceAddEditClick((ProgramServiceModel)e))
+                                                 ShowAddButton=@(LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.ProgramServiceAddEdit.ToString()) && _programData.Program.IsSynced)
+                                                 ShowPagination=@(_programData.RecordCount < 1) />
+                                break;
+                        }
+                    }
+                </Card>
+                }
+        </ChildContent2>
+        <PageFooter>
+            @if (!IsShowAddEditPage)
+            {
+                @if (ProgramID > 0 && _programData.Tasks.Any(x => x.IsActive) && LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.ProgramPublish.ToString()))
+                {
+                    <AmhButtonControl ResourceKey=@(_programData.Program.IsPublished ? ResourceConstants.R_UNPUBLISH_KEY : ResourceConstants.R_PUBLISH_KEY)
+                                      OnValueChanged=@OnPublishButtonClicked />
+
+                    if (!_hidePublishUnpublishConfirmation)
+                    {
+                        <AmhMessageControl FieldType=@FieldTypes.TopHeadingWithCloseButtonPopupMessageControl
+                                           ResourceKey=@(_programData.Program.IsPublished ? ResourceConstants.R_UNPUBLISH_KEY : ResourceConstants.R_PUBLISH_KEY)
+                                           ShowHidePopup=@_hidePublishUnpublishConfirmation
+                                           Actions=@_messageButtonActions
+                                           OnValueChanged=@OnPopupOkClickAsync />
+                    }
+
+                }
+                @if (_hasPermission)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+                }
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClick />
+            }
+        </PageFooter>
+    </BasePage>
+}

@@ -1,0 +1,42 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@inject NavigationManager NavigationManager
+@page "/AddBulkUploadUserView"
+@page "/AddBulkUploadPatients"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@PageTitle
+              PageOperation=@PageOperationType.Add
+              OnClose=@OnClose
+              PageResources=@_userData.Resources
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhUploadControl ResourceKey=@ResourceConstants.R_UPLOAD_DOCUMENT_TEXT_KEY
+                              OnValueChanged=@OnAttachmentClick />
+
+            @if (!string.IsNullOrWhiteSpace(_userData.SampleFilePath))
+            {
+                <AmhLabelControl FieldType=@FieldTypes.LinkHStartVCenterLabelControl
+                                 ResourceKey=@ResourceConstants.R_DOWNLOAD_EXCEL_SAMPLE_TEXT_KEY
+                                 OnValueChanged=@OnDownloadSampleClick />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_isDownloadVisible)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DOWNLOAD_TEXT_KEY
+                                  OnValueChanged=@OnDownloadButtonClicked />
+            }
+
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                              OnValueChanged=@OnSaveButtonClickAsync />
+
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

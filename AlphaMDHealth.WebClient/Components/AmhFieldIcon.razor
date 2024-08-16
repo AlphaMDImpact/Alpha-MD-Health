@@ -1,0 +1,57 @@
+﻿@using Microsoft.Fast.Components.FluentUI
+
+@if (!string.IsNullOrWhiteSpace(LeftIcon))
+{
+    <FluentIcon Slot="start"
+                Value="@(Microsoft.Fast.Components.FluentUI.Icon.FromImageUrl(LeftIcon))"
+                Width="15px"
+                Style=@("margin-top: -2px;" + " "+ Style)
+                OnClick=LeftIconClicked />
+}
+@if (!string.IsNullOrWhiteSpace(RightIcon))
+{
+    <FluentIcon Slot="end"
+                Value="@(Microsoft.Fast.Components.FluentUI.Icon.FromImageUrl(RightIcon))"
+                Width="15px"
+                Style="margin-top: -2px;"
+                OnClick=RightIconClicked />
+}
+
+@code {
+    /// <summary>
+    /// left icon to display in fluent entry
+    /// </summary>
+    [Parameter]
+    public string LeftIcon { get; set; }
+
+    /// <summary>
+    /// right icon to display in fluent entry
+    /// </summary>
+    [Parameter]
+    public string RightIcon { get; set; }
+
+    /// <summary>
+    /// left icon click event
+    /// </summary>
+    [Parameter]
+    public EventCallback<object> LeftIconClick { get; set; }
+
+    /// <summary>
+    /// right icon click event
+    /// </summary>
+    [Parameter]
+    public EventCallback<object> RightIconClick { get; set; }
+
+    [Parameter]
+    public string Style { get; set; }
+
+    private void LeftIconClicked()
+    {
+        LeftIconClick.InvokeAsync();
+    }
+
+    private void RightIconClicked()
+    {
+        RightIconClick.InvokeAsync();
+    }
+}

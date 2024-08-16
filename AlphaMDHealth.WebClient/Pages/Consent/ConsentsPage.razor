@@ -1,0 +1,39 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ConsentsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error 
+              @bind-Success=@Success 
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_consentData.Resources
+              ApplyCard=true
+              ApplyFixedFooter=@(!ShowDetailPage)
+              ShowPageTitle=@(_consentData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <ConsentPage ConsentID=@_consentID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_consentData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_consentData.Consents
+                                     DataSourceType=@ConsentModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ConsentsView.ToString())
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_consentData.FeaturePermissions, AppPermissions.ConsentAddEdit.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((ConsentModel)e))
+                                     ShowPagination=@(_consentData.RecordCount < 1) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_consentData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

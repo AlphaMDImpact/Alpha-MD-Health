@@ -1,0 +1,93 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+@typeparam DataSourceType
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                IsValid=@IsValid
+                ResourceKey=@ResourceKey
+                ShowHeader=@ShowHeader
+                IsControlEnabled=@IsControlEnabled>
+    <ChildControl>
+        @if (DataSource?.Count() > 0)
+        {
+            <AmhTabControl @bind-Value=@_selectedLanguageID
+                           Options=@_languageOptions
+                           FieldType=@FieldTypes.TabControl
+                           IsControlEnabled=@IsControlEnabled>
+                <ChildContent>
+                    @if (_languageTabData != null && _languageTabData.Count > 0)
+                    {
+                        @foreach (var dtas in _languageTabData)
+                        {
+                            System.Reflection.PropertyInfo prop = typeof(DataSourceType).GetProperty(dtas.DataField);
+                            System.Reflection.PropertyInfo languageProp = typeof(DataSourceType).GetProperty("LanguageID");
+                            var data = DataSource?.FirstOrDefault(x => Convert.ToString(languageProp.GetValue(x)) == _selectedLanguageID.ToString());
+                            var id = $"LanguagesField-{languageProp.GetValue(data)}-"; 
+                            var selectedData = Convert.ToString(prop.GetValue(data));
+
+                            if (dtas.FieldType == FieldTypes.Default)
+                            {
+                                var resource = PageResources.FirstOrDefault(x => x.ResourceKey == dtas.ResourceKey);
+                                if (!string.IsNullOrWhiteSpace(resource.FieldType))
+                                {
+                                    dtas.FieldType = resource.FieldType.ToEnum<FieldTypes>();
+                                }
+                            }
+                            @switch (dtas.FieldType)
+                            {
+                                case FieldTypes.TextEntryControl:
+                                case FieldTypes.EmailEntryControl:
+                                case FieldTypes.AlphaEntryControl:
+                                case FieldTypes.AlphaNumericEntryControl:
+                                    <AmhEntryControl Value=@selectedData
+                                                     UniqueID=@id
+                                                     RegexExpression=@dtas.RegexPattern
+                                                     ResourceKey=@dtas.ResourceKey
+                                                     IsControlEnabled=@IsControlEnabled
+                                                     @bind-IsButtonClick=@IsButtonClick
+                                                     OnValueChanged=@(e => { OnFieldValueChanged(e, dtas.DataField); }) />
+                                    break;
+                                case FieldTypes.NumericEntryControl:
+                                case FieldTypes.DecimalEntryControl:
+                                case FieldTypes.CounterEntryControl:
+                                    double? value = Convert.ToDouble(selectedData);
+                                    <AmhNumericEntryControl Value=@Convert.ToDouble(selectedData)
+                                                            UniqueID=@id
+                                                            ResourceKey=@dtas.ResourceKey
+                                                            @bind-IsButtonClick=@IsButtonClick
+                                                            IsControlEnabled=@IsControlEnabled
+                                                            OnValueChanged=@(e => { OnFieldValueChanged(e, dtas.DataField); }) />
+                                    break;
+                                case FieldTypes.MobileNumberControl:
+                                    <AmhMobileNumberControl Value=@selectedData
+                                                            UniqueID=@id
+                                                            @bind-IsButtonClick=@IsButtonClick
+                                                            ResourceKey=@dtas.ResourceKey
+                                                            CountryCodes=@dtas.CountryCodes
+                                                            OnValueChanged=@(e => { OnFieldValueChanged(e, dtas.DataField); }) />
+                                    break;
+                                case FieldTypes.MultiLineEntryControl:
+                                    <AmhMultilineEntryControl Value=@selectedData
+                                                              UniqueID=@id
+                                                              MaxLine=5
+                                                              @bind-IsButtonClick=@IsButtonClick
+                                                              ResourceKey=@dtas.ResourceKey
+                                                              IsControlEnabled=@IsControlEnabled
+                                                              OnValueChanged=@(e => { OnFieldValueChanged(e, dtas.DataField); }) />
+                                    break;
+                                case FieldTypes.RichTextControl:
+                                    <AmhRichTextEditor Value=@selectedData
+                                                       UniqueID=@id
+                                                       @bind-IsButtonClick=@IsButtonClick
+                                                       ResourceKey=@dtas.ResourceKey
+                                                       IsControlEnabled=@IsControlEnabled
+                                                       OnValueChanged=@(e => { OnFieldValueChanged(e, dtas.DataField); }) />
+                                    break;
+                            }
+                        }
+                    }
+                </ChildContent>
+            </AmhTabControl>
+        }
+    </ChildControl>
+</AmhBaseControl>

@@ -1,0 +1,94 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ProgramReadingRangeAddEdit/{programreadingid:long}/{readingrangeid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageOperation=@GetPageOperationType(_isEditable, ReadingRangeID == 0)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ProgramReadingRangeAddEdit.ToString())
+              OnClose=@OnClose
+              IsAccordion=@IsAccordion
+              ApplyFixedFooter=true
+              PageResources=@_rangeData?.Resources
+              ApplyTab=false
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhEntryControl ResourceKey=@ResourceConstants.R_READING_TYPE_KEY
+                             @bind-Value=@_rangeData.ReadingRange.Reading
+                             IsControlEnabled=@false />
+
+            <AmhRadioButtonListControl @bind-Value=@genderValue
+                                       ResourceKey=@ResourceConstants.R_GENDER_TYPE_KEY
+                                       Options=@_rangeData.GenderOptions
+                                       IsControlEnabled=@_isEditable />
+
+            <AmhRadioButtonListControl @bind-Value=@ageValue
+                                       ResourceKey=@ResourceConstants.R_AGE_GROUPS_KEY
+                                       Options=@_rangeData.AgeOptions
+                                       IsControlEnabled=@_isEditable OnValueChanged=@onAgeGroupChanged />
+
+            @if (ageValue == ResourceConstants.R_AGE_TYPE_AGE_RANGE_KEY_ID.ToString())
+            {
+                <AmhNumericEntryControl @bind-Value=@_fromAgeString
+                                        ResourceKey=@ResourceConstants.R_FROM_AGE_KEY
+                                        IsControlEnabled=@_isEditable />
+
+                <AmhNumericEntryControl @bind-Value=@_toAgeString
+                                        ResourceKey=@ResourceConstants.R_TO_AGE_KEY
+                                        IsControlEnabled=@_isEditable />
+            }
+
+            <AmhNumericEntryControl @bind-Value=@_absoluteMinValueString
+                                    ResourceKey=@ResourceConstants.R_ABSOLUTE_MIN_VALUE_KEY
+                                    DigitsAfterDecimal=@_decimalPrecision
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhNumericEntryControl @bind-Value=@_absoluteMaxValueString
+                                    ResourceKey=@ResourceConstants.R_ABSOLUTE_MAX_VALUE_KEY
+                                    DigitsAfterDecimal=@_decimalPrecision
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhColorPickerControl @bind-Value=@_rangeData.ReadingRange.AbsoluteBandColor
+                                   IsControlEnabled=@_isEditable
+                                   ResourceKey=@ResourceConstants.R_ABSOLUTE_BAND_COLOR_KEY />
+
+            <AmhNumericEntryControl @bind-Value=@_normalMinValueString
+                                    ResourceKey=@ResourceConstants.R_IDEAL_MIN_VALUE_KEY
+                                    DigitsAfterDecimal=@_decimalPrecision
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhNumericEntryControl @bind-Value=@_normalMaxValueString
+                                    ResourceKey=@ResourceConstants.R_IDEAL_MAX_VALUE_KEY
+                                    DigitsAfterDecimal=@_decimalPrecision
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhColorPickerControl @bind-Value=@_rangeData.ReadingRange.NormalBandColor
+                                   IsControlEnabled=@_isEditable
+                                   ResourceKey=@ResourceConstants.R_IDEAL_BAND_COLOR_KEY />
+
+            <AmhColorPickerControl @bind-Value=@_rangeData.ReadingRange.TargetBandColor
+                                   IsControlEnabled=@_isEditable
+                                   ResourceKey=@ResourceConstants.R_TARGET_BAND_COLOR_KEY />
+        </ChildContent>
+        <PageFooter>
+            @if (_rangeData.ReadingRange.ReadingRangeID > 0 && LibPermissions.HasPermission(_rangeData.FeaturePermissions, AppPermissions.ProgramReadingRangeDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClicked />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_showDeletedConfirmationPopup
+                                   Actions=@_popupActions
+                                   OnValueChanged=@OnDeletePopupActionClickAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl  ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl  ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

@@ -1,0 +1,24 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+<BasePage @bind-Error=@Error
+          @bind-Success=@Success
+          @bind-ShowDetailPage=@ShowDetailPage
+          CurrentPage=@this
+          ApplyStructure=true
+          PageResources=@PageResources
+          PageTitle=@LibResources.GetResourceValueByKey(PageResources,ResourceConstants.R_MENU_HEADER_KEY)
+          ApplyCard=@false
+          ApplyParentStructure=@(!ShowDetailPage)
+          ApplyFixedFooter=@IsPatientMobileView
+          ShowPageTitle=true>
+    <ChildContent>
+            <AmhListViewControl DataSourceType="GroupModelMenu"
+                            DataSource=@getData()
+                                SourceFields=@getViewCellModel()
+                                IsGroupedData=@true
+                                ShowSearch=@false
+                                ShowCounterFlag=false
+                                OnValueChanged=@(e => OnMoreTabChangeAsync(e))/>
+    </ChildContent>
+</BasePage>

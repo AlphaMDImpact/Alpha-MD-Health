@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="50px" height="50px" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Icon-Camera-disabled</title>
+    <g id="Welcome" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Videocall-Appointments" transform="translate(-859.000000, -810.000000)">
+            <g id="Video-holder" transform="translate(319.000000, 226.000000)">
+                <g id="Group-5" transform="translate(400.000000, 584.000000)">
+                    <g id="Icon-Camera-disabled" transform="translate(140.000000, 0.000000)">
+                        <circle id="Oval-2-Copy" fill="#FFFFFF" cx="25" cy="25" r="25"></circle>
+                        <g id="Group" transform="translate(13.928571, 18.214286)" fill="#0078D3">
+                            <path d="M13.8650534,0.163871714 L1.99187192,0.163871714 C0.981845615,0.163871714 0.0738964399,0.919819925 0.0738964399,1.9170282 L0.0738964399,11.9909764 C0.0738964399,12.9881846 0.981845615,13.8888889 1.99187192,13.8888889 L13.8650534,13.8888889 C14.8750797,13.8888889 15.6540894,12.9881846 15.6540894,11.9909764 L15.6540894,1.9170282 C15.6540894,0.919819925 14.8750797,0.163871714 13.8650534,0.163871714 L13.8650534,0.163871714 Z" id="Shape"></path>
+                            <polygon id="Shape" points="17.2658335 4.72100632 17.2658335 9.31030894 22.5308642 12.1732617 22.5308642 1.87949886"></polygon>
+                        </g>
+                        <path d="M13.6934293,15.3095238 L34.725,35.3395912 L33.3065707,36.6904762 L12.275,16.6604088 L13.6934293,15.3095238 Z" id="Line-3" stroke="#FFFFFF" fill="#0078D3" fill-rule="nonzero" transform="translate(23.500000, 26.000000) scale(-1, 1) translate(-23.500000, -26.000000) "></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

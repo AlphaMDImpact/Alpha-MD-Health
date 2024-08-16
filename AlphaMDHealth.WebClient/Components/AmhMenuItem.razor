@@ -1,0 +1,105 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+@using AlphaMDHealth.Utility
+
+<div class=@(string.Concat(IsTitle? " " : " cursor-pointer-children"))
+     onclick="javascript:ani()">
+    <NavigationComponent IsFirstRender="false" />
+    <div id=@MenuID
+         class=@AppState.ClassName((string.Concat(_menuClass, IsSubMenu ?" ":"")))
+         @onclick=@OnMenuItemClicked
+         @onclick:stopPropagation>
+        @if (ShowBack)
+        {
+            <img class=@AppState.ClassName(string.Concat("image-icon"," margin-left-xs "))
+                 style=@(AppState.AppDirection == "ltr" ? "transform:rotate(180deg);":"")
+                 src=@("images/Arrow-menu-blue.svg")
+                 @onclick=@(()=> { OnBackButtonClicked.InvokeAsync(""); })
+                 @onclick:stopPropagation />
+        }
+        <div class=@string.Concat($"d-flex {(Location == MenuLocation.Left ? "justify-content-between": "")} align-items-center",AppendClass)
+             style="width:100%">
+            <div class="d-flex align-items-center">
+                @if (!string.IsNullOrWhiteSpace(MenuIcon))
+                {
+                    <img class=@_imageClass src=@("images/" + MenuIcon) />
+                    <label class="padding-horizontal-md "> @TailTruncateString(MenuTitle, 20)</label>
+                    <div id=@string.Concat(MenuID, "badgeCount")
+                         class="text-end hide"
+                         style="margin-left: -20px;margin-top: -15px;">
+                        <label id=@string.Concat(MenuID, "badgeCountValue")
+                               class="badge-number">
+                        </label>
+                    </div>
+                }
+                else
+                {
+                    if (IsSubMenu)
+                    {
+                        if (Location == MenuLocation.Left)
+                        {
+                            <CustomImageControl Id="MasterPageProfileImage"
+                                                IsCircular="false"
+                                                Width=@AppImageSize.ImageSizeM
+                                                Height=@AppImageSize.ImageSizeM
+                                                CornerRadius="4px"
+                                                FontSize="12px"
+                                                DefaultValue=@SubMenuIconName
+                                                BackColor=@BackColor />
+                            @if (IsSelected)
+                            {
+                                <label class="padding-horizontal-md lbl-primary-app-body-large-semi-bold d-flex"
+                                       style="width: 150px;text-overflow: ellipsis;overflow: hidden;cursor: pointer;">
+                                    @TailTruncateString(MenuTitle, 20)
+                                </label>
+                            }
+                            else
+                            {
+                                <label class=@(IsTitle? "padding-horizontal-md d-flex" : "padding-horizontal-md d-flex cursor-pointer")
+                                       style="width: 150px;text-overflow: ellipsis;overflow: hidden;">
+                                    @MenuTitle
+                                </label>
+                            }
+                        }
+                        else
+                        {
+                            <label class=@(string.Concat(IsTitle? "" : "padding-horizontal-md cursor-pointer lbl-primary-text-body-large-regular margin-bottom-xxxs", IsSelected ? " f-bold" : ""))
+                                   style="width: 150px;text-overflow: ellipsis;overflow: hidden;">
+                                @MenuTitle
+                            </label>
+                        }
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrWhiteSpace(SubMenuIconName))
+                        {
+                            <CustomImageControl Id="MasterPageProfileImage"
+                                                IsCircular="false"
+                                                Width=@AppImageSize.ImageSizeMD
+                                                Height=@AppImageSize.ImageSizeMD
+                                                CornerRadius="4px"
+                                                FontSize="12px"
+                                                DefaultValue=@SubMenuIconName
+                                                BackColor=@BackColor />
+                        }
+                        <label class=@(string.Concat(IsTitle? "menuItemLabel" : "padding-horizontal-md cursor-pointer", string.IsNullOrWhiteSpace(SubMenuIconName) ? "" : " f-bold"))
+                               style="min-width: 80px;text-overflow: ellipsis;overflow: hidden;">
+                            @MenuTitle
+                            @* @if (IsDropdown)
+                            {
+                                <img class=@AppState.ClassName("padding-left-xs image-icon flip-image", "padding-right-xs image-icon flip-image")
+                                     src=@("images/Dropper-icon.svg")
+                                     style="width:20px; height:20px" />
+                            } *@
+                        </label>
+                    }
+                }
+            </div>
+           @*  @if (IsDropdown && Location == MenuLocation.Left)
+            {
+                <img class=@AppState.ClassName("image-icon flip-image")
+                     src=@(Location == MenuLocation.Left ? "images/Arrow-menu-dark.svg": "images/Dropper-icon.svg") />
+            } *@
+        </div>
+    </div>
+</div>

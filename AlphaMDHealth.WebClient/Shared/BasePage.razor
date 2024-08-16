@@ -1,0 +1,296 @@
+﻿@using BlazorBootstrap
+@using Radzen
+@using Radzen.Blazor
+@inject IJSRuntime JSRuntime
+
+@namespace AlphaMDHealth.WebClient
+
+<CascadingValue Value=@IsPopup>
+    <CascadingValue Value=@PageResources IsFixed=@true>
+        <CascadingValue Value=@RegisterComp IsFixed=@true>
+            @{
+                string message = string.Empty;
+                bool isSuccess = false;
+                CheckErrorMessage(ref message, ref isSuccess);
+            }
+            @if (IsPopup)
+            {
+                @if (ShowPopup)
+                {
+                    <div class=@popupStyle>
+                        <div class="w-available p-2 @(PopupPagePostion == PopupPosition.Center ? "" : "h-available ")"
+                             style="background-color:var(--bs-body-bg-background); border-radius:12px; height:@(PopupPagePostion == PopupPosition.Center ? "auto; max-height: 90vh;" : "100vh; max-height: 100%;");">
+                            <RadzenStack class="p-2">
+                                <AmhHeaderControl Title=@_pageTitle>
+                                    <ActionSection>
+                                        @if (ShowClose)
+                                        {
+                                            <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                                             ImageHeight=@AppImageSize.ImageSizeXXS
+                                                             ImageWidth=@AppImageSize.ImageSizeXXS
+                                                             Icon=@ImageConstants.I_CLOSE_BTN_SVG
+                                                             OnValueChanged=@OnCancelClickAsync />
+                                        }
+                                    </ActionSection>
+                                </AmhHeaderControl>
+                                <MessageAlert Message=@message IsSuccess=@isSuccess />
+                                <div class=@string.Concat("p-2 ", (PopupPagePostion == PopupPosition.CenterLarge ? " " : "padding-bottom-lg"))
+                                     style=@GetPopupStyle()>
+                                    @ChildContent
+                                    <AmhHeaderControl><ActionSection>@PageFooter</ActionSection></AmhHeaderControl>
+                                </div>
+                            </RadzenStack>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                @if (!IsPatientMobileView)
+                {
+                    <MessageAlert Message=@message IsSuccess=@isSuccess />
+                }
+                @if (ApplyParentStructure)
+                {
+                    <div class=@((_isAfterLoginLayout ? (IsPatientMobileView?"": "p-2") : "") + " " + Class) Gap="1">
+                        @if (_isAfterLoginLayout)
+                        {
+                            @if (ApplyStructure && !ShowDetailPage && AppState.Tabs?.Count > 0)
+                            {
+                                @if (!string.IsNullOrWhiteSpace(AppState.SelectedTabTitle) || _baseActions?.Count > 0)
+                                {
+                                    <AmhHeaderControl Title=@AppState.SelectedTabTitle ActionButtons=@_baseActions />
+                                }
+                                @if (!OnMenuClicked)
+                                {
+                                    @if (!IsPatientMobileView)
+                                    {
+                                        <RadzenStack Orientation=@Radzen.Orientation.Horizontal
+                                                     JustifyContent=@JustifyContent.Start
+                                                     Gap="1rem"
+                                                     Style="margin-top:15px"
+                                                     AlignItems=@AlignItems.Center>
+                                            @if (!string.IsNullOrWhiteSpace(_headerIcon))
+                                            {
+                                                <AmhImageControl ShowHeader=@false
+                                                                 FieldType=@FieldTypes.SquareWithBorderImageControl
+                                                                 ImageWidth=@AppImageSize.ImageSizeXXL
+                                                                 ImageHeight=@AppImageSize.ImageSizeXXL
+                                                                 Value=@_headerIcon />
+                                            }
+                                            <RadzenStack Gap="0">
+                                                <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl Value=@_headerTitle />
+                                                <AmhLabelControl FieldType=@FieldTypes.PrimaryAppSmallHStartVCenterLabelControl Value=@_headerSubTitle />
+                                                <AmhLabelControl FieldType=@FieldTypes.TertiarySmallHStartVCenterLabelControl Value=@_headerDescription />
+                                            </RadzenStack>
+                                        </RadzenStack>
+                                        <AmhTabControl ShowHeader=@false
+                                                       FieldType=@FieldTypes.TabControl
+                                                       Options=@GetTabOptions()
+                                                       OnValueChanged=@OnTabChangeAsync />
+                                    }
+
+                                }
+                            }
+                            @if (ApplyTab && !string.IsNullOrEmpty(AppState.SelectedTab))
+                            {
+                                <div class=@(IsAccordion || ShowDetailPage? "col-lg-8 col-md-12" : "col-12" )>
+
+                                    @if (!string.IsNullOrWhiteSpace(_pageTitle) || PageHeader != default)
+                                    {
+                                        @if (!SetDashboardFlag)
+                                        {
+                                            <AmhHeaderControl Title=@_pageTitle IsPatientMobileView=@IsPatientMobileView ActionButtons=@ActionButtons><ActionSection>@PageHeader</ActionSection></AmhHeaderControl>
+                                        }
+                                    }
+
+                                    @if (IsPatientMobileView)
+                                    {
+                                        <MessageAlert Message=@message IsSuccess=@isSuccess />
+                                    }
+                                    @if (ApplyCard)
+                                    {
+                                        <Card Class="p-4 mt-3">
+                                            @ChildContent
+                                        </Card>
+                                    }
+                                    else
+                                    {
+                                        @ChildContent
+                                    }
+                                </div>
+                                <div class=@Content2Class>
+                                    @ChildContent2
+                                </div>
+                            }
+                            else
+                            {
+                                @if (!string.IsNullOrWhiteSpace(_pageTitle) || PageHeader != default)
+                                {
+                                    <AmhHeaderControl Title=@_pageTitle ActionButtons=@ActionButtons><ActionSection>@PageHeader</ActionSection></AmhHeaderControl>
+                                }
+                                @if (IsPatientMobileView)
+                                {
+                                    <MessageAlert Message=@message IsSuccess=@isSuccess />
+                                }
+                                <div class=@(ShowDetailPage ? (IsAccordion ? "col-12" : "col-lg-8 col-md-12") : "")>
+                                    @if (ApplyCard)
+                                    {
+                                        <Card Class="p-4 mt-3">
+                                            @ChildContent
+                                        </Card>
+                                    }
+                                    else
+                                    {
+                                        @ChildContent
+                                    }
+                                </div>
+                                <div class=@Content2Class>
+                                    @ChildContent2
+                                </div>
+                            }
+                            @if (ApplyFixedFooter)
+                            {
+                                if (ApplyMobileViewBeforLogin)
+                                {
+                                    <div class="before-login-mobile-footer">
+                                        @if (ActionButtons?.Count > 0)
+                                        {
+                                            var action = ActionButtons?.FirstOrDefault(x => x.ButtonResourceKey == ResourceConstants.R_NEXT_ACTION_KEY || x.ButtonResourceKey == ResourceConstants.R_DELETE_ACTION_KEY || x.ButtonResourceKey == ResourceConstants.R_DECLINE_KEY || x.ButtonResourceKey == ResourceConstants.R_ACCEPT_KEY || x.ButtonResourceKey == AppPermissions.BuySubscriptionPlan.ToString());
+                                            @if (action != null)
+                                            {
+                                                <AmhButtonControl ResourceKey=@action.ButtonResourceKey
+                                                                  FieldType=@action.FieldType
+                                                                  Icon=@action.Icon
+                                                                  Style=@action.Style
+                                                                  Class=@action.ButtonClass
+                                                                  Value=@(string.IsNullOrEmpty(action.Value)?"":action.Value)
+                                                                  OnValueChanged=action.ButtonAction />
+                                            }
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="fixed-footer-wrapper">
+                                        <FixedFooter IsAccordion=@IsAccordion IsTab=@(!string.IsNullOrEmpty(AppState.SelectedTab)) IsPatientMobileView=@IsPatientMobileView>
+                                            <Content>
+                                                @if (IsPatientMobileView)
+                                                {
+                                                    <AmhTabControl ShowHeader=@false
+                                                                   FieldType=@FieldTypes.TabControl
+                                                                   Options=@GetTabOptions()
+                                                                   OnValueChanged=@OnTabChangeAsync ShowIcon=@IsPatientMobileView />
+                                                }
+                                                else
+                                                {
+                                                    @PageFooter
+                                                }
+                                            </Content>
+                                        </FixedFooter>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <AmhHeaderControl FooterClass=@FooterClass><ActionSection>@PageFooter</ActionSection></AmhHeaderControl>
+                            }
+                        }
+                        else if (ApplyMobileViewBeforLogin)
+                        {
+                            <div class=@(IsAccordion || ShowDetailPage? "col-lg-8 col-md-12" : "col-12" )>
+                                @if (!string.IsNullOrWhiteSpace(_pageTitle) || PageHeader != default)
+                                {
+                                    <AmhHeaderControl Title=@_pageTitle IsPatientMobileView=@IsPatientMobileView ActionButtons=@ActionButtons><ActionSection>@PageHeader</ActionSection></AmhHeaderControl>
+                                }
+                                @if (IsPatientMobileView)
+                                {
+                                    <MessageAlert Message=@message IsSuccess=@isSuccess />
+                                }
+                                @if (ApplyCard)
+                                {
+                                    <Card Class="p-4 mt-3">
+                                        @ChildContent
+                                    </Card>
+                                }
+                                else
+                                {
+                                    @ChildContent
+                                }
+                            </div>
+                            <div class=@Content2Class>
+                                @ChildContent2
+                            </div>
+                            @if (ApplyFixedFooter)
+                            {
+                                <div class="before-login-mobile-footer">
+                                    @if (ActionButtons?.Count > 0)
+                                    {
+                                        var action = ActionButtons?.FirstOrDefault(x => x.ButtonResourceKey == ResourceConstants.R_NEXT_ACTION_KEY || x.ButtonResourceKey == ResourceConstants.R_SAVE_ACTION_KEY || x.ButtonResourceKey == ResourceConstants.R_DECLINE_KEY || x.ButtonResourceKey == ResourceConstants.R_I_ACCEPT_TEXT_KEY || x.ButtonResourceKey == AppPermissions.BuySubscriptionPlan.ToString());
+                                        @if (action != null)
+                                        {
+                                            <AmhButtonControl ResourceKey=@action.ButtonResourceKey
+                                                              FieldType=@action.FieldType
+                                                              Icon=@action.Icon
+                                                              Style=@action.Style
+                                                              Class=@action.ButtonClass
+                                                              Value=@(string.IsNullOrEmpty(action.Value)?"":action.Value)
+                                                              OnValueChanged=action.ButtonAction />
+                                        }
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            @if (!ApplyStructure)
+                            {
+                                @ChildContent
+                                @ChildContent2
+                                @PageFooter
+                            }
+                            else
+                            {
+                                @if (IsPatientMobileView)
+                                {
+                                    <MessageAlert Message=@message IsSuccess=@isSuccess />
+                                }
+                                <RadzenCard class="rz-my-12 rz-mx-auto rz-border-radius-2 rz-shadow-1 px-16"
+                                            Style="width: 100%; max-width: 600px; overflow: hidden;">
+                                    <div class="row d-flex justify-content-center">
+                                        <div class="col-12 d-flex justify-content-center align-items-center mt-3 mb-4">
+                                            <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                                             ImageWidth=AppImageSize.ImageNoSize
+                                                             Class="custom-image-height"
+                                                             Icon=@ImageConstants.I_DEFAULT_APP_LOGO_SVG
+                                                             Value=@LibSettings.GetSettingValueByKey(AppState?.MasterData?.Settings, SettingsConstants.S_LOGO_KEY) />
+                                        </div>
+                                    </div>
+                                    <AmhLabelControl FieldType=@FieldTypes.PrimaryLargeHStartVCenterBoldLabelControl Value=@_pageTitle />
+                                    @ChildContent
+                                    @PageFooter
+                                </RadzenCard>
+                            }
+                        }
+                        @if (!_hideDeleteConfirmation)
+                        {
+                            <AmhMessageControl FieldType=@FieldTypes.TopHeadingWithCloseButtonPopupMessageControl
+                                               ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                               ShowHidePopup=@_hideDeleteConfirmation
+                                               Actions=@_deleteConfirmationOptions
+                                               OnValueChanged=@PopUpCallbackAsync ContentClass="top-center" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    @if (IsPatientMobileView)
+                    {
+                        <MessageAlert Message=@message IsSuccess=@isSuccess />
+                    }
+                    @ChildContent
+                }
+            }
+        </CascadingValue>
+    </CascadingValue>
+</CascadingValue>

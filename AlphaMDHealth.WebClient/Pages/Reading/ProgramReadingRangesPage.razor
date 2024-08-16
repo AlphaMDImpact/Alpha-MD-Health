@@ -1,0 +1,46 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ProgramReadingRangesView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              IsAccordion=@IsAccordion
+              PageResources=@_rangeData.Resources
+              Content2Class=@(_showAddEditPage ? "col-lg-8 col-md-12 card p-4" :"col-12 card p-4")
+              ShowPageTitle=@(_rangeData.ErrCode != ErrorCode.OK)>
+        <ChildContent2>
+            @if (_showAddEditPage)
+            {
+                <ProgramReadingRangePage ReadingRangeID=@_readingRangeID
+                                         ProgramReadingID=@ProgramReadingID
+                                         IsAccordion=true
+                                         OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_rangeData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ProgramReadingRangesView.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((ReadingRangeModel)e))
+                                     DataSource=@_rangeData.ReadingRanges
+                                     DataSourceType=@ReadingRangeModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ActionButtons=@_actionButtons
+                                     ShowAddButton=@LibPermissions.HasPermission(_rangeData.FeaturePermissions, AppPermissions.ProgramReadingRangeAddEdit.ToString())
+                                     ShowPagination=@false />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_rangeData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent2>
+        <ChildContent>
+
+        </ChildContent>
+    </BasePage>
+}

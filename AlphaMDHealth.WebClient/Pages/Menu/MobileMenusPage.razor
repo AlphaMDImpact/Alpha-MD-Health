@@ -1,0 +1,45 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/MobileMenusView"
+@page "/PatientMobileMenusView"
+
+@if (IsPatientMobileView)
+{
+    <PatientMobileMenuPage PageResources="@_menuData.Resources" />
+}
+else
+{
+    @if (_isDataFetched)
+    {
+        <BasePage @bind-Error=@Error
+                  @bind-Success=@Success
+                  @bind-ShowDetailPage=@ShowDetailPage
+                  CurrentPage=@this
+                  ShowPageTitle=@(_menuData.ErrCode != ErrorCode.OK)
+                  ApplyCard=true
+                  ApplyParentStructure=@(!ShowDetailPage)
+                  PageResources=@_menuData.Resources>
+            <ChildContent>
+                @if (ShowDetailPage)
+                {
+                    <MobileMenuPage MenuID=@_menuID
+                                    IsPatientMenu=@_menuData.Menu.IsPatientMenu
+                                    OnClose=@OnAddEditClosedAsync />
+                }
+                else if (_menuData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.MobileMenuGroupsView.ToString())
+                                     DataSource=@_menuData.Menus
+                                     DataSourceType=@MenuModel
+                                     TableStructure=@GenerateTableStructure()
+                                     OnValueChanged=@((e) => OnAddEditClick((MenuModel)e))
+                                     ShowAddButton=@LibPermissions.HasPermission(_menuData.FeaturePermissions, RouterDataRoute.Page == AppPermissions.MobileMenusView.ToString() ? AppPermissions.MobileMenuAddEdit.ToString() : AppPermissions.PatientMobileMenuAddEdit.ToString()) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_menuData.ErrCode.ToString() />
+                }
+            </ChildContent>
+        </BasePage>
+    }
+}

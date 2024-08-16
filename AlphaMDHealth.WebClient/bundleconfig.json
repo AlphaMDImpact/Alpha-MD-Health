@@ -1,0 +1,28 @@
+[
+  {
+    "outputFileName": "wwwroot/css/NewCss.min.css",
+    "inputFiles": [
+      "wwwroot/css/datepicker.css",
+      "wwwroot/css/datetimepicker.css",
+      "wwwroot/css/timepicker.css"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/NewJs.min.js",
+    "inputFiles": [
+      "wwwroot/js/Common1.js",
+      "wwwroot/js/Common2.js",
+      "wwwroot/js/Common3.js",
+      "wwwroot/js/Common4.js",
+      "wwwroot/js/Common5.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    }
+  }
+]

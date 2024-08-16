@@ -1,0 +1,9 @@
+﻿@code {
+    [Parameter] public string value { get; set; }
+    [Parameter] public FieldTypes FieldType { get; set; }
+}
+
+@* <div class="d-flex justify-content-center mb-3"> *@
+    <AmhLabelControl FieldType=@FieldType
+                     Value=@value/>
+@* </div> *@

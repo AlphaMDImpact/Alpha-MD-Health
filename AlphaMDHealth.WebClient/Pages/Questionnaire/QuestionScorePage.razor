@@ -1,0 +1,117 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              OnClose=@OnClose
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionScoreAddEdit.ToString())
+              PageResources=@_questionnaireData.Resources
+              RegisterComp=@RegisterControl
+              IsAccordion=@IsAccordion
+              PageOperation=@GetPageOperationType(_isEditable, QuestionID == 0)>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=@_questionnaireData.DropDownOptions
+                                ResourceKey=@ResourceConstants.R_STARTING_QUESTION_SELECTION_KEY
+                                OnValueChanged=@OnQuestionTypeChanged
+                                IsControlEnabled=@_isEditable />
+
+            <AmhLabelControl ResourceKey=@_questionnaireData.Question.QuestionTypeID.ToString()
+                             FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl />
+
+            @switch (_questionnaireData.Question.QuestionTypeID)
+            {
+                case QuestionType.MultiSelectQuestionKey:
+                case QuestionType.SingleSelectQuestionKey:
+                case QuestionType.DropDownQuestionKey:
+                case QuestionType.MultilineTextQuestionKey:
+                case QuestionType.TextQuestionKey:
+                case QuestionType.RichTextQuestionKey:
+                case QuestionType.FilesAndDocumentQuestionKey:
+                case QuestionType.MeasurementQuestionKey:
+                    @foreach (var scoreData in _questionnaireData.QuestionScores.Select((value, i) => new { i, value }))
+                    {
+                        var optionData = scoreData.value;
+                        optionData.ScoreValue = optionData.ScoreValue == null ? 0 : optionData.ScoreValue;
+                        bool isCheck = _scoreIndex.Count > 0 && scoreData.i + 1 <= _scoreIndex.Count && _scoreIndex[scoreData.i] == scoreData.i;
+                        <AmhLabelControl Value=@optionData.OptionText
+                                         FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl />
+
+                        <AmhNumericEntryControl @bind-Value=@optionData.ScoreValue
+                                                ResourceKey=@ResourceConstants.R_THEN_VALUE_KEY
+                                                UniqueID=@($"{ResourceConstants.R_THEN_VALUE_KEY}_{scoreData.i}")
+                                                IsControlEnabled=@_isEditable
+                                                ShowHeader=@true
+                                                OnValueChanged=@(v => UpdateScoreValue(Convert.ToDouble(v), optionData, isCheck)) />
+                    }
+                    break;
+                case QuestionType.NumericQuestionKey:
+                case QuestionType.DateQuestionKey:
+                case QuestionType.DateTimeQuestionKey:
+                case QuestionType.TimeQuestionKey:
+                case QuestionType.VerticalSliderQuestionKey:
+                case QuestionType.HorizontalSliderQuestionKey:
+                    <AmhLabelControl ResourceKey=@ResourceConstants.R_VALUE_BLANK_CONDITION_KEY
+                                     FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl />
+
+                    <AmhNumericEntryControl @bind-Value=@_selectedIfBlankAnswer
+                                            UniqueID="2"
+                                            ResourceKey=@ResourceConstants.R_THEN_VALUE_KEY
+                                            DigitsAfterDecimal=3
+                                            IsControlEnabled=@_isEditable />
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_ADD_MORE_CONDITION_KEY
+                                      OnValueChanged=@OnAddClicked
+                                      IsControlEnabled=@_isEditable
+                                      FieldType=@FieldTypes.PrimaryTransparentExButtonControl />
+                    @foreach (var data in _numericConditions.Select((value, i) => new { i, value }))
+                    {
+                        var conditionData = data.value;
+                        var index = data.i;
+                        <AmhConditionComponent UniqueID=@GetUniqeID(index)
+                                               ConditionNumber=@index.ToString()
+                                               QuestionScoreDataToBeMapped=@conditionData
+                                               ConditionDataSource=@CreateOptionList(conditionData.QuestionID.ToString())
+                                               QuestionnaireData=@_questionnaireData
+                                               ResourceKey=@string.Concat(Constants.ADD_BETWEEN_CONDITION, index)
+                                               IsForScorePage=@true
+                                               ConditionPageResources=@_questionnaireData.Resources
+                                               SelectedValue=@((long)conditionData.QuestionID)
+                                               DeleteButtonClicked=@OnConditionDelete />
+                    }
+                    <AmhLabelControl ResourceKey=@ResourceConstants.R_ELSE_CONDITION_KEY
+                                     FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl />
+
+                    <AmhNumericEntryControl @bind-Value=@_selectedElseAnswer
+                                            ResourceKey=@ResourceConstants.R_THEN_VALUE_KEY
+                                            UniqueID="3"
+                                            DigitsAfterDecimal=3
+                                            IsControlEnabled=@_isEditable />
+                    break;
+                default:
+                    break;
+            }
+
+        </ChildContent>
+        <PageFooter>
+            @if (QuestionID > 0 && LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.QuestionScoreDelete.ToString()))
+            {
+                <AmhButtonControl Class="mt-3" ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                  OnValueChanged=@OnDeleteButtonClicked />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideConfirmationPopup
+                                   Actions=@_actionData
+                                   OnValueChanged=@DeleteQuestionPopUpCallbackAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl Class="mt-3" ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                  OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl Class="mt-3" ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCancelClick />
+        </PageFooter>
+    </BasePage>
+}

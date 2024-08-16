@@ -1,0 +1,61 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.DashboardConfigurationAddEdit.ToString())
+              OnClose=@OnClose
+              PageResources=@_dashboardData.Resources
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              ApplyCard=true
+              PageOperation=@GetPageOperationType(_isEditable, DashboardSettingID == 0)>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=@_dashboardData.FeaturesOptions
+                                ResourceKey=@ResourceConstants.R_FEATURE_NAME_KEY
+                                IsControlEnabled=@_isEditable
+                                OnValueChanged=@OnFeatureSelectionChanged />
+            @if (_configurationRecordParameters.Count > 0)
+            {
+                <AmhLabelControl Value=@(_selectedFeature?.SequenceNo + " " + LibResources.GetResourceValueByKey(_dashboardData?.Resources, ResourceConstants.R_COLUMN_NAME_KEY)) />
+            }
+            <AmhNumericEntryControl @bind-Value=@_sequenceNo
+                                    ResourceKey=@ResourceConstants.R_SEQUENCE_NO_KEY
+                                    IsControlEnabled=@_isEditable
+                                    OnValueChanged=@OnSequenceChanged />
+            @if (_dashboardData.ErrCode == ErrorCode.DuplicateData)
+            {
+                <AmhLabelControl ResourceKey=@ResourceConstants.R_SEQUENCE_NO_ERROR_KEY />
+            }
+            <div class="mt-3"></div>
+            <AmhTableControl DataSource=@_configurationRecordParameters
+                             DataSourceType=@SystemFeatureParameterModel
+                             TableStructure=@GenerateTableStructure()
+                             TableHeader=@LibResources.GetResourceValueByKey(_dashboardData.Resources, ResourceConstants.R_PARAMETER_LIST_HEADER_KEY)
+                             ShowSearch=@false
+                             ShowAddButton=@false
+                             ShowPagination=@false />
+        </ChildContent>
+        <PageFooter>
+            @if (_dashboardData.ConfigurationRecord.DashboardSettingID > 0 && LibPermissions.HasPermission(_dashboardData.FeaturePermissions, AppPermissions.DashboardConfigurationDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnDeleteClicked />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideDeleteConfirmation
+                                   Actions=@_actionData
+                                   OnValueChanged=@OnDeleteConfirmationActionClickedAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

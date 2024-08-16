@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/OrganisationTagsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_organisationTagData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_organisationTagData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <OrganisationTag OrganisationTagId=@_organisationTagId OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_organisationTagData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_organisationTagData.OrganisationTags
+                                     DataSourceType=@OrganisationTagModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.OrganisationTagsView.ToString())
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_organisationTagData.FeaturePermissions, AppPermissions.OrganisationTagAddEdit.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((OrganisationTagModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_organisationTagData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

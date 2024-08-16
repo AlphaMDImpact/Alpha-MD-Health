@@ -1,0 +1,65 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientTrackerAddEdit"
+@page "/PatientTrackerAddEdit/{patienttrackerid:guid}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(!_showViewPage)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientTrackerAddEdit.ToString())
+              ShowPageTitle=@(!_showViewPage)
+              OnClose=@OnClose
+              PageResources=@_trackerData?.Resources
+              PageOperation=@GetPageOperationType(_isEditable,PatientTrackerID == Guid.Empty)
+              ApplyFixedFooter=true
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            @if (_showViewPage)
+            {
+                <TrackerViewPage PatientTrackerID=@PatientTrackerID OnClose=@OnTrackerViewClosed />
+            }
+            else
+            {
+                <AmhDropdownControl @bind-Options=@_trackerData.TrackerTypes
+                                    ResourceKey=@ResourceConstants.R_SELECT_TRACKER_NAME_TEXT_KEY
+                                    IsControlEnabled=@(PatientTrackerID == Guid.Empty) />
+
+                <AmhDateTimeControl @bind-Value=@_trackerData.PatientTracker.FromDate
+                                    ResourceKey=@ResourceConstants.R_START_DATE_KEY
+                                    IsControlEnabled=@_isEditable />
+
+                <AmhDateTimeControl @bind-Value=@_trackerData.PatientTracker.ToDate
+                                    ResourceKey=@ResourceConstants.R_END_DATE_KEY
+                                    IsControlEnabled=@_isEditable />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!_showViewPage)
+            {
+                @if (PatientTrackerID != Guid.Empty && LibPermissions.HasPermission(_trackerData.FeaturePermissions, AppPermissions.PatientTrackerDelete.ToString()) && _isEditable)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnDeleteButtonClicked />
+                    <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                       Actions=@_actionData
+                                       ShowHidePopup=@_hideConfirmationPopup
+                                       OnValueChanged=@DeletePatientTrackerPopUpCallbackAsync />
+                }
+                @if (PatientTrackerID != Guid.Empty)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_VIEW_BUTTON_KEY OnValueChanged=@OnTrackerViewClicked />
+                }
+                @if (_isEditable)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+                }
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClickedAsync />
+            }
+        </PageFooter>
+    </BasePage>
+}

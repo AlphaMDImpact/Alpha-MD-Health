@@ -1,0 +1,74 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientEducationAddEdit.ToString())
+              OnClose=@OnClose
+              PageResources=@_educationData.Resources
+              ShowPageTitle=@(!_showPreview)
+              RegisterComp=@RegisterControl
+              ApplyFixedFooter=@(!_showPreview)
+              ApplyCard=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              PageOperation=@GetPageOperationType(_isEditable, PageID == 0)>
+        <ChildContent>
+            @if (_showPreview)
+            {
+                <ContentPreviewPage ShowDetailPage=@_showPreview
+                                    OnClose=@OnPreviewClosed
+                                    PatientEducationID=@(PatientEducationID == 0 ? GenericMethods.RandomPositiveNumber : PatientEducationID)
+                                    PageId=@_pageID
+                                    UserId=@_educationData.SelectedUserID
+                                    IsEducationPreview=@true />
+            }
+            else
+            {
+                <AmhDropdownControl @bind-Options=@_educationData.EducationTypes
+                                    ResourceKey=@ResourceConstants.R_CATEGORY_KEY
+                                    IsControlEnabled=@_isEditable
+                                    OnValueChanged=@OnCategoryChange />
+
+                <AmhDropdownControl @bind-Options=@_educations
+                                    ResourceKey=@ResourceConstants.R_SELECT_EDUCATION_LABEL_KEY
+                                    IsControlEnabled=@_isEditable
+                                    OnValueChanged=@OnEducationChange />
+
+                <AmhDateTimeControl @bind-Value=@_educationData.Page.FromDate
+                                    ResourceKey=@ResourceConstants.R_START_DATE_KEY
+                                    IsControlEnabled=@_isEditable />
+
+                <AmhDateTimeControl @bind-Value=@_educationData.Page.ToDate
+                                    ResourceKey=@ResourceConstants.R_END_DATE_KEY
+                                    IsControlEnabled=@_isEditable />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!_showPreview)
+            {
+                @if (PageID > 0 && _educationData.Page.ProgramEducationID < 1 && LibPermissions.HasPermission(_educationData.FeaturePermissions, AppPermissions.PatientEducationDelete.ToString()))
+                {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClick />
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                ShowHidePopup=@_hideConfirmationPopup
+                Actions=@_actionData
+                OnValueChanged=@DeletePopUpCallbackAsync />
+                }
+                @if (_pageID > 0)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_PREVIEW_KEY OnValueChanged=@OnPreviewClick />
+                }
+                @if (_isEditable)
+                {
+                    <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnAssignButtonClickedAsync />
+                }
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=OnCancelClickAsync />
+            }
+
+        </PageFooter>
+    </BasePage>
+}

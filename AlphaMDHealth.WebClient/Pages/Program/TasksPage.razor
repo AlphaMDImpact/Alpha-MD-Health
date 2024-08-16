@@ -1,0 +1,42 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/TasksView"
+@page "/TasksView/{taskid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ShowPageTitle=@(_programData.ErrCode != ErrorCode.OK)
+              ApplyParentStructure=@(!ShowDetailPage)
+              ApplyCard=true
+              PageResources=@_programData.Resources>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <TaskPage TaskID=@_taskID ShowDetailPage=true OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_programData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@(LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.TasksView.ToString()))
+                                     DataSource=@_programData.Tasks
+                                     DataSourceType=@TaskModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowSearch=@(_programData.RecordCount < 1)
+                                     ShowAddButton=@(_programData.RecordCount < 1 && LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.TaskAddEdit.ToString()))
+                                     ShowPagination=@(_programData.RecordCount < 1)
+                                     OnValueChanged=@(async (e) => await OnAddEditClickedAsync((TaskModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_programData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

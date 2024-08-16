@@ -1,0 +1,105 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+@using System.Net
+@using System.Text.RegularExpressions;
+
+<AmhBaseControl ApplyStructure=false
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                @bind-ErrorMessage=@ErrorMessage
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <div class=@string.Concat("row px-0 ", _showModal?_modalStyle :"")>
+            <div class="d-flex" style="justify-content:center">
+                <div class=@string.Concat("p-2 attachment-card ", AppState.IsPatient ? "attachment-card-mobileview " :"")>
+                    <AmhHeaderControl Title=@Regex.Replace(DataSource.FileName, Constants.FormattedStringRegex, string.Empty).Split(Constants.DOT_SEPARATOR)[0]>
+                        <ActionSection>
+                            <AmhImageControl FieldType=@FieldTypes.CircleImageControl
+                                             Icon=@ImageConstants.I_CLOSE_BTN_SVG
+                                             OnValueChanged=@OnCloseActionButtonClicked
+                                             ImageHeight=AppImageSize.ImageSizeS
+                                             ImageWidth=AppImageSize.ImageSizeS />
+                        </ActionSection>
+                    </AmhHeaderControl>
+                    <div class=@string.Concat("attachment-card-preview ", AppState.IsPatient ? "attachment-card-preview-mobileview " :"")>
+                        <div class=@string.Concat("attachment-card-image ", AppState.IsPatient ? "attachment-card-image-mobileview " :"")>
+                            @if (DataSource != null)
+                            {
+                                @if (GenericMethods.IsImageFile(DataSource.FileExtension))
+                                {
+                                    <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                                     Icon=@DataSource.FileIcon
+                                                     Class=@string.Concat(AppState.IsPatient ? "image-size-mobileview " :"image-size ")
+                                                     Value=@(GenericMethods.IsDocumentFile(DataSource.FileExtension) ? null : DataSource.FileValue) />
+                                }
+                                else
+                                {
+                                    @if (DataSource.FileValue != null)
+                                    {
+                                        @if (AppState.IsPatient)
+                                        {
+                                            <AmhImageControl FieldType=@FieldTypes.SquareImageControl
+                                                             Icon=@DataSource.FileIcon
+                                                             ImageHeight=@AppImageSize.ImageSizeL
+                                                             ImageWidth=@AppImageSize.ImageSizeL />
+                                        }
+                                        else
+                                        {
+                                            @if (GenericMethods.IsPathString(DataSource.FileValue))
+                                            {
+                                                switch (GenericMethods.GetExtension(DataSource.FileExtension))
+                                                {
+                                                    case Constants.PDF_FILE_TYPE:
+                                                        <embed style="width:100%; height:65vh;" src=@DataSource.FileValue type="application/pdf" />
+                                                        break;
+                                                    case Constants.XLSX_FILE_TYPE:
+                                                    case Constants.XLS_FILE_TYPE:
+                                                    case Constants.DOCX_FILE_TYPE:
+                                                    case Constants.DOC_FILE_TYPE:
+                                                        string docPath = WebUtility.UrlEncode(DataSource.FileValue);
+                                                        string pdfViewPath = string.Concat(Constants.OFFICE_VIEW_URL, docPath);
+                                                        <iframe style="width:100%; height:65vh;" src=@pdfViewPath frameborder='0'>
+                                                            <a target='_blank' href='http://office.com'></a>
+                                                            <a target='_blank' href='http://office.com/webapps'></a>.
+                                                        </iframe>
+                                                        break;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <AmhImageControl FieldType=@FieldTypes.SquareImageControl
+                                                                 Icon=@DataSource.FileIcon
+                                                                 ImageHeight=@AppImageSize.ImageSizeL
+                                                                 ImageWidth=@AppImageSize.ImageSizeL />
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(ResourceKey))
+                    {
+                        <AmhMultilineEntryControl @bind-Value=@_description @ref=@_amhChartControl
+                                                  ResourceKey=@ResourceKey
+                                                  ShowHeader=@false
+                                                  FieldType=@FieldTypes.MultiLineEntryControl
+                                                  IsControlEnabled=@(IsControlEnabled && DataSource.IsDeleteAllowed) />
+                        if (IsControlEnabled && DataSource.IsDeleteAllowed)
+                        {
+                                <AmhButtonControl FieldType=@FieldTypes.PrimaryButtonControl
+                                                  Value=@LibResources.GetResourceValueByKey(PageResources,ResourceConstants.R_SAVE_ACTION_KEY)
+                                                  OnValueChanged=@(e=> { OnClick(DataSource); }) />
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </ChildControl>
+</AmhBaseControl>

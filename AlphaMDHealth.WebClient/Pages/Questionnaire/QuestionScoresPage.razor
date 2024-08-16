@@ -1,0 +1,49 @@
+﻿@namespace AlphaMDHealth.WebClient
+@page "/QuestionScoresView"
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              ShowDetailPage=@true
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionScoresView.ToString())
+              ShowPageTitle=@false
+              PageResources=@_questionnaireData.Resources
+              IsAccordion=@IsAccordion>
+        <ChildContent>
+            @if (_showAddEditPage)
+            {
+                <QuestionScorePage OnClose=@OnAddEditClosedAsync
+                                   QuestionnaireID=@QuestionnaireID
+                                   IsAccordion=@IsAccordion
+                                   QuestionID=@_questionID />
+            }
+            else
+            {
+                @if (_questionnaireData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionScoresView.ToString())
+                                     DataSource=@_questionnaireData.QuestionnaireQuestionScores
+                                     DataSourceType=@QuestionScoreModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.QuestionScoreAddEdit.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((QuestionScoreModel)e))
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_questionnaireData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!_showAddEditPage && LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.QuestionScoreAddEdit.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_AND_NEXT_ACTION_KEY
+                                  OnValueChanged=@OnSaveAndNextButtonClicked Class="mt-2" />
+            }
+        </PageFooter>
+    </BasePage>
+}

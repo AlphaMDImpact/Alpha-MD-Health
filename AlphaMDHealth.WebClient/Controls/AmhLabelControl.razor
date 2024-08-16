@@ -1,0 +1,296 @@
+﻿@using Radzen
+@using Radzen.Blazor
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                ShowHeader=@false
+                ApplyStructure=@false
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <RadzenLabel @onclick=@OnLabelClicked
+                     Component=@For
+                     Style=@Style
+                     id=@($"{UniqueID}-{_resourceKey}-{FieldType}-lbl")
+                     class=@(AppState.ClassName($"{GetStyle()} {Class}"))
+                     disabled=@(!IsControlEnabled)
+                     Text=@Value>
+            @if (string.IsNullOrWhiteSpace(Value))
+            {
+                @ValueControl
+            }
+            else
+            {
+                @if (FieldType.ToString().StartsWith("Html"))
+                {
+                    @(new MarkupString(Value))
+                }
+                else
+                {
+                    @Value
+                }
+            }
+        </RadzenLabel>
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    /// <summary>
+    /// Content to be wrapped in BasePage
+    /// </summary>
+    [Parameter]
+    public RenderFragment ValueControl { get; set; }
+
+    private string _value;
+
+    /// <summary>
+    /// Control value represents text of Label control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value == null || string.IsNullOrWhiteSpace(_value)
+                ? _resource?.ResourceValue ?? string.Empty
+                : _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private string GetStyle()
+    {
+        string styleName = string.Empty;
+        styleName = FieldType switch
+        {
+            #region Primary
+            FieldTypes.PrimaryLargeHVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-large lbl-HVCenter",
+            FieldTypes.PrimaryLargeHStartVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-large lbl-HStart-VCenter",
+            FieldTypes.PrimaryLargeHEndVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-large lbl-HEnd-VCenter",
+            FieldTypes.PrimaryLargeHVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-large lbl-HVCenter",
+            FieldTypes.PrimaryLargeHStartVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-large lbl-HStart-VCenter",
+            FieldTypes.PrimaryLargeHEndVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-large lbl-HEnd-VCenter",
+
+            FieldTypes.PrimaryMediumHVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-medium lbl-HVCenter",
+            FieldTypes.PrimaryMediumHStartVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-medium lbl-HStart-VCenter",
+            FieldTypes.PrimaryMediumHEndVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-medium lbl-HEnd-VCenter",
+            FieldTypes.PrimaryMediumHVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-medium lbl-HVCenter",
+            FieldTypes.PrimaryMediumHStartVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-medium lbl-HStart-VCenter",
+            FieldTypes.PrimaryMediumHEndVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-medium lbl-HEnd-VCenter",
+
+            FieldTypes.PrimarySmallHVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-small lbl-HVCenter",
+            FieldTypes.PrimarySmallHStartVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-small lbl-HStart-VCenter",
+            FieldTypes.PrimarySmallHEndVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-small lbl-HEnd-VCenter",
+            FieldTypes.PrimarySmallHVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-small lbl-bold lbl-HVCenter",
+            FieldTypes.PrimarySmallHStartVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-small lbl-bold lbl-HStart-VCenter",
+            FieldTypes.PrimarySmallHEndVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-small lbl-bold lbl-HEnd-VCenter",
+
+            FieldTypes.PrimaryMicroHVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-micro lbl-HVCenter",
+            FieldTypes.PrimaryMicroHStartVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-micro lbl-HStart-VCenter",
+            FieldTypes.PrimaryMicroHEndVCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-micro lbl-HEnd-VCenter",
+            FieldTypes.PrimaryMicroHVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-micro lbl-HVCenter",
+            FieldTypes.PrimaryMicroHStartVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-micro lbl-HStart-VCenter",
+            FieldTypes.PrimaryMicroHEndVCenterBoldLabelControl => "lbl-base lbl-primary-text lbl-bold lbl-micro lbl-HEnd-VCenter",
+            #endregion
+
+            #region Secondary
+            FieldTypes.SecondaryLargeHVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-large lbl-HVCenter",
+            FieldTypes.SecondaryLargeHStartVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-large lbl-HStart-VCenter",
+            FieldTypes.SecondaryLargeHEndVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-large lbl-HEnd-VCenter",
+            FieldTypes.SecondaryLargeHVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-large lbl-HVCenter",
+            FieldTypes.SecondaryLargeHStartVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-large lbl-HStart-VCenter",
+            FieldTypes.SecondaryLargeHEndVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-large lbl-HEnd-VCenter",
+
+            FieldTypes.SecondaryMediumHVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-medium lbl-HVCenter",
+            FieldTypes.SecondaryMediumHStartVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-medium lbl-HStart-VCenter",
+            FieldTypes.SecondaryMediumHEndVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-medium lbl-HEnd-VCenter",
+            FieldTypes.SecondaryMediumHVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-medium lbl-HVCenter",
+            FieldTypes.SecondaryMediumHStartVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-medium lbl-HStart-VCenter",
+            FieldTypes.SecondaryMediumHEndVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-medium lbl-HEnd-VCenter",
+
+            FieldTypes.SecondarySmallHVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-small lbl-HVCenter",
+            FieldTypes.SecondarySmallHStartVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-small lbl-HStart-VCenter",
+            FieldTypes.SecondarySmallHEndVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-small lbl-HEnd-VCenter",
+            FieldTypes.SecondarySmallHVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-small lbl-bold lbl-HVCenter",
+            FieldTypes.SecondarySmallHStartVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-small lbl-bold lbl-HStart-VCenter",
+            FieldTypes.SecondarySmallHEndVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-small lbl-bold lbl-HEnd-VCenter",
+
+            FieldTypes.SecondaryMicroHVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-micro lbl-HVCenter",
+            FieldTypes.SecondaryMicroHStartVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-micro lbl-HStart-VCenter",
+            FieldTypes.SecondaryMicroHEndVCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-micro lbl-HEnd-VCenter",
+            FieldTypes.SecondaryMicroHVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-micro lbl-HVCenter",
+            FieldTypes.SecondaryMicroHStartVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-micro lbl-HStart-VCenter",
+            FieldTypes.SecondaryMicroHEndVCenterBoldLabelControl => "lbl-base lbl-secondary-text lbl-bold lbl-micro lbl-HEnd-VCenter",
+
+            #endregion
+
+            #region Tertiary
+            FieldTypes.TertiaryLargeHVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-large lbl-HVCenter",
+            FieldTypes.TertiaryLargeHStartVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-large lbl-HStart-VCenter",
+            FieldTypes.TertiaryLargeHEndVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-large lbl-HEnd-VCenter",
+            FieldTypes.TertiaryLargeHVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-large lbl-HVCenter",
+            FieldTypes.TertiaryLargeHStartVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-large lbl-HStart-VCenter",
+            FieldTypes.TertiaryLargeHEndVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-large lbl-HEnd-VCenter",
+
+            FieldTypes.TertiaryMediumHVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-medium lbl-HVCenter",
+            FieldTypes.TertiaryMediumHStartVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-medium lbl-HStart-VCenter",
+            FieldTypes.TertiaryMediumHEndVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-medium lbl-HEnd-VCenter",
+            FieldTypes.TertiaryMediumHVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-medium lbl-HVCenter",
+            FieldTypes.TertiaryMediumHStartVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-medium lbl-HStart-VCenter",
+            FieldTypes.TertiaryMediumHEndVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-medium lbl-HEnd-VCenter",
+
+            FieldTypes.TertiarySmallHVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-small lbl-HVCenter",
+            FieldTypes.TertiarySmallHStartVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-small lbl-HStart-VCenter",
+            FieldTypes.TertiarySmallHEndVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-small lbl-HEnd-VCenter",
+            FieldTypes.TertiarySmallHVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-small lbl-bold lbl-HVCenter",
+            FieldTypes.TertiarySmallHStartVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-small lbl-bold lbl-HStart-VCenter",
+            FieldTypes.TertiarySmallHEndVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-small lbl-bold lbl-HEnd-VCenter",
+
+            FieldTypes.TertiaryMicroHVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-micro lbl-HVCenter",
+            FieldTypes.TertiaryMicroHStartVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-micro lbl-HStart-VCenter",
+            FieldTypes.TertiaryMicroHEndVCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-micro lbl-HEnd-VCenter",
+            FieldTypes.TertiaryMicroHVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-micro lbl-HVCenter",
+            FieldTypes.TertiaryMicroHStartVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-micro lbl-HStart-VCenter",
+            FieldTypes.TertiaryMicroHEndVCenterBoldLabelControl => "lbl-base lbl-tertiary-text lbl-bold lbl-micro lbl-HEnd-VCenter",
+
+            #endregion
+
+            #region PrimaryApp
+            FieldTypes.PrimaryAppLargeHVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-large lbl-HVCenter",
+            FieldTypes.PrimaryAppLargeHStartVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-large lbl-HStart-VCenter",
+            FieldTypes.PrimaryAppLargeHEndVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-large lbl-HEnd-VCenter",
+            FieldTypes.PrimaryAppLargeHVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-large lbl-HVCenter",
+            FieldTypes.PrimaryAppLargeHStartVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-large lbl-HStart-VCenter",
+            FieldTypes.PrimaryAppLargeHEndVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-large lbl-HEnd-VCenter",
+
+            FieldTypes.PrimaryAppMediumHVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-medium lbl-HVCenter",
+            FieldTypes.PrimaryAppMediumHStartVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-medium lbl-HStart-VCenter",
+            FieldTypes.PrimaryAppMediumHEndVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-medium lbl-HEnd-VCenter",
+            FieldTypes.PrimaryAppMediumHVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-medium lbl-HVCenter",
+            FieldTypes.PrimaryAppMediumHStartVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-medium lbl-HStart-VCenter",
+            FieldTypes.PrimaryAppMediumHEndVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-medium lbl-HEnd-VCenter",
+
+            FieldTypes.PrimaryAppSmallHVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-small lbl-HVCenter",
+            FieldTypes.PrimaryAppSmallHStartVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-small lbl-HStart-VCenter",
+            FieldTypes.PrimaryAppSmallHEndVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-small lbl-HEnd-VCenter",
+            FieldTypes.PrimaryAppSmallHVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-small lbl-bold lbl-HVCenter",
+            FieldTypes.PrimaryAppSmallHStartVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-small lbl-bold lbl-HStart-VCenter",
+            FieldTypes.PrimaryAppSmallHEndVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-small lbl-bold lbl-HEnd-VCenter",
+
+            FieldTypes.PrimaryAppMicroHVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-micro lbl-HVCenter",
+            FieldTypes.PrimaryAppMicroHStartVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-micro lbl-HStart-VCenter",
+            FieldTypes.PrimaryAppMicroHEndVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-micro lbl-HEnd-VCenter",
+            FieldTypes.PrimaryAppMicroHVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-micro lbl-HVCenter",
+            FieldTypes.PrimaryAppMicroHStartVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-micro lbl-HStart-VCenter",
+            FieldTypes.PrimaryAppMicroHEndVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-micro lbl-HEnd-VCenter",
+
+            #endregion
+
+            #region LightLabel
+            FieldTypes.LightLargeHVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-large lbl-HVCenter",
+            FieldTypes.LightLargeHStartVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-large lbl-HStart-VCenter",
+            FieldTypes.LightLargeHEndVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-large lbl-HEnd-VCenter",
+            FieldTypes.LightLargeHVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-large lbl-HVCenter",
+            FieldTypes.LightLargeHStartVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-large lbl-HStart-VCenter",
+            FieldTypes.LightLargeHEndVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-large lbl-HEnd-VCenter",
+
+            FieldTypes.LightMediumHVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-medium lbl-HVCenter",
+            FieldTypes.LightMediumHStartVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-medium lbl-HStart-VCenter",
+            FieldTypes.LightMediumHEndVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-medium lbl-HEnd-VCenter",
+            FieldTypes.LightMediumHVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-medium lbl-HVCenter",
+            FieldTypes.LightMediumHStartVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-medium lbl-HStart-VCenter",
+            FieldTypes.LightMediumHEndVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-medium lbl-HEnd-VCenter",
+
+            FieldTypes.LightSmallHVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-small lbl-HVCenter",
+            FieldTypes.LightSmallHStartVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-small lbl-HStart-VCenter",
+            FieldTypes.LightSmallHEndVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-small lbl-HEnd-VCenter",
+            FieldTypes.LightSmallHVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-small lbl-bold lbl-HVCenter",
+            FieldTypes.LightSmallHStartVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-small lbl-bold lbl-HStart-VCenter",
+            FieldTypes.LightSmallHEndVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-small lbl-bold lbl-HEnd-VCenter",
+
+            FieldTypes.LightMicroHVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-micro lbl-HVCenter",
+            FieldTypes.LightMicroHStartVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-micro lbl-HStart-VCenter",
+            FieldTypes.LightMicroHEndVCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-micro lbl-HEnd-VCenter",
+            FieldTypes.LightMicroHVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-micro lbl-HVCenter",
+            FieldTypes.LightMicroHStartVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-micro lbl-HStart-VCenter",
+            FieldTypes.LightMicroHEndVCenterBoldLabelControl => "lbl-base lbl-light-text lbl-bold lbl-micro lbl-HEnd-VCenter",
+            #endregion
+
+            #region Link
+            FieldTypes.LinkHVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-HVCenter lbl-link",
+            FieldTypes.LinkHStartVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-HStart-VCenter lbl-link",
+            FieldTypes.LinkHEndVCenterLabelControl => "lbl-base lbl-primary-app lbl-regular lbl-HEnd-VCenter lbl-link",
+            FieldTypes.LinkHVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-HVCenter lbl-link",
+            FieldTypes.LinkHStartVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-HStart-VCenter lbl-link",
+            FieldTypes.LinkHStartVCenterBoldUnderlineLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-HStart-VCenter lbl-link-underline",
+            FieldTypes.LinkHEndVCenterBoldLabelControl => "lbl-base lbl-primary-app lbl-bold lbl-HEnd-VCenter lbl-link",
+            FieldTypes.LinkErrorHEndVCenterLabelControl => "lbl-base lbl-error lbl-regular lbl-HEnd-VCenter lbl-link",
+            #endregion
+
+            #region Error
+            FieldTypes.ErrorHVCenterLabelControl => "lbl-base lbl-error lbl-regular lbl-HVCenter",
+            FieldTypes.ErrorHStartVCenterLabelControl => "lbl-base lbl-error lbl-regular lbl-HStart-VCenter",
+            FieldTypes.ErrorHEndVCenterLabelControl => "lbl-base lbl-error lbl-regular lbl-HEnd-VCenter",
+            FieldTypes.ErrorHVCenterBoldLabelControl => "lbl-base lbl-error lbl-bold lbl-HVCenter",
+            FieldTypes.ErrorHStartVCenterBoldLabelControl => "lbl-base lbl-error lbl-bold lbl-HStart-VCenter",
+            FieldTypes.ErrorHEndVCenterBoldLabelControl => "lbl-base lbl-error lbl-bold lbl-HEnd-VCenter",
+            #endregion
+
+            #region Html
+            FieldTypes.HtmlPrimaryCenterLabelControl => "lbl-base lbl-primary-text lbl-regular lbl-HVCenter",
+            FieldTypes.HtmlSecondaryLabelControl => "lbl-base lbl-secondary-text lbl-regular",
+            FieldTypes.HtmlSecondaryCenterLabelControl => "lbl-base lbl-secondary-text lbl-regular lbl-HVCenter",
+            FieldTypes.HtmlTertiaryLabelControl => "lbl-base lbl-tertiary-text lbl-regular",
+            FieldTypes.HtmlTertiaryCenterLabelControl => "lbl-base lbl-tertiary-text lbl-regular lbl-HVCenter",
+            FieldTypes.HtmlLightLabelControl => "lbl-base lbl-light-text lbl-regular",
+            FieldTypes.HtmlLightCenterLabelControl => "lbl-base lbl-light-text lbl-regular lbl-HVCenter",
+            #endregion
+
+            _ => "lbl-base lbl-primary-text lbl-regular lbl-small lbl-HStart-VCenter",
+        };
+
+        if (!IsControlEnabled)
+        {
+            switch (FieldType.ToString())
+            {
+                case string ct when ct.StartsWith("PrimaryApp"):
+                    styleName += " lbl-primary-app-disabled";
+                    break;
+                case string ct when ct.StartsWith("Primary"):
+                    styleName += " lbl-primary-text-disabled";
+                    break;
+                case string ct when ct.StartsWith("Secondary"):
+                    styleName += " lbl-secondary-text-disabled";
+                    break;
+                case string ct when ct.StartsWith("Tertiary"):
+                    styleName += " lbl-tertiary-text-disabled";
+                    break;
+            }
+        }
+
+        return styleName;
+    }
+
+    private void OnLabelClicked(object sender)
+    {
+        OnValueChangedAction(sender);
+    }
+}

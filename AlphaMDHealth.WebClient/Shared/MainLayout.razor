@@ -1,0 +1,87 @@
+﻿@inject IJSRuntime JSRuntime
+@using Radzen.Blazor
+@using Radzen;
+
+@inherits LayoutComponentBase
+@namespace AlphaMDHealth.WebClient
+
+@* Below tag is added for pop service of all Radzen control *@
+@* Note: do not remove it or control will misbehave *@
+<RadzenDialog />
+<RadzenTooltip />
+<MudBlazor.MudThemeProvider />
+
+@if (_isDataFetched)
+{
+    <NavigationComponent @ref=@navigator IsFirstRender="false" />
+    <RadzenLayout Style="width: 100%;">
+
+        @if (!IsDashboardPatientMobileView)
+        {
+            <RadzenHeader>
+                <Header IsAfterLoginLayout=@_isAfterLoginLayout
+                        OnSidebarToggleClicked=@(() => {sidebarExpanded = !sidebarExpanded; StateHasChanged();})
+                        OnMenuClicked=@OnFeatureMenuClickAsync />
+            </RadzenHeader>
+
+            @if (_isAfterLoginLayout && sidebarExpanded)
+            {
+                <RadzenSidebar Responsive="true" Style="width: 260px">
+                    <Sidebar @bind-SidebarExpanded=sidebarExpanded />
+                </RadzenSidebar>
+            }
+        }
+        <RadzenBody class=@(IsDashboardPatientMobileView ?" radzen-mobile-body":"")>
+            @Body
+        </RadzenBody>
+
+        @if (!_isAfterLoginLayout && (AppState?.MasterData?.Menus?.Any(x => x.MenuLocation == MenuLocation.Footer) ?? false))
+        {
+            <RadzenFooter>
+                <Footer OnMenuClicked=@OnFeatureMenuClickAsync />
+            </RadzenFooter>
+        }
+    </RadzenLayout>
+
+    @*
+    <NavigationComponent @ref=@navigator IsFirstRender="false" />
+
+    <RadzenLayout Style="width: 100%; height: 100%;">
+
+        <RadzenHeader>
+            <Header IsAfterLoginLayout=@_isAfterLoginLayout
+                    OnSidebarToggleClicked=@(e => { sidebarExpanded = !sidebarExpanded; bodyExpanded = !bodyExpanded; })
+                    OnMenuClicked=@OnFeatureMenuClickAsync />
+        </RadzenHeader>
+
+        <RadzenBody @bind-Expanded=@bodyExpanded
+                    Style="margin:0px; padding:0px">
+            <ChildContent>
+                @Body
+            </ChildContent>
+        </RadzenBody>
+
+        @if (_isAfterLoginLayout)
+        {
+            <RadzenSidebar @bind-Expanded=@sidebarExpanded
+                           class="demos-sidebar"
+                           Style="display: flex; flex-direction: column">
+                <Sidebar MenuChange=@_menuChange />
+            </RadzenSidebar>
+        }
+
+        @if (!_isAfterLoginLayout && (AppState?.MasterData?.Menus?.Any(x => x.MenuLocation == MenuLocation.Footer) ?? false))
+        {
+            <RadzenFooter>
+                <Footer OnMenuClicked=@OnFeatureMenuClickAsync />
+            </RadzenFooter>
+        }
+
+    </RadzenLayout> *@
+}
+else
+{
+    <div Class="rz-app-loading">
+        <div Class="logo-loading"></div>
+    </div>
+}

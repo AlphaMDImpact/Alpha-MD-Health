@@ -1,0 +1,53 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@(_appointmentData.Appointment?.PageHeading??string.Empty)
+              ApplyCard=true
+              PageResources=@_appointmentData.Resources>
+        <ChildContent>
+            @if (_appointmentData.Appointment?.PageData != null)
+            {
+                <AmhLabelControl FieldType=@FieldTypes.SecondarySmallHStartVCenterLabelControl
+                                 Value=@_appointmentData.Appointment.PageData />
+            }
+            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterLabelControl
+                             Value=@(string.Join(Constants.STRING_SPACE, _appointmentData.Appointment.FromDateString, Constants.SYMBOL_DASH, _appointmentData.Appointment.ToDateString)) />
+
+            <AmhTableControl DataSource=@_appointmentData.AppointmentParticipants
+                             DataSourceType=@ParticipantsModel
+                             TableHeader=@LibResources.GetResourceValueByKey(_appointmentData.Resources, ResourceConstants.R_PARTICIPANTS_TEXT_KEY)
+                             TableStructure=@GenerateTableStructure()
+                             ShowSearch=@false />
+        </ChildContent>
+        <PageFooter>
+            @if (IsAppointmentAddEditAllowed())
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_EDIT_ACTION_KEY OnValueChanged=@OnEditClickAsync />
+            }
+
+            @if (IsAppointmentJoinAllowed())
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_JOIN_TEXT_KEY OnValueChanged=@OnJoinButtonClicked />
+            }
+            @if (IsAppointmentAcceptAllowed())
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_ACCEPT_KEY OnValueChanged=@OnAcceptButtonClickedAsync />
+            }
+            @if (IsAppointmentDeclineAllowed())
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DECLINE_TEXT_KEY OnValueChanged=@OnDeclineButtonClicked />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DECLINE_ERROR_APPOINTMENT_KEY
+                                   ShowHidePopup=@_hideDeletedConfirmationPopup
+                                   Actions=@_actionData
+                                   OnValueChanged=@OnDeclineActionClickAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelButtonClickAsync />
+        </PageFooter>
+    </BasePage>
+}

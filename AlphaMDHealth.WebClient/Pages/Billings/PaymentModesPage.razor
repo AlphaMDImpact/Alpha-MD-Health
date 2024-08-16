@@ -1,0 +1,38 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PaymentModesView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error 
+              @bind-Success=@Success 
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              PageResources=@_paymentModeData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_paymentModeData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PaymentModePage PaymentModeID=@_paymentModeID OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_paymentModeData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_paymentModeData.PaymentModes
+                                     DataSourceType=@PaymentModeModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PaymentModesView.ToString())
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_paymentModeData.FeaturePermissions, AppPermissions.PaymentModeAddEdit.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((PaymentModeModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_paymentModeData.ErrCode.ToString()></AmhMessageControl>
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

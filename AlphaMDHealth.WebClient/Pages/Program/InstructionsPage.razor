@@ -1,0 +1,40 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/InstructionsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyCard=true
+              PageResources=@_programData.Resources
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_programData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <InstructionPage InstructionID=@_instructionID
+                                 ShowDetailPage=true
+                                 OnClose=@OnAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_programData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_programData.Instructions
+                                     DataSourceType=@InstructionModel
+                                     TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.InstructionsView.ToString())
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.InstructionAddEdit.ToString())
+                                     OnValueChanged=@((e) => OnAddEditClick((InstructionModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_programData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

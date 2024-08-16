@@ -1,0 +1,20 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits AmhBaseControl
+@using AlphaMDHealth.Utility
+
+<div class=@string.Concat("mx-2 ", StyleConstants.ST_CONTROl_ACTIVITY_CSS)>
+    <div class="col-auto d-flex padding-horizontal-clearfix flex-wrap"
+         style="align-items:center; width:70%">
+        @foreach (var type in ReadingCategories)
+        {
+            <div class=@string.Concat("margin-bottom-xs d-flex align-items-center flex-column cursor-pointer ", AppState.ClassName("margin-right-xs ", "margin-left-xs ")) style="opacity:@(type.IsSelected ? "1" : "0.5");
+                 color:@(type.IsSelected? "primary-app-color":"tertiary-text-color"); padding:8px;" @onclick=@(e => { OnClick((short)type.OptionID); })>
+                <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                 ImageHeight=AppImageSize.ImageSizeL
+                                 ImageWidth=AppImageSize.ImageSizeL
+                                 Icon=@string.Concat(type.GroupName.ToLower(),".svg")/>
+                <AmhLabelControl FieldType=@(type.IsSelected ? FieldTypes.LinkHVCenterBoldLabelControl : FieldTypes.HtmlPrimaryLabelControl) Value=@type.OptionText Style="color:(type.IsSelected? primary-app-color:tertiary-text-color);" />
+            </div>
+        }
+    </div>
+</div>

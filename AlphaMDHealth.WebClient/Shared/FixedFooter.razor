@@ -1,0 +1,21 @@
+﻿@namespace AlphaMDHealth.WebClient
+<div class="page-footer">
+    <div class=@(IsTab ? "col-lg-9 col-md-12 d-flex gap justify-content-end "+ (IsPatientMobileView ?"" : "pr-6") :("col-lg-9 col-md-0 d-flex gap justify-content-end "+ (IsPatientMobileView ?"":"pr-6")))>
+        @Content
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment Content { get; set; }
+
+    [Parameter]
+    public bool IsAccordion { get; set; }
+
+    [Parameter]
+    public bool IsTab { get; set; }
+
+    [Parameter]
+    public bool IsPatientMobileView { get; set; }
+
+}

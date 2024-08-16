@@ -1,0 +1,64 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/RegistrationView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageResources=@_userData.Resources
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhEntryControl @bind-Value=@_userData.User.FirstName
+                             ResourceKey=@ResourceConstants.R_FIRST_NAME_KEY
+                             Icon=@ImageConstants.I_USER_ID_SVG
+                             RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_ALPHA_REGEX_KEY) />
+
+            <AmhEntryControl @bind-Value=_userData.User.LastName
+                             ResourceKey=@ResourceConstants.R_LAST_NAME_KEY
+                             Icon=@ImageConstants.I_USER_ID_SVG
+                             RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_ALPHA_REGEX_KEY) />
+
+            <AmhEntryControl @bind-Value=_userData.User.EmailId
+                             Icon=@ImageConstants.I_EMAIL_ICON_SVG
+                             ResourceKey=@ResourceConstants.R_EMAIL_ADDRESS_KEY
+                             RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_EMAIL_REGEX_KEY) />
+
+            <AmhMobileNumberControl @bind-Value=@_userData.User.PhoneNo
+                                    ResourceKey=@ResourceConstants.R_MOBILE_NUMBER_KEY
+                                    CountryCodes=@_userData.CountryCodes />
+
+            <AmhEntryControl @bind-Value=_userData.User.AccountPassword
+                             ResourceKey=@ResourceConstants.R_NEW_PASSWORD_KEY
+                             Icon=@ImageConstants.I_PASSWORD_LOCK_ICON
+                             RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_PASSWORD_REGEX_KEY) />
+
+            <AmhEntryControl @bind-Value=_confirmPassword
+                             ResourceKey=@ResourceConstants.R_CONFIRM_PASSWORD_KEY
+                             Icon=@ImageConstants.I_PASSWORD_LOCK_ICON
+                             RegexExpression=@LibSettings.GetSettingValueByKey(_userData.Settings, SettingsConstants.S_PASSWORD_REGEX_KEY) />
+
+            @if (_showOtpPopup)
+            {
+                <SMSValidationPage @bind-Error=@Error
+                                   @bind-Success=@Success
+                                   @bind-ShowPopup=@_showOtpPopup
+                                   @bind-Value=@_userData.User.Otp
+                                   PageData=@_userData
+                                   ShowClose=false
+                                   IsPopup=@true
+                                   PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.SMSAuthenticationView.ToString())
+                                   OnResendClicked=@OnResendOtpClickAsync
+                                   OnVerifyClicked=@OnVerifyOtpClickAsync />
+            }
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_REGISTER_ACTION_KEY
+                              OnValueChanged=@RegisterUserAsync FieldType=@FieldTypes.PrimaryButtonControl Class="my-4" />
+            <AmhHorizontalRuleControl />
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_ALREADY_HAVE_LOGIN_ACTION_KEY Class="my-3 mb-8"
+                              OnValueChanged=@OnLoginViewClickAsync />
+        </PageFooter>
+    </BasePage>
+}

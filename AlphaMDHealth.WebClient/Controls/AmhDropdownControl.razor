@@ -1,0 +1,392 @@
+﻿@using System.Globalization;
+@using MudBlazor
+@using Microsoft.Fast.Components.FluentUI
+@using Radzen
+@using Radzen.Blazor
+@using System.Linq
+
+@inherits AmhBaseControl;
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                @bind-Options=@Options
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                IsValid=@IsValid>
+    <ChildControl>
+        @switch (FieldType)
+        {
+            case FieldTypes.MultiSelectEditableDropdownControl:
+                <RadzenDropDownDataGrid @ref="grid" @bind-Value=@Values
+                                        id=@string.Concat(ResourceKey, FieldType, "dropdown")
+                                        Style="width:100%;"
+                                        Chips="true"
+                                        AllowFiltering="true"
+                                        AllowRowSelectOnRowClick=@false
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        AllowClear="true"
+                                        Multiple="true"
+                                        Disabled=@(!IsControlEnabled)
+                                        Placeholder=@_resource?.PlaceHolderValue
+                                        Data=@Options
+                                        TextProperty="OptionText"
+                                        ValueProperty="OptionID"
+                                        DisabledProperty="IsDisabled"
+                                        Name="DropDownDataGridMultiple">
+                    <Columns>
+                        <RadzenDropDownDataGridColumn Width="60px" Sortable="false">
+                            <HeaderTemplate>
+                                <RadzenCheckBox TriState="false"
+                                                TValue="bool"
+                                                InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_SELECT_ALL_TEXT_KEY)  }})"
+                                                Disabled="@(!grid.AllowSelectAll)"
+                                                @bind-Value=@SelectAll
+                                                Change=@OnSelectAllChanged />
+                            </HeaderTemplate>
+                            <Template Context="data">
+                                <RadzenCheckBox @onclick:stopPropagation
+                                                TriState="false"
+                                                TValue="bool"
+                                                InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select item" }})"
+                                                Disabled=@(((OptionModel) data).IsDisabled)
+                                                Value="@(Values != null && Values.Contains(((OptionModel) data).OptionID))"
+                                                Change=@(args=> OnSelectRow(data)) />
+                            </Template>
+                        </RadzenDropDownDataGridColumn>
+                        <RadzenDropDownDataGridColumn Property="OptionText" Title="OptionText" />
+                    </Columns>
+                </RadzenDropDownDataGrid>
+                break;
+            case FieldTypes.SingleSelectEditableDropdownControl:
+                <MudAutocomplete T="OptionModel" @bind-Value=@SelectedOption @bind-SelectedValues=@SelectedOptions
+                                 id=@string.Concat(ResourceKey, FieldType, "dropdown")
+                                 Margin=@Margin.Dense
+                                 Style="border:1.5px solid var(--separator-n-disabled-color) !important; border-radius:6px;"
+                                 Dense=@true
+                                 class="input-primary input-primary-mobile"
+                                 Variant=@MudBlazor.Variant.Outlined
+                                 AnchorOrigin=@Origin.BottomCenter
+                                 Immediate=@true
+                                 MaxItems=@Options?.Count()
+                                 Disabled=@(!IsControlEnabled)
+                                 ToStringFunc=@MapText
+                                 Placeholder=@_resource?.PlaceHolderValue
+                                 SearchFunc=@OnOptionSearched
+                                 ItemDisabledFunc=@IsItemDisabled
+                                 Clearable=@(FieldType.ToString().Contains("Editable"))
+                                 OnClearButtonClick=@((e)=>{OnClearAsync(e);})>
+                                <NoItemsTemplate>
+                                    <MudText Align="MudBlazor.Align.Left" Class="px-4 py-1">
+                                        @GetResourceValue(ResourceConstants.R_NO_DATA_FOUND_KEY)
+                                    </MudText>
+                                </NoItemsTemplate>
+                </MudAutocomplete>
+                break;
+            default:
+                <MudSelect T="OptionModel" @bind-SelectedValues=@SelectedOptions
+                           id=@string.Concat(ResourceKey, FieldType, "dropdown")
+                           Class="input-primary input-primary-mobile"
+                           Margin=@Margin.Dense
+                           Dense=@true
+                           Variant=@MudBlazor.Variant.Outlined
+                           AnchorOrigin=@Origin.BottomCenter
+                           Immediate=@true
+                           Disabled=@(!IsControlEnabled)
+                           ToStringFunc=@MapText
+                           Placeholder=@_resource?.PlaceHolderValue
+                           MultiSelection=@(FieldType != FieldTypes.SingleSelectDropdownControl && FieldType != FieldTypes.SingleSelectEditableDropdownControl)
+                           SelectAll=@(FieldType != FieldTypes.SingleSelectDropdownControl && FieldType != FieldTypes.SingleSelectEditableDropdownControl)
+                           SelectAllText=@LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_SELECT_ALL_TEXT_KEY)
+                           Clearable=@(FieldType.ToString().Contains("Editable"))
+                           OnClearButtonClick=@((e)=>{OnClearAsync(e);})>
+                    @if (Options?.Count > 0)
+                    {
+                        @foreach (var item in Options)
+                        {
+                            <MudSelectItem Value=@item Disabled=@item.IsDisabled />
+                        }
+                    }
+                </MudSelect>
+                break;
+        }
+    </ChildControl>
+</AmhBaseControl>
+
+@code {
+    private RadzenDropDownDataGrid<IEnumerable<long>> grid;
+    private Func<OptionModel, string> MapText = p => p?.OptionText;
+    private Func<OptionModel, bool> MapIsDisabled = p => p?.IsDisabled ?? false;
+    private string _value = string.Empty;
+
+    private bool _selectAll;
+    private bool SelectAll
+    {
+        get
+        {
+            return _selectAll;
+        }
+        set
+        {
+            _selectAll = value;
+            if (grid != null)
+            {
+                grid.View.Cast<OptionModel>().ToList().ForEach(x =>
+                {
+                    if (!x.IsDisabled)
+                    {
+                        x.IsSelected = value;
+                    }
+                });
+            }
+        }
+    }
+
+    private OptionModel SelectedOption
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_value))
+            {
+                var selectedId = FetchOptionIDsFromValue(_value)?.FirstOrDefault() ?? 0;
+                return Options.FirstOrDefault(x => x.OptionID == selectedId);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        set
+        {
+            var val = value != null ? value.OptionID.ToString() : string.Empty;
+            if (Value != val)
+            {
+                Value = val;
+            }
+        }
+    }
+
+    private IEnumerable<OptionModel> SelectedOptions
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_value))
+            {
+                var selectedIds = FetchOptionIDsFromValue(_value);
+                return Options.Where(item => selectedIds?.Contains(item.OptionID) ?? false).ToList();
+            }
+            else
+            {
+                return Enumerable.Empty<OptionModel>();
+            }
+        }
+        set
+        {
+            var val = value != null ? string.Join(Constants.SYMBOL_PIPE_SEPERATOR, value.Select(x => x.OptionID)) : string.Empty;
+            if (Value != val)
+            {
+                Value = val;
+            }
+        }
+    }
+
+    private IEnumerable<long> Values
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_value))
+            {
+                return _value.Split(Constants.SYMBOL_PIPE_SEPERATOR).Select(x => Convert.ToInt64(x));
+            }
+            else
+            {
+                return Enumerable.Empty<long>();
+            }
+        }
+        set
+        {
+            var val = value != null ? string.Join(Constants.SYMBOL_PIPE_SEPERATOR, value) : string.Empty;
+            if (Value != val)
+            {
+                Value = val;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Control value represents text of button control
+    /// </summary>
+    [Parameter]
+    public string Value
+    {
+        get
+        {
+            return _value;
+        }
+        set
+        {
+            if (value != _value)
+            {
+                _value = value;
+                ResetSelectedOptionsFromValue();
+                ValueChanged.InvokeAsync(value);
+                OnValueChangedAction(_value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Bindable property of Value
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Initializes the component.
+    /// </summary>
+    protected override Task OnInitializedAsync()
+    {
+        if (Options == null)
+        {
+            Options = new List<OptionModel>();
+        }
+        SetValueFromOptionSource();
+        return base.OnInitializedAsync();
+    }
+
+    /// <summary>
+    /// method to invoke after option changed
+    /// </summary>
+    public override void OnOptionsChanged()
+    {
+        Value = string.Join(Constants.SYMBOL_PIPE_SEPERATOR, Options?.Where(item => item.IsSelected)?.Select(item => item.OptionID));
+    }
+
+    /// <summary>
+    /// Validates a Control implementation Method
+    /// </summary>
+    /// <param name="isButtonClick"></param>
+    public override bool ValidateControl(bool isButtonClick)
+    {
+        ErrorMessage = string.Empty;
+        if (IsControlEnabled && _resource != null)
+        {
+            int count = string.IsNullOrWhiteSpace(_value) ? 0 : _value.Split(Constants.SYMBOL_PIPE_SEPERATOR).Length;
+            if (Validator.HasRequiredValidationError(_resource, count > 0 && _value != "-1"))
+            {
+                ErrorMessage = GetRequiredResourceValue();
+            }
+            else if (count > 0 && _value != "-1")
+            {
+                if (Validator.HasMinLengthValidationError(_resource, count))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_MINIMUM_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength);
+                    // ErrorMessage = string.Format(CultureInfo.CurrentCulture, "At-least {0} options should be selected", _resource.MinLength);
+                }
+                else if (Validator.HasRangeValidationError(_resource, count))
+                {
+                    ErrorMessage = string.Format(CultureInfo.CurrentCulture
+                        , LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_RANGE_LENGTH_VALIDATION_KEY)
+                        , _resource.MinLength, _resource.MaxLength);
+                    // ErrorMessage = string.Format(CultureInfo.CurrentCulture, "Cannot select more than {0} options", _resource.MaxLength);
+                }
+            }
+        }
+        SetValidationResult(isButtonClick);
+        return IsValid;
+    }
+
+    public async Task OnSelectRow(dynamic data)
+    {
+        if (!data.IsDisabled)
+        {
+            grid.SelectItem(data);
+        }
+        if (SelectAll)
+        {
+            SelectAll = !grid.View.Cast<OptionModel>().Any(x => !x.IsSelected && !x.IsDisabled);
+        }
+        else if (Options.All(x => x.IsSelected || x.IsDisabled))
+        {
+            SelectAll = grid.View.Cast<OptionModel>().All(x => x.IsSelected || x.IsDisabled);
+        }
+    }
+
+    public async Task OnSelectAllChanged(bool selectAll)
+    {
+        var views = grid.View.Cast<OptionModel>();
+        Values = (selectAll
+            ? views.Where(x => x.IsSelected || !x.IsDisabled)?.Select(c => c.OptionID).ToList()
+            : views.Where(x => x.IsDisabled && x.IsSelected)?.Select(c => c.OptionID)).ToList() ?? Enumerable.Empty<long>();
+        await Task.CompletedTask;
+    }
+
+    // private void OnOptionChanged()
+    // {
+    //     OnValueChangedAction(_value);
+    // }
+
+    private void SetValueFromOptionSource()
+    {
+        // if (FieldType.ToString().StartsWith("Multi"))
+        // {
+        //     if (Options.Any(x => x.OptionID == -1))
+        //     {
+        //         Options.RemoveAll(x => x.OptionID == -1);
+        //     }
+        // }
+        // else if (!Options.Any(x => x.OptionID == -1))
+        // {
+        //     Options.Insert(0, new OptionModel { OptionID = -1, OptionText = LibResources.GetResourceValueByKey(PageResources, ResourceConstants.R_DROP_DOWN_PLACE_HOLDER_KEY) });
+        // }
+        if (string.IsNullOrWhiteSpace(_value))
+        {
+            Value = string.Join(Constants.SYMBOL_PIPE_SEPERATOR, Options.Where(item => item.IsSelected).Select(item => item.OptionID));
+        }
+    }
+
+    /// <summary>
+    /// Sets default values for the control.
+    /// </summary>
+    private void ResetSelectedOptionsFromValue()
+    {
+        var selectedIds = FetchOptionIDsFromValue(_value);
+        if (Options?.Count > 0)
+        {
+            Options.ForEach(x =>
+            {
+                x.IsSelected = (selectedIds?.Count > 0 ? selectedIds?.Contains(x.OptionID) ?? false : (x.IsDisabled && x.IsSelected));
+            });
+            if (grid == null)
+            {
+                _selectAll = Options.All(x => x.IsSelected || x.IsDisabled);
+            }
+        }
+    }
+
+    private async Task<IEnumerable<OptionModel>> OnOptionSearched(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return Options;
+        }
+        return Options.Where(x => x.OptionText.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    /// <summary>
+    /// Determines whether an item should be disabled in the dropdown.
+    /// </summary>
+    private bool IsItemDisabled(OptionModel option)
+    {
+        return option != null && option.IsDisabled;
+    }
+
+    private void OnClearAsync(MouseEventArgs e)
+    {
+        SelectedOptions = new List<OptionModel>();
+    }
+}

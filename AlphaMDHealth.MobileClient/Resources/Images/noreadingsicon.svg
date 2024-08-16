@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="160px" height="160px" viewBox="0 0 160 160" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>B302C09D-8717-4F3D-B1CE-4846CEA099F1</title>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Restart-app" transform="translate(-295.000000, -625.000000)">
+            <g id="Cont" transform="translate(203.000000, 625.000000)">
+                <g id="restart-app" transform="translate(92.000000, 0.000000)">
+                    <circle id="Oval" fill="#CCE4F6" cx="80" cy="80" r="80"></circle>
+                    <g id="Icon" transform="translate(30.000000, 30.000000)" stroke="#0078D3" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+                        <g id="Group" transform="translate(50.719340, 50.382067) scale(-1, 1) rotate(46.000000) translate(-50.719340, -50.382067) translate(17.719340, 12.882067)">
+                            <path d="M65.7754423,50.7412628 C62.4521775,61.3159445 54.1765492,69.5674736 43.6548856,72.8256709 C25.9034943,78.3202639 7.00498616,68.3601091 1.51039314,50.6063079 C-3.98178998,32.871786 5.97595492,13.9564085 23.7273462,8.46181547 C34.2466,5.2036182 45.741867,7.35084732 54.4609185,14.1973994" id="Stroke-159"></path>
+                            <polyline id="Stroke-161" transform="translate(51.162570, 10.944319) rotate(-9.000000) translate(-51.162570, -10.944319) " points="43.1625701 19.9443187 59.1625701 17.9012182 56.0386479 1.94431874"></polyline>
+                        </g>
+                        <polyline id="Line" points="46 42 54 58 70.2725018 50.4"></polyline>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

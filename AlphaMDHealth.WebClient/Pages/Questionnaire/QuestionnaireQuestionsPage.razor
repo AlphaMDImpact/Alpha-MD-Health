@@ -1,0 +1,47 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              ShowDetailPage=@true
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionnaireQuestionsView.ToString())
+              ShowPageTitle=@ShowPageTitle
+              IsAccordion=@IsAccordion
+              PageResources=@_questionnaireData.Resources>
+        <ChildContent>
+            @if (_showAddEditPage)
+            {
+                <QuestionnaireQuestionPage OnClose=@OnAddEditClosedAsync
+                                           QuestionnaireID=@QuestionnaireID
+                                           IsAccordion=@IsAccordion
+                                           QuestionID=@_questionID />
+            }
+            else
+            {
+                @if (_questionnaireData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl TableHeader=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionnaireQuestionsView.ToString())
+                                     DataSource=@_questionnaireData.Questions
+                                     DataSourceType=@QuestionnaireQuestionModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowAddButton=@(LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.QuestionnaireQuestionAddEdit.ToString()))
+                                     OnValueChanged=@((e) => OnAddEditClick((QuestionnaireQuestionModel)e)) />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_questionnaireData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!_showAddEditPage && LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.QuestionnaireQuestionAddEdit.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_AND_NEXT_ACTION_KEY
+                                  OnValueChanged=@OnSaveAndNextButtonClicked Class="mt-2" />
+            }
+        </PageFooter>
+    </BasePage>
+}

@@ -1,0 +1,32 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/UserWelcomeScreensView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              ApplyStructure=@false
+              Class="welcome-media justify-content-center; align-items-center;"
+              PageResources=@AppState?.MasterData?.Resources>
+        <ChildContent>
+            <AmhCarouselControl @bind-Value=@_selectedIndex
+                                UniqueID="welcomeScreen"
+                                ShowArrows=@false
+                                BaseClass="h-100"
+                                Heading=@(AppState?.RouterData?.SelectedRoute?.FeatureText?.Replace("{orgName}", AppState?.MasterData?.OrganisationName))
+                                DataSourceType="AppIntroModel"
+                                DataSource=@_welcomeData.AppIntros
+                                SourceFields=@MapSourceField()
+                                OnValueChanged=@OnSlideChangedAsync>
+            </AmhCarouselControl>
+        </ChildContent>
+        <PageFooter>
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CONTINUE_ACTION_KEY
+                              Class="welcome-screen-btn"
+                              OnValueChanged=@OnNextButtonClickedAsync>
+            </AmhButtonControl>
+        </PageFooter>
+    </BasePage>
+}

@@ -1,0 +1,44 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.DepartmentAddEdit.ToString())
+              PageOperation=@GetPageOperationType(_isEditable, DepartmentId == 0)
+              OnClose=@OnClose
+              PageResources=@_departmentData.Resources
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              ApplyCard=true
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhLanguageTabControl DataSourceType=@DepartmentModel
+                                   LanguageTabData=@DataFormatter
+                                   DataSource=@_departmentData.Departments
+                                   IsControlEnabled=@_isEditable />
+        </ChildContent>
+        <PageFooter>
+            @if (_departmentData.Department.DepartmentID > 0 && LibPermissions.HasPermission(_departmentData.FeaturePermissions, AppPermissions.DepartmentDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                  OnValueChanged=@OnRemoveClick />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideDeletedConfirmationPopup
+                                   Actions=@_popupActions
+                                   OnValueChanged=@OnDeleteConfirmationPopupClickedAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl OnValueChanged=OnSaveButtonClickedAsync
+                                  ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                              OnValueChanged=@OnCancelClickedAsync />
+        </PageFooter>
+    </BasePage>
+}

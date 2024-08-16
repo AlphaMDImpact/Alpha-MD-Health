@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="60px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Slider-holder</title>
+    <g id="Patient" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Questionnaires---Slider" transform="translate(-317.000000, -809.000000)" fill-rule="nonzero">
+            <g id="Content" transform="translate(0.000000, 153.000000)">
+                <g transform="translate(1.000000, 174.000000)" id="Answers">
+                    <g transform="translate(72.000000, 293.000000)">
+                        <g id="Slider" transform="translate(0.000000, 20.000000)">
+                            <g id="Slider-holder" transform="translate(244.000000, 169.000000)">
+                                <path d="M30,0 C13.4314575,0 0,13.4314575 0,30 C0,46.5685425 13.4314575,60 30,60 C46.5685425,60 60,46.5685425 60,30 C60,13.4314575 46.5685425,0 30,0 Z" id="Path" fill="#DADADA"></path>
+                                <path d="M30,3.52941176 C44.6193022,3.52941176 56.4705882,15.3806978 56.4705882,30 C56.4705882,44.6193022 44.6193022,56.4705882 30,56.4705882 C15.3806978,56.4705882 3.52941176,44.6193022 3.52941176,30 C3.52941176,15.3806978 15.3806978,3.52941176 30,3.52941176 Z" id="Path" fill="#FFFFFF"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

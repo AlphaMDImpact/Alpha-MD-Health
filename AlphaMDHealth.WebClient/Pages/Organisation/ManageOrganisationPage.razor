@@ -1,0 +1,33 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/ManageOrganisationView/{organizationid:long}"
+
+<BasePage @bind-Error=@Error
+          @bind-Success=@Success
+          @bind-ShowDetailPage=@ShowDetailPage
+          CurrentPage=@this
+          ApplyParentStructure=(!ShowDetailPage)
+          PageOperation=@GetPageOperationType(true, OrganizationID == -1)>
+    <ChildContent>
+        @if (!ShowDetailPage)
+        {
+            <div id="ManageOrganisations" class="card p-3 col-lg-8 col-md-12 mt-3">
+                <OrganisationProfilePage IsManageOrganization=@true
+                                         IsAccordion=true
+                                         ApplyParentStructure=false
+                                         ShowDetailPage=@ShowDetailPage
+                                         OrganisationID=@OrganizationID />
+            </div>
+        }
+
+        @if (OrganizationID != -1)
+        {
+            <div id="ManageAdmins" class="my-5" style="margin-left:-10px; margin-right:-10px;">
+                <UsersPage IsManageOrganization=@true
+                           CurrentView=@AppPermissions.UsersView
+                           HideProfilePage=@HideOrganisationProfilePage
+                           OrganizationID=@OrganizationID />
+            </div>
+        }
+    </ChildContent>
+</BasePage>

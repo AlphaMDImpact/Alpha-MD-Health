@@ -1,0 +1,132 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              OnClose=@OnClose
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionAddEdit.ToString())
+              PageResources=@_questionnaireData.Resources
+              RegisterComp=@RegisterControl
+              IsAccordion=true
+              PageOperation=@GetPageOperationType(_isEditable, QuestionID == 0)>
+        <ChildContent>
+            @if (_shouldShowAddEditAnswer)
+            {
+                <AnswerPage QuestionnaireData=@_questionnaireData
+                            Languages=@_languages
+                            SelectedAnswerID=@_selectedAnswerID
+                            OnClose=@AnswerPopUpClosedEventCallback />
+            }
+            else
+            {
+                <AmhDropdownControl @bind-Options=@_questionnaireData.DropDownOptions
+                                    ResourceKey=@ResourceConstants.R_QUESTION_TYPE_KEY
+                                    IsControlEnabled=@_isEditable
+                                    ValueChanged=@OnQuestionTypeChanged />
+
+                @if (_questionnaireData.Question.QuestionTypeID != QuestionType.RichTextQuestionKey)
+                {
+                    <div class="row">
+                        <div style="display:flex;" class="col-lg-8 col-md-12 justify-content-between">
+                            <AmhCheckBoxListControl Options=@CreateOptions(1, ResourceConstants.R_IS_REQUIRED_KEY, _questionnaireData.Question.IsRequired)
+                                                    ShowHeader=@false
+                                                    ResourceKey=@ResourceConstants.R_IS_REQUIRED_KEY
+                                                    ValueChanged=@(e => { _questionnaireData.Question.IsRequired = !string.IsNullOrWhiteSpace((string)e) && Convert.ToInt32(e) == 1; })
+                                                    IsControlEnabled=@_isEditable />
+
+                            <AmhCheckBoxListControl Options=@CreateOptions(2, ResourceConstants.R_ADD_TO_MEDICAL_HISTORY_KEY, _questionnaireData.Question.AddToMedicalHistory)
+                                                    ShowHeader=@false
+                                                    ResourceKey=@ResourceConstants.R_ADD_TO_MEDICAL_HISTORY_KEY
+                                                    ValueChanged=@(e => { _questionnaireData.Question.AddToMedicalHistory = !string.IsNullOrWhiteSpace((string)e) && Convert.ToInt32(e) == 2; })
+                                                    IsControlEnabled=@_isEditable />
+
+                            <AmhCheckBoxListControl Options=@CreateOptions(3, ResourceConstants.R_SHOW_VALUE_TO_PATIENT, _questionnaireData.Question.ShowValueToPatient)
+                                                    ShowHeader=@false
+                                                    ResourceKey=@ResourceConstants.R_SHOW_VALUE_TO_PATIENT
+                                                    ValueChanged=@(e => { _questionnaireData.Question.ShowValueToPatient = !string.IsNullOrWhiteSpace((string)e) && Convert.ToInt32(e) == 3; })
+                                                    IsControlEnabled=@_isEditable />
+                        </div>
+                    </div>
+                    
+                }
+
+                @if (_questionnaireData.Question.QuestionTypeID == QuestionType.FilesAndDocumentQuestionKey)
+                {
+                    <AmhDropdownControl @bind-Options=@_questionnaireData.DefaultRespondants
+                                        ResourceKey=@ResourceConstants.R_SELECT_File_CATEGORY_KEY
+                                        IsControlEnabled=@_isEditable />
+                }
+
+                @if (_questionnaireData.Question.QuestionTypeID == QuestionType.MeasurementQuestionKey)
+                {
+                    <AmhDropdownControl @bind-Options=@_questionnaireData.ReadingsOptions
+                                        ResourceKey=@ResourceConstants.R_SELECT_MEASURMENT_KEY
+                                        IsControlEnabled=@_isEditable />
+                }
+
+                @if (!IsAnswerOptionsNeeded())
+                {
+                    <AmhNumericEntryControl @bind-Value=@_minValueString
+                                            ResourceKey=@ResourceConstants.R_MIN_TEXT_KEY
+                                            IsControlEnabled=@_isEditable
+                                            DigitsAfterDecimal=3 />
+
+                    <AmhNumericEntryControl @bind-Value=@_maxValueString
+                                            ResourceKey=@ResourceConstants.R_MAX_TEXT_KEY
+                                            IsControlEnabled=@_isEditable
+                                            DigitsAfterDecimal=3 />
+                }
+
+                @if (ShouldShowSlider())
+                {
+                    <AmhNumericEntryControl FieldType=@FieldTypes.DecimalEntryControl
+                                            @bind-Value=@_sliderValueString
+                                            ResourceKey=@ResourceConstants.R_SLIDER_STEPS_KEY
+                                            IsControlEnabled=@_isEditable
+                                            DigitsAfterDecimal=3 />
+                }
+
+                <AmhLanguageTabControl DataSource=@_questionnaireData.QuestionDetails
+                                       DataSourceType=@QuestionnaireQuestionDetailsModel
+                                       LanguageTabData=@_dataFormatter
+                                       IsControlEnabled=@_isEditable />
+
+                @if (_shouldShowAnswersList)
+                {
+                    <AmhTableControl TableHeader=@LibResources.GetResourceValueByKey(_questionnaireData.Resources, ResourceConstants.R_SETUP_ANSWERS_KEY)
+                                     DataSource=@_questionnaireData.QuestionOptions.Where(x => x.IsActive).OrderBy(x=>x.SequenceNo).ToList()
+                                     DataSourceType=@QuestionnaireQuestionOptionModel
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowViewAll=@false
+                                     ShowSearch=@true
+                                     ShowPagination=@false
+                                     ShowAddButton=@true
+                                     OnValueChanged=@((e) => OnAddEditClick((QuestionnaireQuestionOptionModel)e)) />
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (!_shouldShowAddEditAnswer)
+            {
+                @if (_questionnaireData.Question.QuestionID > 0 && LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.QuestionDelete.ToString()))
+                {
+                    <AmhButtonControl Class="mt-3" ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                      OnValueChanged=@OnDeleteButtonClicked />
+
+                    <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                       ShowHidePopup=@_hideConfirmationPopup
+                                       Actions=@_actionData
+                                       OnValueChanged=@OnDeleteButtonClickAsync />
+                }
+                @if (_isEditable)
+                {
+                    <AmhButtonControl Class="mt-3 mx-2" ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+                }
+                <AmhButtonControl Class="mt-3" ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClick />
+            }
+        </PageFooter>
+    </BasePage>
+}

@@ -1,0 +1,46 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/FileCategoryAddEdit/{filecategoryid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.FileCategoryAddEdit.ToString())
+              PageOperation=@GetPageOperationType(_isEditable, FileCategoryID == 0)
+              OnClose=@OnClose
+              PageResources=@_categoryData?.Resources
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@ShowDetailPage
+              ApplyCard=true
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhUploadControl @bind-Value=@_categoryData.FileCatergory.ImageName
+                              ResourceKey=@ResourceConstants.R_FILE_CATEGORY_IMAGE_KEY 
+                              OnValueChanged=@OnImageChanged/>
+
+            <AmhLanguageTabControl LanguageTabData=@DataFormatter
+                                   DataSource=@_categoryData.FileCategoryDetails
+                                   DataSourceType=@FileCategoryDetailModel
+                                   IsControlEnabled=@(_isEditable) />
+
+            <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                               ShowHidePopup=@_showDeletedConfirmationPopup
+                               Actions=@_messageButtonActions
+                               OnValueChanged=@OnDeleteConfirmationClickedAsync />
+        </ChildContent>
+        <PageFooter>
+            @if (_categoryData.FileCatergory.FileCategoryID > 0 && LibPermissions.HasPermission(_categoryData.FeaturePermissions, AppPermissions.FileCategoryDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClick />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=OnCancelClickAsync />
+        </PageFooter>
+    </BasePage>
+}

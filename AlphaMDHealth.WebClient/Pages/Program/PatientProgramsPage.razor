@@ -1,0 +1,46 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/PatientProgramsView"
+@page "/PatientProgramsView/{patientprogramid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              @bind-ShowDetailPage=@ShowDetailPage
+              CurrentPage=@this
+              ApplyStructure=@(Parameters?.Count < 1)
+              PageResources=@_programData.Resources
+              ApplyCard=true
+              ApplyParentStructure=@(!ShowDetailPage)
+              ShowPageTitle=@(_programData.ErrCode != ErrorCode.OK)>
+        <ChildContent>
+            @if (ShowDetailPage)
+            {
+                <PatientProgramPage PatientProgramID=@_patientProgramID
+                                    IsAccordion=true
+                                    OnClose=@OnProgramAddEditClosedAsync />
+            }
+            else
+            {
+                @if (_programData.ErrCode == ErrorCode.OK)
+                {
+                    <AmhTableControl DataSource=@_programData.Programs
+                                     DataSourceType=@ProgramModel
+                                     ShowAddButton=@((_programData.RecordCount == 0) && LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.PatientProgramAddEdit.ToString()))
+                                     ShowSearch=@(_programData.RecordCount < 1)
+                                     TableStructure=@GenerateTableStructure()
+                                     ShowPagination=@(_programData.RecordCount < 1)
+                                     ShowViewAll=@(_programData.RecordCount > 0)
+                                     TableHeader=@(LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.PatientProgramsView.ToString()))
+                                     OnValueChanged=@(async e=> { await OnProgramClickedAsync((ProgramModel)e);})
+                                     OnViewClicked=@OnViewAllClickedAsync />
+                }
+                else
+                {
+                    <AmhMessageControl ResourceKey=@_programData.ErrCode.ToString() />
+                }
+            }
+        </ChildContent>
+    </BasePage>
+}

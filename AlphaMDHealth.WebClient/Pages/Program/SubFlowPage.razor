@@ -1,0 +1,87 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/SubflowAddEdit"
+@page "/SubflowAddEdit/{subflowid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              RegisterComp=@RegisterControl
+              PageResources=@_programData.Resources
+              OnClose=@OnClose
+              ApplyFixedFooter=true
+              ApplyStructure=true
+              ApplyCard=true
+              ShowDetailPage=@ShowDetailPage
+              PageOperation=@GetPageOperationType(_isEditable, SubFlowID == 0)
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.SubflowAddEdit.ToString())>
+        <ChildContent>
+            <AmhLanguageTabControl LanguageTabData=@DataFormatter
+                                   DataSource=@_programData?.LanguageDetails
+                                   DataSourceType=@ProgramDetails
+                                   IsControlEnabled=@_isEditable />
+
+            <AmhDropdownControl @bind-Options=@_programData.OperationTypes
+                                ResourceKey=@ResourceConstants.R_OPERATION_TYPE_KEY
+                                OnValueChanged=@OnOperationTypeChanged />
+
+            @switch (_programData.SubFlow.OperationType)
+            {
+                case ResourceConstants.R_BETWEEN_KEY:
+                    <AmhNumericEntryControl @bind-Value=@_fromValue
+                                            IsControlEnabled=@_isEditable
+                                            ResourceKey=@ResourceConstants.R_FROM_KEY />
+
+                    <AmhNumericEntryControl @bind-Value=@_toValue
+                                            IsControlEnabled=@_isEditable
+                                            ResourceKey=@ResourceConstants.R_TO_KEY />
+                    break;
+                case ResourceConstants.R_GREATER_THAN_KEY:
+                case ResourceConstants.R_LESS_THAN_EQUAL_TO_KEY:
+                case ResourceConstants.R_GREATER_THAN_EQUAL_TO_KEY:
+                case ResourceConstants.R_EQUAL_TO_KEY:
+                case ResourceConstants.R_LESS_THAN_KEY:
+                    <AmhNumericEntryControl @bind-Value=@_fromValue
+                                            IsControlEnabled=@_isEditable
+                                            ResourceKey=@ResourceConstants.R_FROM_KEY />
+                    break;
+            }
+            <AmhDropdownControl @bind-Options=@_programData.TaskTypes
+                                OnValueChanged=@OnTaskTypeChangedAsync
+                                IsControlEnabled=@_isEditable
+                                ResourceKey=@ResourceConstants.R_TASK_TYPE_KEY />
+
+            <AmhDropdownControl @bind-Options=@_programData.Items
+                                ResourceKey=@ResourceConstants.R_ITEM_KEY
+                                IsControlEnabled=@_isEditable />
+
+            @if (_programData.SubFlow.TaskType == ResourceConstants.R_EMAIL_KEY ||
+           _programData.SubFlow.TaskType == ResourceConstants.R_NOTIFICATION_KEY ||
+           _programData.SubFlow.TaskType == ResourceConstants.R_SMS_KEY)
+            {
+                <AmhDropdownControl @bind-Options=@_programData.ProgramSubFlows
+                                    IsControlEnabled=@_isEditable
+                                    ResourceKey=@ResourceConstants.R_SELECT_ROLE_KEY />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_programData.SubFlow.SubFlowID > 0 && LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.SubflowDelete.ToString()))
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClick />
+
+                <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideDeletedConfirmationPopup
+                                   Actions=@_popupActions
+                                   ContentClass="top-center"
+                                   OnValueChanged=@OnActionClickAsync />
+            }
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClicked />
+        </PageFooter>
+    </BasePage>
+}

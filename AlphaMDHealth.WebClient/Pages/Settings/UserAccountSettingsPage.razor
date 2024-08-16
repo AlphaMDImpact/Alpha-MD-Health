@@ -1,0 +1,46 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/UserAccountSettingsView"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.UserAccountSettingsView.ToString())
+              PageResources=@_userSettings.Resources
+              ApplyStructure=@(AppState.RouterData.SelectedRoute.Page == AppPermissions.UserAccountSettingsView.ToString())
+              ApplyFixedFooter=true
+              IsAccordion=@IsAccordion
+              ShowDetailPage=@true
+              ApplyCard=true
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            @if (_userSettings.ErrCode == ErrorCode.OK)
+            {
+                <AmhLabelControl FieldType=@FieldTypes.PrimaryMediumHStartVCenterLabelControl
+                                 ResourceKey=@ResourceConstants.R_MEASUREMENT_UNITS_KEY />
+                @if (_userSettings.UserAccountSettings?.Count > 0)
+                {
+                    var measurementUnitsSettings = _userSettings.UserAccountSettings.Where(x => x.SettingType == UserSettingType.MeasurementUnitsKey);
+                    foreach (var item in measurementUnitsSettings)
+                    {
+                        <AmhDropdownControl @bind-Options=@item.ReadingUnitOption
+                                            ResourceKey=@item.ReadingTypeKey />
+                    }
+                }
+            }
+            else
+            {
+                <AmhMessageControl ResourceKey=@_userSettings.ErrCode.ToString() />
+            }
+        </ChildContent>
+        <PageFooter>
+            @if (_userSettings.ErrCode == ErrorCode.OK)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+        </PageFooter>
+    </BasePage>
+}

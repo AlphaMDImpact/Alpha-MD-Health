@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="60px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Video-consult</title>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Appointments" transform="translate(-68.000000, -830.000000)">
+            <g id="Noti-holder-1" transform="translate(40.000000, 780.000000)">
+                <g id="Content" transform="translate(28.000000, 43.000000)">
+                    <g id="Video-consult" transform="translate(0.000000, 7.000000)">
+                        <circle id="Oval" fill="#0078D3" cx="30" cy="30" r="30"></circle>
+                        <g id="Group" transform="translate(15.000000, 22.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                            <path d="M18.7894737,16.3815789 L2.52631579,16.3815789 C1.22368421,16.3815789 0.197368421,15.3157895 0.197368421,14.0526316 L0.197368421,2.52631579 C0.197368421,1.22368421 1.26315789,0.197368421 2.52631579,0.197368421 L18.75,0.197368421 C20.0526316,0.197368421 21.0789474,1.26315789 21.0789474,2.52631579 L21.0789474,14.0131579 C21.1184211,15.3157895 20.0526316,16.3815789 18.7894737,16.3815789 Z" id="Path"></path>
+                            <path d="M22.6973684,4.77631579 L22.6973684,11.8026316 L29.2105263,15.4736842 C29.4868421,15.6315789 29.8026316,15.4342105 29.8026316,15.1184211 L29.8026316,1.46052632 C29.8026316,1.14473684 29.4868421,0.986842105 29.2105263,1.10526316 L22.6973684,4.77631579 Z" id="Path"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

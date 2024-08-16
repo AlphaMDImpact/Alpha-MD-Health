@@ -1,0 +1,43 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+@page "/QuestionnaireAddEditView"
+@page "/QuestionnaireAddEditView/{questionnaireid:long}"
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              ShowPageTitle=@ShowPageTitle
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionnairesView.ToString())
+              PageResources=@_questionnaireData.Resources
+              RegisterComp=@RegisterControl
+              IsAccordion=@IsAccordion
+              PageOperation=@GetPageOperationType(_isEditable, QuestionnaireID == 0)>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=@_questionnaireData.DropDownOptions
+                                ResourceKey=@ResourceConstants.R_QUESTIONNAIRE_TYPE_KEY
+                                IsControlEnabled=@_isEditable />
+
+            <AmhEntryControl @bind-Value=@_questionnaireData.Questionnaire.QuestionnaireCode
+                             ResourceKey=@ResourceConstants.R_CODE_TEXT_KEY
+                             IsControlEnabled=@_isEditable />
+
+            <AmhDropdownControl @bind-Options=@_questionnaireData.DefaultRespondants
+                                ResourceKey=@ResourceConstants.R_DEFAULT_RESPONDANT_KEY
+                                IsControlEnabled=@_isEditable />
+
+            <AmhLanguageTabControl LanguageTabData=@_dataFormatter
+                                   DataSource=@_questionnaireData.PageDetails
+                                   DataSourceType=@ContentDetailModel
+                                   IsControlEnabled=@_isEditable />
+        </ChildContent>
+        <PageFooter>
+            @if (_isEditable)
+            {
+                <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_AND_NEXT_ACTION_KEY
+                                  OnValueChanged=@OnSaveButtonClickedAsync Class="mt-2" />
+            }
+        </PageFooter>
+    </BasePage>
+}

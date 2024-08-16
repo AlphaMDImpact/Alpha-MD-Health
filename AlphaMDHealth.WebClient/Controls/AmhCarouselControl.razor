@@ -1,0 +1,100 @@
+﻿@using System.Globalization;
+@using MudBlazor;
+@using System.Collections;
+@inherits AmhBaseControl
+@typeparam DataSourceType
+
+@namespace AlphaMDHealth.WebClient
+
+<AmhBaseControl @bind-ErrorMessage=@ErrorMessage
+                BaseClass=@BaseClass
+                Class=@Class
+                ShowHeader=@ShowHeader
+                ResourceKey=@ResourceKey
+                FieldType=@FieldType
+                Icon=@Icon
+                Source=@Source
+                IsControlEnabled=@IsControlEnabled
+                Options=@Options
+                IsValid=@IsValid>
+    <ChildControl>
+        <MudCarousel @ref="_carousel"
+                     @bind-SelectedIndex="Value"
+                     Class="mud-width-full h-100"
+                     TData="DataSourceType"
+                     ItemsSource="@DataSource"
+                     ShowArrows="@ShowArrows"
+                     ShowBullets="@ShowBullets"
+                     EnableSwipeGesture="@EnableSwipeGesture"
+                     AutoCycle="@Autocycle">
+            <ItemTemplate Context="item">
+                <div class="d-flex flex-column flex-column justify-center carousel-item h-100">
+                    @if (!string.IsNullOrWhiteSpace(_sourceFields.LeftImage) || !string.IsNullOrWhiteSpace(_sourceFields.LeftIcon))
+                    {
+                        <!-- Image -->
+                        <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.LeftField, _sourceFields.LeftFieldType))
+                                              ImageHeight=AppImageSize.ImageNone
+                                              ImageWidth=AppImageSize.ImageNone
+                                              BaseClass="h-100"
+                                              Icon=@(GetFieldByName(item, _sourceFields.LeftIcon?.ToString())?.ToString())
+                                              Value=@(GetFieldByName(item, _sourceFields.LeftImage)?.ToString()) />
+                    }
+                    <div style="width:100%;height:100%; position:fixed;z-index:1998;background:rgba(0, 0, 0, 0.5);">
+                        <div class="d-flex flex-column flex-column justify-center "
+                             style="width:100%;position:relative;top:15%; bottom:50%;z-index:1999;align-items:center;">
+                            <AmhImageControl FieldType=@FieldTypes.ImageControl
+                                             Icon="default_org_logo.svg"
+                                             ImageHeight=@AppImageSize.ImageSizeXXL
+                                             ImageWidth=@AppImageSize.ImageSizeXXL />
+
+                            <AmhLabelControl FieldType=@FieldTypes.LightLargeHVCenterBoldLabelControl
+                                             Value=@Heading />
+                        </div>
+                    </div>
+                    <div class="carousel-caption d-md-block rz-card rz-border-radius-10 px-16 h-100"
+                         style="width:100%; top:50%; left:0px; right:0px; background:var(--generic-background-color); bottom:0px; border-bottom-left-radius:0px !important; border-bottom-right-radius:0px !important; z-index:2000;">
+                        <!-- Header -->
+                        @if (!string.IsNullOrWhiteSpace(_sourceFields.LeftHeader))
+                        {
+                            <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.LeftHeaderField, _sourceFields.LeftHeaderFieldType))
+                                                  Value=@(GetFieldByName(item, _sourceFields.LeftHeader)?.ToString()) />
+                        }
+                        <!-- Description -->
+                        @if (!string.IsNullOrWhiteSpace(_sourceFields.LeftDescription))
+                        {
+                            <AmhListViewComponent FieldType=@(GetFieldType(item, _sourceFields.LeftDescriptionField, _sourceFields.LeftDescriptionFieldType))
+                                                  Value=@(GetFieldByName(item, _sourceFields.LeftDescription)?.ToString()) />
+                        }
+                    </div>
+                </div>
+            </ItemTemplate>
+            <BulletTemplate Context="selected">
+                <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                    <span class="mud-icon-button-label">
+                        <MudIcon Icon=@(selected ? Icons.Material.TwoTone.RemoveCircle : Icons.Material.Sharp.Lens)
+                                 Size=@(selected ? Size.Small: Size.Small)
+                                 Color="@Color.Inherit" />
+                    </span>
+                </div>
+            </BulletTemplate>
+            <PreviousButtonTemplate>
+                <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                    <span class="mud-icon-button-label">
+                        <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium"
+                                 Icon="@Icons.Material.Filled.SkipPrevious"
+                                 Color="@Color.Inherit" />
+                    </span>
+                </div>
+            </PreviousButtonTemplate>
+            <NextButtonTemplate>
+                <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                    <span class="mud-icon-button-label">
+                        <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium"
+                                 Icon="@Icons.Material.Filled.SkipNext"
+                                 Color="@Color.Inherit" />
+                    </span>
+                </div>
+            </NextButtonTemplate>
+        </MudCarousel>
+    </ChildControl>
+</AmhBaseControl>

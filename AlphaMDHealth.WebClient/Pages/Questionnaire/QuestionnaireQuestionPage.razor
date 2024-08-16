@@ -1,0 +1,122 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              OnClose=@OnClose
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.QuestionnaireQuestionAddEdit.ToString())
+              PageResources=@_questionnaireData.Resources
+              RegisterComp=@RegisterControl
+              IsAccordion=@IsAccordion
+              PageOperation=@GetPageOperationType(_isEditable, QuestionID == 0)>
+        <ChildContent>
+            <AmhCheckBoxListControl ShowHeader=@false
+                                    ResourceKey=@ResourceConstants.R_IS_STARTING_QUESTION_KEY
+                                    Options=@FirstQuestionOption()
+                                    ValueChanged=@(e => { _isStartingQuestion = !string.IsNullOrWhiteSpace((string)e) && Convert.ToInt32(e) == 1;})
+                                    IsControlEnabled=@_isEditable />
+
+            <AmhDropdownControl @bind-Options=@_questionnaireData.DropDownOptions
+                                ResourceKey=@ResourceConstants.R_STARTING_QUESTION_SELECTION_KEY
+                                OnValueChanged=@OnQuestionTypeChanged
+                                IsControlEnabled=@_isEditable />
+
+            @if (_questionnaireData.DropDownOptions.Any(x => x.IsSelected))
+            {
+                <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                 ResourceKey=@_questionnaireData.Question.QuestionTypeID.ToString() />
+
+                @switch (_questionnaireData.Question.QuestionTypeID)
+                {
+                    case QuestionType.MultiSelectQuestionKey:
+                    case QuestionType.SingleSelectQuestionKey:
+                    case QuestionType.DropDownQuestionKey:
+                    case QuestionType.MultilineTextQuestionKey:
+                    case QuestionType.TextQuestionKey:
+                    case QuestionType.RichTextQuestionKey:
+                    case QuestionType.FilesAndDocumentQuestionKey:
+                    case QuestionType.MeasurementQuestionKey:
+                        @foreach (var option in _questionnaireData.QuestionConditions.Select((value, i) => new { i, value }))
+                        {
+                            <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                             Value=@option.value.OptionText />
+
+                            <AmhDropdownControl ShowHeader=@false
+                                                UniqueID=@($"{ResourceConstants.R_VALUE_KEY}_{option.i}")
+                                                ResourceKey=@ResourceConstants.R_JUMP_TO_QUESTION_KEY
+                                                OnValueChanged=@(e => OnQuestionChanged(e, option.value))
+                                                Options=@CreateOptionList(option.value.TargetQuestionID.ToString(),string.Empty)
+                                                IsControlEnabled=@_isEditable />
+                        }
+                        break;
+                    case QuestionType.NumericQuestionKey:
+                    case QuestionType.DateQuestionKey:
+                    case QuestionType.DateTimeQuestionKey:
+                    case QuestionType.TimeQuestionKey:
+                    case QuestionType.VerticalSliderQuestionKey:
+                    case QuestionType.HorizontalSliderQuestionKey:
+                        <AmhLabelControl FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl
+                                         ResourceKey=@ResourceConstants.R_VALUE_BLANK_CONDITION_KEY />
+
+                        <AmhDropdownControl ResourceKey=@ResourceConstants.R_ACTION_KEY
+                                            ShowHeader=@false
+                                            UniqueID=@Constants.IF_BLANK
+                                            IsControlEnabled=@_isEditable
+                                            Options=@CreateOptionList(_questionnaireData.QuestionConditions.FirstOrDefault(x=>x.Value1.ToString()==Constants.TENTHOUSAND && x.Value2==0)?.TargetQuestionID.ToString(),getIfControlValue()) />
+
+                        <AmhButtonControl ResourceKey=@ResourceConstants.R_ADD_MORE_CONDITION_KEY
+                                          OnValueChanged=@OnAddClicked
+                                          FieldType=@FieldTypes.PrimaryTransparentExButtonControl />
+
+                        @foreach (var data in _numericConditions.Select((value, i) => new { i, value }))
+                        {
+                            <AmhConditionComponent UniqueID=@GetUniqeID(data.i) 
+                                                   ConditionNumber=@data.i.ToString()
+                                                   QuestionConditionDataToBeMapped=@data.value
+                                                   ConditionDataSource=@CreateOptionList(data.value.TargetQuestionID.ToString(),string.Empty)
+                                                   QuestionnaireData=@_questionnaireData
+                                                   ResourceKey=@ResourceConstants.R_CONDITION_KEY
+                                                   ConditionPageResources=@_questionnaireData?.Resources
+                                                   SelectedValue=@((long)data.value.TargetQuestionID)
+                                                   DeleteButtonClicked=@OnConditionDelete
+                                                   IsControlEnabled=@_isEditable/>
+                        }
+                        <AmhLabelControl ResourceKey=@ResourceConstants.R_ELSE_CONDITION_KEY FieldType=@FieldTypes.PrimarySmallHStartVCenterBoldLabelControl />
+
+                        <AmhDropdownControl ShowHeader=@false
+                                            ResourceKey=@ResourceConstants.R_ACTION_KEY
+                                            UniqueID=@Constants.ELSE
+                                            IsControlEnabled=@_isEditable
+                                            Options=@CreateOptionList(_questionnaireData.QuestionConditions.FirstOrDefault(x=>x.Value1.ToString()==Constants.FIFTEENTHOUSAND && x.Value2==0)?.TargetQuestionID.ToString(),getElseControlValue()) />
+                        break;
+                }
+            }
+        </ChildContent>
+        <PageFooter>
+             <div class="row">
+                    <div style="display:flex;" class="col-lg-8 col-md-12 justify-content-between mt-3">
+                        @if (QuestionID > 0 && LibPermissions.HasPermission(_questionnaireData.FeaturePermissions, AppPermissions.QuestionnaireQuestionDelete.ToString()))
+                        {
+                            <AmhButtonControl ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY
+                                              OnValueChanged=@OnDeleteButtonClicked />
+
+                            <AmhMessageControl ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                               ShowHidePopup=@_hideConfirmationPopup
+                                               Actions=@_actionData
+                                               OnValueChanged=@OnDeleteConfirmationPopUpClickedAsync />
+                        }
+                        @if (_isEditable)
+                        {
+                            <AmhButtonControl ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY
+                                              Class="mx-3" OnValueChanged=@OnSaveButtonClickedAsync />
+                        }
+                        <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY
+                                          OnValueChanged=@OnCancelClickedAsync />
+                    </div>
+            </div>
+        </PageFooter>
+    </BasePage>
+}

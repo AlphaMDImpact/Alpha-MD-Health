@@ -1,0 +1,42 @@
+﻿@namespace AlphaMDHealth.WebClient
+@inherits BasePage
+
+@if (_isDataFetched)
+{
+    <BasePage @bind-Error=@Error
+              @bind-Success=@Success
+              CurrentPage=@this
+              PageTitle=@LibPermissions.GetFeatureText(AppState.MasterData.OrganisationFeatures, AppPermissions.ProgramBillingItemAddEdit.ToString())
+              PageOperation=@GetPageOperationType(_isEditable, _programData.ProgramBillItem.ProgramBillingItemID == 0)
+              PageResources=@_programData?.Resources
+              OnClose=@OnClose
+              IsAccordion=@IsAccordion
+              ApplyFixedFooter=true
+              ApplyCard=true
+              RegisterComp=@RegisterControl>
+        <ChildContent>
+            <AmhDropdownControl @bind-Options=@_programData.BillingItemOptionList
+                                ResourceKey=@ResourceConstants.R_ITEM_KEY
+                                IsControlEnabled=@(!_isDisabled || _isEditable) />
+
+            <AmhNumericEntryControl @bind-Value=@_amount
+                                    ResourceKey=@ResourceConstants.R_AMOUNT_KEY
+                                    IsControlEnabled=@(!_isDisabled || _isEditable) />
+        </ChildContent>
+        <PageFooter>
+            @if (_programData.ProgramBillItem.ProgramBillingItemID != 0 && !_isDisabled && LibPermissions.HasPermission(_programData.FeaturePermissions, AppPermissions.ProgramBillingItemDelete.ToString()))
+            {
+                <AmhButtonControl  ResourceKey=@ResourceConstants.R_DELETE_ACTION_KEY OnValueChanged=@OnRemoveClick />
+                <AmhMessageControl   ResourceKey=@ResourceConstants.R_DELETE_CONFIRMATION_KEY
+                                   ShowHidePopup=@_hideConfirmationPopup
+                                   Actions=@_actionData
+                                   OnValueChanged=@DeletePopUpCallbackAsync />
+            }
+            @if (!_isDisabled || _isEditable)
+            {
+                <AmhButtonControl  ResourceKey=@ResourceConstants.R_SAVE_ACTION_KEY OnValueChanged=@OnSaveButtonClickedAsync />
+            }
+            <AmhButtonControl ResourceKey=@ResourceConstants.R_CANCEL_ACTION_KEY OnValueChanged=@OnCancelClick />
+        </PageFooter>
+    </BasePage>
+}

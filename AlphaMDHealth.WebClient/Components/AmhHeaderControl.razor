@@ -1,0 +1,179 @@
+﻿@using Radzen.Blazor
+@using Radzen;
+
+@if (IsPatientMobileView)
+{
+    <RadzenHeader Style="position:fixed" class=@(IsDashboardPage() ? "fixed-postion-dashboard":"fixed-postion-list")>
+        <RadzenCard class=@(IsDashboardPage() ? "header-mobile-style":"table-header-mobile-style")>
+            @if (IsDashboardPage())
+            {
+                <div class="row mt-3">
+                    <div class="col-2 d-flex align-items-center">
+                        <AmhImageControl Icon=@ImageConstants.PATIENT_MOBILE_BACK_SVG
+                                         FieldType=@FieldTypes.SquareImageControl
+                                         ImageHeight=AppImageSize.ImageSizeM
+                                         ImageWidth=AppImageSize.ImageSizeM
+                                         OnValueChanged="onBackButtonCLick" />
+                    </div>
+                </div>
+                <AmhLabelControl FieldType=@FieldTypes.PrimaryLargeHStartVCenterLabelControl Value=@SetGreetingMessage() Style="color:white" />
+                <AmhLabelControl FieldType=@FieldTypes.PrimaryMediumHStartVCenterBoldLabelControl Value=@getUsername() Style="color:white" />
+            }
+            else
+            {
+                <div class="row mt-3">
+                    <div class="col-2 d-flex align-items-center">
+                        @{
+                            var action = ActionButtons?.FirstOrDefault(x => x.ButtonResourceKey == ResourceConstants.R_CANCEL_ACTION_KEY);
+                        }
+                        @if (action != null)
+                        {
+                            <AmhImageControl Icon=@action.Icon
+                                             FieldType=@FieldTypes.SquareImageControl
+                                             OnValueChanged=@action.ButtonAction
+                                             ImageHeight=AppImageSize.ImageSizeM
+                                             ImageWidth=AppImageSize.ImageSizeM />
+                        }
+                    </div>
+                    <div class="col-8 d-flex justify-content-center align-items-center">
+                        @if (!string.IsNullOrWhiteSpace(Title))
+                        {
+                            <AmhLabelControl FieldType=@FieldTypes.PrimaryMediumHEndVCenterBoldLabelControl Style="color:white; text-wrap:nowrap;" Value=@Title />
+                        }
+                    </div>
+                    <div class="col-2 justify-content-center align-items-center">
+                        @{
+                            var save_action = ActionButtons?.FirstOrDefault(x => x.ButtonResourceKey == ResourceConstants.R_SAVE_ACTION_KEY || x.ButtonResourceKey == ResourceConstants.R_ADD_ACTION_KEY);
+                        }
+                        @if (save_action != null)
+                        {
+                            <AmhImageControl Icon=@save_action.Icon
+                                             FieldType=@FieldTypes.SquareImageControl
+                                             OnValueChanged=@save_action.ButtonAction
+                                             ImageHeight=AppImageSize.ImageSizeM
+                                             ImageWidth=AppImageSize.ImageSizeM />
+                        }
+                        else
+                        {
+                            @if (ActionSection != default)
+                            {
+                                @ActionSection
+                            }
+                        }
+                    </div>
+                </div>
+            }
+
+        </RadzenCard>
+    </RadzenHeader>
+    <div class=@(IsDashboardPage() ? "fixed-postion-dashboard":"fixed-postion-list")></div>
+}
+else
+{
+    <div class=@AppState.ClassName("d-flex col-12 justify-content-between align-items-center px-0 " + Class)
+         style="gap:10px; align-items: center;">
+        @if (!string.IsNullOrWhiteSpace(Title))
+        {
+            <AmhLabelControl FieldType=@FieldTypes.PrimaryMediumHStartVCenterBoldLabelControl Value=@Title />
+        }
+        @{
+            var cols = string.IsNullOrWhiteSpace(Title) ? "col-12" : ""; /* "col-xl-5 col-md-6 col-sm-12" */
+            var actionClass = AppState.ClassName($"d-flex {cols} justify-content-end align-items-center px-0 ");
+        }
+        @if (ActionButtons?.Count > 0 || ActionSection != default)
+        {
+            <div class=@actionClass>
+                <div class=@AppState.ClassName("d-flex justify-content-space-between align-items-center " + FooterClass)
+                     style="gap:10px;">
+                    @if (ActionButtons?.Count > 0)
+                    {
+                        @foreach (var action in ActionButtons)
+                        {
+                            <AmhButtonControl ResourceKey=@action.ButtonResourceKey
+                                              FieldType=@action.FieldType
+                                              Icon=@action.Icon
+                                              Style=@action.Style
+                                              OnValueChanged=action.ButtonAction />
+                        }
+                    }
+                    @if (ActionSection != default)
+                    {
+                        @ActionSection
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Title to display on header
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public string FooterClass { get; set; }
+
+    [Parameter]
+    public bool IsPatientMobileView { get; set; } = false;
+
+    [Parameter]
+    public bool IsMobileView { get; set; } = false;
+
+    [Parameter]
+    public bool ShowBackButton { get; set; } = false;
+
+    /// <summary>
+    /// List of Action Buttons on the header
+    /// </summary>
+    [Parameter]
+    public IList<ButtonActionModel> ActionButtons { get; set; }
+
+    /// <summary>
+    /// View to render on header
+    /// </summary>
+    [Parameter]
+    public RenderFragment ActionSection { get; set; }
+
+    [Parameter]
+    public string Class { get; set; }
+
+    [Inject]
+    private IJSRuntime JsRuntime { get; set; }
+
+    private string SetGreetingMessage()
+    {
+        var currentTime = AppState.webEssentials.ConvertToLocalTime(DateTimeOffset.UtcNow);
+        if (currentTime.Hour < 12)
+        {
+            return LibResources.GetResourceValueByKey(AppState.MasterData?.Resources, ResourceConstants.R_GM_KEY);
+        }
+        else if (currentTime.Hour < 18)
+        {
+            return LibResources.GetResourceValueByKey(AppState.MasterData?.Resources, ResourceConstants.R_GA_KEY);
+        }
+        else
+        {
+            return LibResources.GetResourceValueByKey(AppState.MasterData?.Resources, ResourceConstants.R_GE_KEY);
+        }
+    }
+
+    private string getUsername()
+    {
+        return AppState.MasterData?.Users?[0].FirstName + " " + AppState.MasterData?.Users?[0].LastName;
+    }
+
+    private bool IsDashboardPage()
+    {
+        return AppState.RouterData?.SelectedRoute?.Page == AppPermissions.DashboardView.ToString() 
+        || AppState.RouterData?.SelectedRoute?.Page == AppPermissions.PatientDetailView.ToString();
+    }
+
+    private async void onBackButtonCLick()
+    {
+        await JsRuntime.InvokeVoidAsync("invokeWebviewMethod", "backactionclicked", "200");
+    }
+}
+
